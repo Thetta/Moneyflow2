@@ -92,7 +92,6 @@ async function totalAndMinNeedsAsserts (money, i, CURRENT_INPUT, e1, e2, e3, off
 		dividendsAmount = dividends;
 		reserveAmount = rest - dividendsAmount;
 	}
-	console.log('totalspend, bonus, rest, dividendsAmount, reserveAmount', totalSpend, (bonusesSpendPercent * (b1 + b2 + b3)), rest, dividendsAmount, reserveAmount);
 	var allNeeds = totalSpend + (bonusesSpendPercent * (b1 + b2 + b3)) + (dividendsAmount + reserveAmount);
 
 	assert.equal((new web3.BigNumber(i.AllOutpultsTotalNeed).div(money)).toNumber(), allNeeds, `AllOutpults Total Need should be ${allNeeds}`);
@@ -238,7 +237,6 @@ contract('WeiTable tests', (accounts) => {
 		let AbsoluteExpense3Id = getEId(await weiTable.addAbsoluteExpense(3 * neededAmount, isPeriodic, isAccumulateDebt, periodHours));
 
 		// add 3 WeiAbsoluteExpense outputs to the splitter
-		console.log('topDownSplitterId, AbsoluteExpense1Id', topDownSplitterId, AbsoluteExpense1Id)
 		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense1Id);
 		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense2Id);
 		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense3Id);
@@ -621,7 +619,6 @@ contract('WeiTable tests', (accounts) => {
 		var totalNeed = await weiTable.getTotalWeiNeeded(6 * neededAmount);
 		assert.equal(totalNeed, 6 * neededAmount);
 		var minNeed = await weiTable.getMinWeiNeeded();
-		// console.log('minNeed:', minNeed)
 		assert.equal(minNeed, 6 * neededAmount);
 
 		var isOpen1At = await weiTable.isOpenAt(AbsoluteExpense1Id);
