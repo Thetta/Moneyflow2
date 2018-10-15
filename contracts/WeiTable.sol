@@ -120,7 +120,7 @@ contract WeiTable is IWeiReceiver, Ownable {
 		require(isNeedsMoneyAt(_eId));
 		if(!expenses[_eId].isFund) {
 			require(_amount == getTotalWeiNeededAt(_eId, _currentFlow));
-		}else{
+		}else {
 			require(_amount <= getTotalWeiNeededAt(_eId, _currentFlow));
 		}
 
@@ -185,7 +185,7 @@ contract WeiTable is IWeiReceiver, Ownable {
 	function getDebtMultiplierAt(uint _eId) internal view returns(uint) {
 		if((expenses[_eId].isAccumulateDebt)&&(0 != expenses[_eId].momentReceived)) {
 			return ((block.timestamp - expenses[_eId].momentReceived) / (expenses[_eId].periodHours * 3600 * 1000));
-		} else {
+		}else {
 			return 1;
 		}
 	}
@@ -194,9 +194,9 @@ contract WeiTable is IWeiReceiver, Ownable {
 		if(splitters[_eId].isOpen) {
 			return getTotalWeiNeededSplitterAt(_eId, _currentFlow);
 		}else if(expenses[_eId].isOpen) {
-			if(expenses[_eId].isFund){
+			if(expenses[_eId].isFund) {
 				return getTotalWeiNeededFundAt(_eId, _currentFlow);
-			}else{
+			} else {
 				return getTotalWeiNeededExpenseAt(_eId, _currentFlow);
 			}
 		}else {
@@ -208,13 +208,8 @@ contract WeiTable is IWeiReceiver, Ownable {
 		uint currentFlow = _currentFlow;
 		uint total = 0;
 		for(uint i=0; i<splitters[_eId].outputs.length; ++i) {
-
 			uint needed;
-			// if(expenses[_eId].isFund){
-			// 	needed = getTotalWeiNeededFundAt(splitters[_eId].outputs[i], currentFlow);
-			// }else{
-				needed = getTotalWeiNeededAt(splitters[_eId].outputs[i], currentFlow);
-			// }
+			needed = getTotalWeiNeededAt(splitters[_eId].outputs[i], currentFlow);
 			
 			total = total + needed;
 			emit SplitterNeeded(splitters[_eId].outputs[i], needed, total, currentFlow);
