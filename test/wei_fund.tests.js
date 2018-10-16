@@ -350,4 +350,5 @@ contract('WeiFund', (accounts) => {
 		assert.equal(0.7, (await web3.eth.getBalance(milestone3.address)).toNumber() / 1e18);
 		assert.equal(1.5, (await web3.eth.getBalance(stabFund.address)).toNumber() / 1e18);
 	});
+
 });
