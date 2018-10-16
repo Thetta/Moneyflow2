@@ -33,7 +33,7 @@ contract WeiFund is IWeiReceiver, IDestination, Ownable {
 		require(!((_isAccumulateDebt)&&(_periodHours==0)));
 		require(!(!(_isPeriodic)&&(_periodHours!=0)));
 		require(!((_isAccumulateDebt)&&(!_isPeriodic)));
-		require(!((_neededWei==0)&&(_isPeriodic)));
+		require(_neededWei!=0);
 		neededWei = _neededWei;
 		isPeriodic = _isPeriodic;
 		isAccumulateDebt = _isAccumulateDebt;
@@ -58,13 +58,9 @@ contract WeiFund is IWeiReceiver, IDestination, Ownable {
 	// -------------- IWeiReceiver
 
 	function processFunds(uint _currentFlow) public payable {
-		// emit consoleUint('_getDebtMultiplier', _getDebtMultiplier());
-		require(isNeedsMoney());
+		require(isNeedsMoney());	
+		require(totalWeiReceived+msg.value<=getDebtMultiplier()*neededWei); // protect from extra money
 		
-		if(neededWei!=0) {
-			require(totalWeiReceived+msg.value<=getDebtMultiplier()*neededWei); // protect from extra money
-		}
-
 		totalWeiReceived += msg.value;
 		if(getTotalWeiNeeded(msg.value)==0) {
 			momentReceived = block.timestamp;
