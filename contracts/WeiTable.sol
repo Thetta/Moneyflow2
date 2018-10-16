@@ -50,6 +50,14 @@ contract WeiTable is IWeiReceiver, Ownable {
 		uint[] outputs;
 	}
 
+	function getLastNodeId() public returns(uint) {
+		if(nodesCount==0) {
+			return 0;
+		} else {
+			return nodesCount - 1;
+		}
+	}	
+
 	// -------------------- INTERNAL IWEIRECEIVER FUNCTIONS -------------------- for nodes
 	function getPartsPerMillionAt(uint _eId) public view returns(uint) {
 		if(NodeTypes.RelativeExpense == nodesType[_eId]) {
