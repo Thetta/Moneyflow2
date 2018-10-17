@@ -13,6 +13,20 @@ contract WeiUnsortedSplitter is SplitterBase, IWeiReceiver {
 	constructor(string _name) SplitterBase(_name) public {
 	}
 
+	function isFund(address _receiver) public returns(bool) {
+		return (
+			(IWeiReceiver(_receiver).getTotalWeiNeeded(1)==1) &&
+			(IWeiReceiver(_receiver).getTotalWeiNeeded(2)==2)
+		);
+	}
+
+	function addChild(address _newChild) public onlyOwner {
+		if(isFund(_newChild)) {
+			revert();
+		}
+		super.addChild(_newChild);
+	}
+
 	// IWeiReceiver:
 	// calculate only absolute outputs, but do not take into account the Percents
 	function getMinWeiNeeded()public view returns(uint) {

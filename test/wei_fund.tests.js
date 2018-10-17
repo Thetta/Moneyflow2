@@ -281,13 +281,13 @@ contract('WeiFund', (accounts) => {
 		await splitter.processFunds(0.5e18, { value: 0.5e18 }).should.be.rejectedWith('revert');
 	});
 
-	it('Should implement roadmap pattern with funds (-> abs-abs-abs-rel100%)', async () => {
+	it('Should implement roadmap pattern with funds (-> abs-abs-abs-bigCap)', async () => {
 		let splitter = await WeiTopDownSplitter.new('Splitter');
 
 		let milestone1 = await WeiFund.new(0.1e18, false, false, 0);
 		let milestone2 = await WeiFund.new(0.2e18, false, false, 0);
 		let milestone3 = await WeiFund.new(0.7e18, false, false, 0);
-		let stabFund = await WeiFund.new(0, false, false, 0);
+		let stabFund = await WeiFund.new(1e30, false, false, 0);
 		await splitter.addChild(milestone1.address);
 		await splitter.addChild(milestone2.address);
 		await splitter.addChild(milestone3.address);
@@ -350,4 +350,5 @@ contract('WeiFund', (accounts) => {
 		assert.equal(0.7, (await web3.eth.getBalance(milestone3.address)).toNumber() / 1e18);
 		assert.equal(1.5, (await web3.eth.getBalance(stabFund.address)).toNumber() / 1e18);
 	});
+
 });

@@ -30,7 +30,7 @@ contract MoneyFlow is IMoneyflow, Ownable {
 
 	constructor() public {
 		// do not set output!
-		donationEndpoint = new WeiRelativeExpenseWithPeriod(1000000, 0, false);
+		donationEndpoint = new WeiRelativeExpenseWithPeriod(1000000, 0);
 		donationF2WR = new FallbackToWeiReceiver(donationEndpoint);
 	}
 
@@ -81,4 +81,3 @@ contract MoneyFlow is IMoneyflow, Ownable {
 		// non payable
 	}
 }
-
