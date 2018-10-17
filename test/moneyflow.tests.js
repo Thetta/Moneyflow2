@@ -10,6 +10,10 @@ var WeiRelativeExpense = artifacts.require('./WeiRelativeExpense');
 var WeiAbsoluteExpenseWithPeriod = artifacts.require('./WeiAbsoluteExpenseWithPeriod');
 var WeiRelativeExpenseWithPeriod = artifacts.require('./WeiRelativeExpenseWithPeriod');
 
+var WeiAbsoluteExpenseWithPeriodSliding = artifacts.require('./WeiAbsoluteExpenseWithPeriodSliding');
+var WeiRelativeExpenseWithPeriodSliding = artifacts.require('./WeiRelativeExpenseWithPeriodSliding');
+
+
 function KECCAK256 (x) {
 	return web3.sha3(x);
 }
@@ -242,7 +246,7 @@ contract('Moneyflow', (accounts) => {
 		var struct = {};
 		var balance0 = await web3.eth.getBalance(creator);
 
-		Employee1 = await WeiAbsoluteExpenseWithPeriod.new(1000 * money, timePeriod, callParams);
+		Employee1 = await WeiAbsoluteExpenseWithPeriodSliding.new(1000 * money, timePeriod, callParams);
 
 		await Employee1.processFunds(1000 * money, { value: 1000 * money, from: outsider, gasPrice: 0 });
 		await Employee1.flush({ from: outsider }).should.be.rejectedWith('revert');
@@ -279,7 +283,7 @@ contract('Moneyflow', (accounts) => {
 		var callParams = { from: creator, gasPrice: 0 };
 		var struct = {};
 		var balance0 = await web3.eth.getBalance(creator);
-		Employee1 = await WeiAbsoluteExpenseWithPeriod.new(1000 * money, timePeriod, callParams);
+		Employee1 = await WeiAbsoluteExpenseWithPeriodSliding.new(1000 * money, timePeriod, callParams);
 
 		var multi1 = await Employee1.getDebtMultiplier();
 		assert.equal(multi1.toNumber(), 1, '0 hours => x1');

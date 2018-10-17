@@ -81,4 +81,3 @@ contract MoneyFlow is IMoneyflow, Ownable {
 		// non payable
 	}
 }
-

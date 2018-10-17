@@ -24,9 +24,9 @@ contract Budget is Ownable {
 		createLayout();
 
 		uint[] employeeSalaries;
-		employeeSalaries.push(1**19);
-		employeeSalaries.push(2**19);
-		employeeSalaries.push(2**19);
+		employeeSalaries.push(10e18);
+		employeeSalaries.push(20e18);
+		employeeSalaries.push(20e18);
 		addEmployees(employeeSalaries);
 
 		uint[] bonuses;
@@ -36,19 +36,19 @@ contract Budget is Ownable {
 		addBonuses(bonuses);
 
 		uint[] tasks;
-		tasks.push(1**17);
-		tasks.push(3**17);
-		tasks.push(5**17);
+		tasks.push(0.1e18);
+		tasks.push(0.3e18);
+		tasks.push(0.5e18);
 		addTasks(tasks);
 
 		uint[] utils;
-		utils.push(2**18);
-		utils.push(3**18);
+		utils.push(2e18);
+		utils.push(3e18);
 		addUtils(utils);
 
 		uint[] funds;
-		funds.push(2**22);
-		funds.push(2**25);
+		funds.push(2e22);
+		funds.push(2e25);
 		addFunds(funds);
 	}
 
