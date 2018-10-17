@@ -21,7 +21,7 @@ contract WeiUnsortedSplitter is SplitterBase, IWeiReceiver {
 	}
 
 	function addChild(address _newChild) public onlyOwner {
-		if(isFund(_newChild)){
+		if(isFund(_newChild)) {
 			revert();
 		}
 		super.addChild(_newChild);

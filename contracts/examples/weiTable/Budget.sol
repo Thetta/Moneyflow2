@@ -47,8 +47,8 @@ contract Budget is Ownable {
 		addUtils(utils);
 
 		uint[] funds;
-		funds.push(2e22);
-		funds.push(2e25);
+		funds.push(20000*1e18);
+		funds.push(20000000*1e18);
 		addFunds(funds);
 	}
 
