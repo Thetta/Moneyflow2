@@ -23,6 +23,5 @@ else
   ganachecli_pid=$!
 fi
 
-truffle migrate
 truffle test $1
 

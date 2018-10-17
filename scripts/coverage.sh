@@ -14,13 +14,13 @@ testrpcsc_running() {
   nc -z localhost 8570
 }
 
-if testrpcsc_running; then
-  echo "Using existing testrpc-sc instance"
+if ganachecli_running; then
+  echo "Using existing ganache-cli instance"
 else
-  echo "Starting testrpc-sc to generate coverage"
-  ./node_modules/.bin/testrpc-sc --gasLimit 0xfffffffffff --port 8570 \
+  echo "Starting ganache-cli"
+  ./node_modules/ganache-cli/build/cli.node.js --gasLimit 0xfffffffffff --port 8555 --defaultBalanceEther 200\
   > /dev/null &
-  testrpcsc_pid=$!
+  ganachecli_pid=$!
 fi
 
 SOLIDITY_COVERAGE=true ./node_modules/.bin/solidity-coverage
