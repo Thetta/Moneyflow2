@@ -16,17 +16,30 @@ contract SplitterBase is ISplitter, Ownable {
 	bool opened = true;
 	mapping (uint=>address) children;
 	uint childrenCount = 0;
+	
+	modifier zeroIfClosed() {
+		if(!isOpen()) {
+			return 0;
+		}
+		_;
+	}
 
-	string public name = "";
+	modifier falseIfClosed() {
+		if(!isOpen()) {
+			return false;
+		}
+		_;
+	}
+
+	modifier onlyIfOpen() {
+		require(isOpen());
+		_;
+	}
 
 	event SplitterBaseProcessFunds(address _sender, uint _value, uint _currentFlow);
 	event SplitterBaseOpen(address _sender);
 	event SplitterBaseClose(address _sender);
 	event SplitterBaseAddChild(address _newChild);
-
-	constructor(string _name) public {
-		name = _name;
-	}
 
 	// ISplitter:
 	function open() public onlyOwner {
@@ -56,4 +69,7 @@ contract SplitterBase is ISplitter, Ownable {
 		children[childrenCount] = _newChild;
 		childrenCount = childrenCount + 1;	
 	}
+
+	function() public {
+	}	
 }
