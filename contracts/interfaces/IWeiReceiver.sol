@@ -11,9 +11,9 @@ import "./IReceiver.sol";
 contract IWeiReceiver is IReceiver {
 
 	enum Type {
-		Absolute;
-		Relative;
-		Splitter;
+		Absolute,
+		Relative,
+		Splitter
 	}
 
 	// Will calculate only absolute outputs, but not take into account the Percents

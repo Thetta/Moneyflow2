@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
 import "../ether/WeiRelativeExpenseWithPeriod.sol";
-import "../ether/WeiTopDownSplitter.sol";
-import "../ether/WeiUnsortedSplitter.sol";
+import "../ether/WeiSplitter.sol";
+import "../ether/WeiSplitter.sol";
 
 
 /**
@@ -24,15 +24,15 @@ import "../ether/WeiUnsortedSplitter.sol";
  *			DividendsFund - fund
 */
 contract DefaultMoneyflowScheme {
-	WeiTopDownSplitter root;
+	WeiSplitter root;
 
-	WeiUnsortedSplitter spends; 
-	WeiUnsortedSplitter bonuses; 
-	WeiUnsortedSplitter rest; 
+	WeiSplitter spends; 
+	WeiSplitter bonuses; 
+	WeiSplitter rest; 
 
-	WeiUnsortedSplitter salaries; 
-	WeiUnsortedSplitter other; 
-	WeiUnsortedSplitter tasks; 
+	WeiSplitter salaries; 
+	WeiSplitter other; 
+	WeiSplitter tasks; 
 
 	WeiRelativeExpenseWithPeriod reserveFund;
 	WeiRelativeExpenseWithPeriod dividendsFund;
@@ -44,15 +44,15 @@ contract DefaultMoneyflowScheme {
 	{
 		require(0x0 != _fundOutput);
 
-		// root = new WeiTopDownSplitter("root");
+		// root = new WeiSplitter("root");
 
-		// spends = new WeiUnsortedSplitter("spends");
-		// bonuses = new WeiUnsortedSplitter("bonuses");
-		// rest = new WeiUnsortedSplitter("rest");
+		// spends = new WeiSplitter("spends");
+		// bonuses = new WeiSplitter("bonuses");
+		// rest = new WeiSplitter("rest");
 
-		// salaries = new WeiUnsortedSplitter("salaries");
-		// other = new WeiUnsortedSplitter("other");
-		// tasks = new WeiUnsortedSplitter("tasks");
+		// salaries = new WeiSplitter("salaries");
+		// other = new WeiSplitter("other");
+		// tasks = new WeiSplitter("tasks");
 
 		// // // use .setPercents() to change 
 		// reserveFund = new WeiFund(_fundOutput, true, _percentsReserve);
@@ -79,7 +79,7 @@ contract DefaultMoneyflowScheme {
 	}
 
 	function deployRoot() public {
-		root = new WeiTopDownSplitter("root");
+		root = new WeiSplitter("root");
 	}
 
 ////////////////////////////////////////////////////////////////

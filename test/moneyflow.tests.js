@@ -3,8 +3,7 @@ var MoneyFlow = artifacts.require('./MoneyFlow');
 var WeiFund = artifacts.require('./WeiFund');
 var IWeiReceiver = artifacts.require('./IWeiReceiver');
 
-var WeiTopDownSplitter = artifacts.require('./WeiTopDownSplitter');
-var WeiUnsortedSplitter = artifacts.require('./WeiUnsortedSplitter');
+var WeiSplitter = artifacts.require('./WeiSplitter');
 var WeiAbsoluteExpense = artifacts.require('./WeiAbsoluteExpense');
 var WeiRelativeExpense = artifacts.require('./WeiRelativeExpense');
 var WeiAbsoluteExpenseWithPeriod = artifacts.require('./WeiAbsoluteExpenseWithPeriod');
@@ -27,24 +26,24 @@ async function createStructure (creator, money, e1, e2, e3, office, internet, t1
 	var callParams = { from: creator, gasPrice: 0 };
 	var o = {};
 
-	o.AllOutpults = await WeiTopDownSplitter.new('AllOutpults', callParams);
-	o.Spends = await WeiUnsortedSplitter.new('Spends', callParams);
-	o.Salaries = await WeiUnsortedSplitter.new('Salaries', callParams);
+	o.AllOutpults = await WeiSplitter.new('AllOutpults', callParams);
+	o.Spends = await WeiSplitter.new('Spends', callParams);
+	o.Salaries = await WeiSplitter.new('Salaries', callParams);
 	o.Employee1 = await WeiAbsoluteExpense.new(e1 * money, callParams);
 	o.Employee2 = await WeiAbsoluteExpense.new(e2 * money, callParams);
 	o.Employee3 = await WeiAbsoluteExpense.new(e3 * money, callParams);
-	o.Other = await WeiUnsortedSplitter.new('Other', callParams);
+	o.Other = await WeiSplitter.new('Other', callParams);
 	o.Office = await WeiAbsoluteExpense.new(office * money, callParams);
 	o.Internet = await WeiAbsoluteExpense.new(internet * money, callParams);
-	o.Tasks = await WeiUnsortedSplitter.new('Tasks', callParams);
+	o.Tasks = await WeiSplitter.new('Tasks', callParams);
 	o.Task1 = await WeiAbsoluteExpense.new(t1 * money, callParams);
 	o.Task2 = await WeiAbsoluteExpense.new(t2 * money, callParams);
 	o.Task3 = await WeiAbsoluteExpense.new(t3 * money, callParams);
-	o.Bonuses = await WeiUnsortedSplitter.new('Bonuses', callParams);
+	o.Bonuses = await WeiSplitter.new('Bonuses', callParams);
 	o.Bonus1 = await WeiRelativeExpense.new(b1, callParams);
 	o.Bonus2 = await WeiRelativeExpense.new(b2, callParams);
 	o.Bonus3 = await WeiRelativeExpense.new(b3, callParams);
-	o.Rest = await WeiUnsortedSplitter.new('Rest', callParams);
+	o.Rest = await WeiSplitter.new('Rest', callParams);
 	o.ReserveFund = await WeiRelativeExpenseWithPeriod.new(reserve, 0, callParams);
 	o.DividendsFund = await WeiRelativeExpenseWithPeriod.new(dividends, 0, callParams);
 
@@ -221,7 +220,7 @@ contract('Moneyflow', (accounts) => {
 
 	it('Should revert when some money stays on unsorted splitter (U-> abs-rel50%)', async () => {
 		var abs = await WeiAbsoluteExpense.new(1e15);
-		var splitter = await WeiUnsortedSplitter.new('splitter');
+		var splitter = await WeiSplitter.new('splitter');
 		var rel = await WeiRelativeExpense.new(500000);
 		await splitter.addChild(abs.address);
 		await splitter.addChild(rel.address);
@@ -231,7 +230,7 @@ contract('Moneyflow', (accounts) => {
 
 	it('Should revert when some money stays on topdown splitter (T-> abs-rel50%)', async () => {
 		var abs = await WeiAbsoluteExpense.new(1e15);
-		var splitter = await WeiTopDownSplitter.new('splitter');
+		var splitter = await WeiSplitter.new('splitter');
 		var rel = await WeiRelativeExpense.new(500000);
 		await splitter.addChild(abs.address);
 		await splitter.addChild(rel.address);
@@ -337,7 +336,7 @@ contract('Moneyflow', (accounts) => {
 
 		var tax = await WeiRelativeExpenseWithPeriod.new(1000000, 0, callParams);
 
-		Splitter = await WeiTopDownSplitter.new('SimpleSplitter', callParams);
+		Splitter = await WeiSplitter.new('SimpleSplitter', callParams);
 		await Splitter.addChild(tax.address, callParams);
 
 		var need1 = await Splitter.isNeedsMoney({ from: creator });
@@ -441,9 +440,9 @@ contract('Moneyflow', (accounts) => {
 		assert.equal(balanceDelta, money, 'all donations is transferred now');
 	});
 
-	it('should process money with WeiTopDownSplitter + 3 WeiAbsoluteExpense', async () => {
-		// create WeiTopDownSplitter
-		var weiTopDownSplitter = await WeiTopDownSplitter.new('JustSplitter');
+	it('should process money with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
+		// create WeiSplitter
+		var weiTopDownSplitter = await WeiSplitter.new('JustSplitter');
 
 		var weiAbsoluteExpense1 = await WeiAbsoluteExpense.new(1 * money, { from: creator, gasPrice: 0 });
 		var weiAbsoluteExpense2 = await WeiAbsoluteExpense.new(2 * money, { from: creator, gasPrice: 0 });
@@ -454,7 +453,7 @@ contract('Moneyflow', (accounts) => {
 		await weiTopDownSplitter.addChild(weiAbsoluteExpense2.address);
 		await weiTopDownSplitter.addChild(weiAbsoluteExpense3.address);
 
-		// add WeiTopDownSplitter to the moneyflow
+		// add WeiSplitter to the moneyflow
 		await moneyflowInstance.setRootWeiReceiver(weiTopDownSplitter.address);
 
 		var revenueEndpointAddress = await moneyflowInstance.getRevenueEndpoint();
@@ -475,9 +474,9 @@ contract('Moneyflow', (accounts) => {
 		assert.equal(weiAbsoluteExpense3Balance.toNumber(), 3 * money, 'resource point received money from splitter');
 	});
 
-	it('should process money with WeiTopDownSplitter + 2 WeiAbsoluteExpense + WeiRelativeExpense', async () => {
-		// create WeiTopDownSplitter
-		var weiTopDownSplitter = await WeiTopDownSplitter.new('JustSplitter');
+	it('should process money with WeiSplitter + 2 WeiAbsoluteExpense + WeiRelativeExpense', async () => {
+		// create WeiSplitter
+		var weiTopDownSplitter = await WeiSplitter.new('JustSplitter');
 
 		var weiAbsoluteExpense1 = await WeiAbsoluteExpense.new(money, { from: creator, gasPrice: 0 });
 		var weiRelativeExpense1 = await WeiRelativeExpense.new(500000, { from: creator, gasPrice: 0 });
@@ -488,7 +487,7 @@ contract('Moneyflow', (accounts) => {
 		await weiTopDownSplitter.addChild(weiRelativeExpense1.address);
 		await weiTopDownSplitter.addChild(weiAbsoluteExpense3.address);
 
-		// add WeiTopDownSplitter to the moneyflow
+		// add WeiSplitter to the moneyflow
 		await moneyflowInstance.setRootWeiReceiver(weiTopDownSplitter.address);
 
 		var revenueEndpointAddress = await moneyflowInstance.getRevenueEndpoint();
@@ -513,9 +512,9 @@ contract('Moneyflow', (accounts) => {
 		assert.equal(weiAbsoluteExpense3Balance.toNumber(), money, 'resource point received money from splitter');
 	});
 
-	it('should process money with WeiUnsortedSplitter + 2 WeiAbsoluteExpense + WeiRelativeExpense', async () => {
-		// create WeiTopDownSplitter
-		var weiUnsortedSplitter = await WeiUnsortedSplitter.new('JustSplitter');
+	it('should process money with WeiSplitter + 2 WeiAbsoluteExpense + WeiRelativeExpense', async () => {
+		// create WeiSplitter
+		var weiUnsortedSplitter = await WeiSplitter.new('JustSplitter');
 
 		var weiAbsoluteExpense1 = await WeiAbsoluteExpense.new(money, { from: creator, gasPrice: 0 });
 		var weiRelativeExpense1 = await WeiRelativeExpense.new(900000, { from: creator, gasPrice: 0 });
@@ -526,7 +525,7 @@ contract('Moneyflow', (accounts) => {
 		await weiUnsortedSplitter.addChild(weiRelativeExpense1.address);
 		await weiUnsortedSplitter.addChild(weiAbsoluteExpense3.address);
 
-		// add WeiTopDownSplitter to the moneyflow
+		// add WeiSplitter to the moneyflow
 		await moneyflowInstance.setRootWeiReceiver(weiUnsortedSplitter.address);
 
 		var revenueEndpointAddress = await moneyflowInstance.getRevenueEndpoint();
@@ -551,9 +550,9 @@ contract('Moneyflow', (accounts) => {
 		assert.equal(weiAbsoluteExpense3Balance.toNumber(), money, 'resource point received money from splitter');
 	});
 
-	it('should process money with WeiUnsortedSplitter + 3 WeiAbsoluteExpense', async () => {
-		// create WeiUnsortedSplitter
-		var weiUnsortedSplitter = await WeiUnsortedSplitter.new('JustSplitter');
+	it('should process money with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
+		// create WeiSplitter
+		var weiUnsortedSplitter = await WeiSplitter.new('JustSplitter');
 
 		var weiAbsoluteExpense1 = await WeiAbsoluteExpense.new(1 * money, { from: creator, gasPrice: 0 });
 		var weiAbsoluteExpense2 = await WeiAbsoluteExpense.new(2 * money, { from: creator, gasPrice: 0 });
@@ -564,7 +563,7 @@ contract('Moneyflow', (accounts) => {
 		await weiUnsortedSplitter.addChild(weiAbsoluteExpense2.address);
 		await weiUnsortedSplitter.addChild(weiAbsoluteExpense3.address);
 
-		// add WeiUnsortedSplitter to the moneyflow
+		// add WeiSplitter to the moneyflow
 		await moneyflowInstance.setRootWeiReceiver(weiUnsortedSplitter.address);
 
 		var revenueEndpointAddress = await moneyflowInstance.getRevenueEndpoint();
@@ -586,8 +585,8 @@ contract('Moneyflow', (accounts) => {
 	});
 
 	it('should process money in structure o-> o-> o-o-o', async () => {
-		var AllOutpults = await WeiTopDownSplitter.new('AllOutpults', { from: creator, gasPrice: 0 });
-		var Salaries = await WeiUnsortedSplitter.new('Salaries', { from: creator, gasPrice: 0 });
+		var AllOutpults = await WeiSplitter.new('AllOutpults', { from: creator, gasPrice: 0 });
+		var Salaries = await WeiSplitter.new('Salaries', { from: creator, gasPrice: 0 });
 
 		var Employee1 = await WeiAbsoluteExpense.new(1000 * money, { from: creator, gasPrice: 0 });
 		var Employee2 = await WeiAbsoluteExpense.new(1500 * money, { from: creator, gasPrice: 0 });

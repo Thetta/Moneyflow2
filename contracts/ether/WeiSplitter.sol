@@ -17,6 +17,10 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 		uint i;
 	}
 
+	function getReceiverType() public view returns(Type) {
+		return Type.Splitter;
+	}
+
 	function getMinWeiNeeded(uint _currentFlow) public view zeroIfClosed returns(uint out) {
 		for(uint j=childrenCount; j>0; --j) {
 			out += IWeiReceiver(children[j-1]).getMinWeiNeeded(_currentFlow);
@@ -55,17 +59,17 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 	function _modifyFlow(FlowBuffer _b) internal view returns(FlowBuffer b) {
 		b = _b;
 		if(!b.relSeqQ) { 
-			if((b.flow>=b.needAcc) { 
+			if(b.flow >= b.needAcc) { 
 				b.flow -= b.needAcc; 
 			} else {
 				b.flow = 0;
 			}
 		}
-	};
+	}
 
 	function _relativesStreak(FlowBuffer _b) internal view returns(FlowBuffer b) {
 		b = _b;
-		b.need = IWeiReceiver(children[_i]).getTotalWeiNeeded(b.flow); 
+		b.need = IWeiReceiver(children[b.i]).getTotalWeiNeeded(b.flow); 
 		if(b.relSeqQ) {
 			b.needAcc += b.need; 
 			b.relSeqQ = false;
@@ -74,9 +78,9 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 		}
 
 		if((b.i+1)>=childrenCount) continue;
-		if((IWeiReceiver(children[_i]).getReceiverType()==Type.Relative)
-		 &&(IWeiReceiver(children[_i+1]).getReceiverType()==Type.Relative)) {
+		if((IWeiReceiver(children[b.i]).getReceiverType()==Type.Relative)
+		 &&(IWeiReceiver(children[b.i+1]).getReceiverType()==Type.Relative)) {
 			b.relSeqQ = true; 
 		}
-	};
+	}
 }

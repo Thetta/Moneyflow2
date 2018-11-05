@@ -2,8 +2,7 @@ var MoneyFlow = artifacts.require('./MoneyFlow');
 var WeiFund = artifacts.require('./WeiFund');
 var IWeiReceiver = artifacts.require('./IWeiReceiver');
 
-var WeiTopDownSplitter = artifacts.require('./WeiTopDownSplitter');
-var WeiUnsortedSplitter = artifacts.require('./WeiUnsortedSplitter');
+var WeiSplitter = artifacts.require('./WeiSplitter');
 var WeiAbsoluteExpense = artifacts.require('./WeiAbsoluteExpense');
 var WeiRelativeExpense = artifacts.require('./WeiRelativeExpense');
 var WeiAbsoluteExpenseWithPeriod = artifacts.require('./WeiAbsoluteExpenseWithPeriod');
@@ -221,7 +220,7 @@ contract('WeiFund', (accounts) => {
 	});
 
 	it('Should implement roadmap pattern with funds (-> abs-abs-abs)', async () => {
-		let splitter = await WeiTopDownSplitter.new('Splitter');
+		let splitter = await WeiSplitter.new('Splitter');
 
 		let milestone1 = await WeiFund.new(0.1e18, false, false, 0);
 		let milestone2 = await WeiFund.new(0.2e18, false, false, 0);
@@ -282,7 +281,7 @@ contract('WeiFund', (accounts) => {
 	});
 
 	it('Should implement roadmap pattern with funds (-> abs-abs-abs-bigCap)', async () => {
-		let splitter = await WeiTopDownSplitter.new('Splitter');
+		let splitter = await WeiSplitter.new('Splitter');
 
 		let milestone1 = await WeiFund.new(0.1e18, false, false, 0);
 		let milestone2 = await WeiFund.new(0.2e18, false, false, 0);

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.24;
 
 import "../interfaces/IDestination.sol";
 import "../interfaces/IWeiReceiver.sol";
@@ -32,6 +32,14 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	event WeiExpenseSetNeededWei(uint _totalWeiNeed);
 	event WeiExpenseSetPercents(uint _partsPerMillion);
 	event WeiExpenseProcessFunds(address _sender, uint _value, uint _currentFlow);
+
+	function getReceiverType() public view returns(Type) {
+		if(0!=partsPerMillion) {
+			return Type.Relative;
+		} else {
+			return Type.Absolute;
+		}
+	}
 
 	modifier zeroIfNoNeed() {
 		if(!isNeedsMoney()) {
@@ -71,12 +79,10 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		momentCreated = block.timestamp;
 	}
 
-	}
-
 	function processFunds(uint _currentFlow) public payable {
 		emit WeiExpenseProcessFunds(msg.sender, msg.value, _currentFlow);
 		require(isNeedsMoney());
-		require(totalWeiReceived+msg.value<=getDebtMultiplier()*neededWei); // protect from extra money
+		require(totalWeiReceived+msg.value<=getTotalWeiNeeded(_currentFlow)); // protect from extra money
 		require(msg.value >= getMinWeiNeeded(_currentFlow));
 		// all inputs divide _minWeiAmount == INTEGER
 
@@ -129,7 +135,7 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		if((minWeiAmount==0)&&(totalWeiNeed>0)) { // FUND
 
 			if((isPeriodic)&&(!isSlidingAmount)&&( (block.timestamp - momentReceived) / (periodHours * 3600 * 1000) >=1)) {
-				return (balanceOnMomentReceived/neededWei) + 1;
+				return (balanceOnMomentReceived/totalWeiNeed) + 1;
 			} else if((isPeriodic)&&(isSlidingAmount)) {
 				return 1 + ((block.timestamp - momentCreated) / (periodHours * 3600 * 1000));
 			}else {

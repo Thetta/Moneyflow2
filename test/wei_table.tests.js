@@ -4,8 +4,7 @@ var MoneyFlow = artifacts.require('./MoneyFlow');
 var WeiFund = artifacts.require('./WeiFund');
 var IWeiReceiver = artifacts.require('./IWeiReceiver');
 
-var WeiTopDownSplitter = artifacts.require('./WeiTopDownSplitter');
-var WeiUnsortedSplitter = artifacts.require('./WeiUnsortedSplitter');
+var WeiSplitter = artifacts.require('./WeiSplitter');
 var WeiAbsoluteExpense = artifacts.require('./WeiAbsoluteExpense');
 var WeiRelativeExpense = artifacts.require('./WeiRelativeExpense');
 var WeiAbsoluteExpenseWithPeriod = artifacts.require('./WeiAbsoluteExpenseWithPeriod');
@@ -226,7 +225,7 @@ contract('WeiTable tests', (accounts) => {
 	});
 
 	// // 0->•abs
-	it('should process money with WeiTopDownSplitter + 3 WeiAbsoluteExpense', async () => {
+	it('should process money with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
 		let weiTable = await WeiTable.new();
 		var output1 = await WeiAbsoluteExpense.new(neededAmount);
 		var output2 = await WeiAbsoluteExpense.new(2 * neededAmount);
@@ -249,7 +248,7 @@ contract('WeiTable tests', (accounts) => {
 		assert.equal(id2, AbsoluteExpense2Id);
 		assert.equal(id3, AbsoluteExpense3Id);
 
-		// add WeiTopDownSplitter to the moneyflow
+		// add WeiSplitter to the moneyflow
 		await moneyflowInstance.setRootWeiReceiver(weiTable.address);
 
 		var revenueEndpointAddress = await moneyflowInstance.getRevenueEndpoint();
@@ -308,7 +307,7 @@ contract('WeiTable tests', (accounts) => {
 		var need2 = await weiTable.isNeedsMoney();
 	});
 
-	it('should process money with WeiUnsortedSplitter + 3 WeiAbsoluteExpense', async () => {
+	it('should process money with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
 		let weiTable = await WeiTable.new();
 		
 		let unsortedSplitterId = getEId(await weiTable.addUnsortedSplitter());
@@ -320,7 +319,7 @@ contract('WeiTable tests', (accounts) => {
 		await weiTable.addChildAt(unsortedSplitterId, AbsoluteExpense2Id);
 		await weiTable.addChildAt(unsortedSplitterId, AbsoluteExpense3Id);
 
-		// add WeiTopDownSplitter to the moneyflow
+		// add WeiSplitter to the moneyflow
 		await moneyflowInstance.setRootWeiReceiver(weiTable.address);
 
 		var revenueEndpointAddress = await moneyflowInstance.getRevenueEndpoint();
@@ -345,7 +344,7 @@ contract('WeiTable tests', (accounts) => {
 		assert.equal(absoluteExpense3Balance.toNumber(), 3 * neededAmount, 'resource point received money from splitter');
 	});
 
-	it('should process money with WeiTopDownSplitter + 2 WeiAbsoluteExpense + WeiRelativeExpense', async () => {
+	it('should process money with WeiSplitter + 2 WeiAbsoluteExpense + WeiRelativeExpense', async () => {
 		let weiTable = await WeiTable.new();
 
 		let topDownSplitterId = getEId(await weiTable.addTopdownSplitter());
@@ -358,7 +357,7 @@ contract('WeiTable tests', (accounts) => {
 		await weiTable.addChildAt(topDownSplitterId, RelativeExpense1Id);
 		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense3Id);
 
-		// add WeiTopDownSplitter to the moneyflow
+		// add WeiSplitter to the moneyflow
 		await moneyflowInstance.setRootWeiReceiver(weiTable.address);
 
 		var id1 = await weiTable.getChildIdAt(topDownSplitterId, 0);
@@ -388,7 +387,7 @@ contract('WeiTable tests', (accounts) => {
 		assert.equal(absoluteExpense3Balance.toNumber(), 1 * neededAmount, 'resource point received money from splitter');
 	});
 
-	it('should process money with WeiUnsortedSplitter + 2 WeiAbsoluteExpense + WeiRelativeExpense', async () => {
+	it('should process money with WeiSplitter + 2 WeiAbsoluteExpense + WeiRelativeExpense', async () => {
 		let weiTable = await WeiTable.new();
 
 		let SplitterId = getEId(await weiTable.addUnsortedSplitter());
@@ -596,7 +595,7 @@ contract('WeiTable tests', (accounts) => {
 		await struct.weiTable.processFunds(CURRENT_INPUT * money / 100, { value: CURRENT_INPUT * money, gasPrice: 0 }).should.be.rejectedWith('revert');
 	});
 
-	it('should process money when opened and not process when closed with WeiTopDownSplitter + 3 WeiAbsoluteExpense', async () => {
+	it('should process money when opened and not process when closed with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
 		let weiTable = await WeiTable.new();
 
 		let topDownSplitterId = getEId(await weiTable.addTopdownSplitter());
@@ -609,7 +608,7 @@ contract('WeiTable tests', (accounts) => {
 		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense2Id);
 		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense3Id);
 
-		// add WeiTopDownSplitter to the moneyflow
+		// add WeiSplitter to the moneyflow
 		await moneyflowInstance.setRootWeiReceiver(weiTable.address);
 
 		var revenueEndpointAddress = await moneyflowInstance.getRevenueEndpoint();
