@@ -20,7 +20,6 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	uint periodHours = 0;
 	uint momentReceived = 0;
 	uint neededWei = 0;
-	address moneySource = 0x0;
 
 	event WeiExpenseFlush(address _owner, uint _balance);
 	event WeiExpenseSetNeededWei(uint _neededWei);
@@ -47,7 +46,7 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		emit WeiExpenseProcessFunds(msg.sender, msg.value, _currentFlow);
 		require(isNeedsMoney());
 
-		require(msg.value == getTotalWeiNeeded(_currentFlow));
+		require(msg.value >= getMinWeiNeeded(_currentFlow));
 
 		// TODO: why not working without if????
 		if(isPeriodic) { 
@@ -55,7 +54,6 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		}
 
 		isMoneyReceived = true;
-		moneySource = msg.sender;
 	}
 
 	function getIsMoneyReceived() public view returns(bool) {
@@ -105,11 +103,6 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		}else {
 			return !isMoneyReceived;
 		}
-	}
-
-	modifier onlyByMoneySource() { 
-		require(msg.sender==moneySource); 
-		_; 
 	}
 
 	function getPartsPerMillion()public view returns(uint) {
