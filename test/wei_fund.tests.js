@@ -48,7 +48,7 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 		let fund = await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 0, false, false);
 
 		var totalNeed = await fund.getTotalWeiNeeded(1e18);
-		var minNeed = await fund.getMinWeiNeeded();
+		var minNeed = await fund.getMinWeiNeeded(0);/*minNeedFix*/
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 1e18);
 		assert.equal(minNeed.toNumber(), 0);
@@ -58,7 +58,7 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 		await fund.processFunds(3e17, { value: 3e17, from: employee1 });
 
 		var totalNeed = await fund.getTotalWeiNeeded(4e17);
-		var minNeed = await fund.getMinWeiNeeded();
+		var minNeed = await fund.getMinWeiNeeded(0);/*minNeedFix*/
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 4e17);
 		assert.equal(minNeed.toNumber(), 0);
@@ -69,7 +69,7 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 		await fund.processFunds(1e17, { value: 1e17 }).should.be.rejectedWith('revert'); // overflow
 
 		var totalNeed = await fund.getTotalWeiNeeded(0);
-		var minNeed = await fund.getMinWeiNeeded();
+		var minNeed = await fund.getMinWeiNeeded(0);/*minNeedFix*/
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0);
 		assert.equal(minNeed.toNumber(), 0);
@@ -81,7 +81,7 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 		assert.equal(b2.toNumber() - b1.toNumber(), 1e18);
 
 		var totalNeed = await fund.getTotalWeiNeeded(0);
-		var minNeed = await fund.getMinWeiNeeded();
+		var minNeed = await fund.getMinWeiNeeded(0);/*minNeedFix*/
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0);
 		assert.equal(minNeed.toNumber(), 0);
@@ -229,7 +229,7 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 		await splitter.addChild(milestone3.address);
 
 		var totalNeed = await splitter.getTotalWeiNeeded(1e18);
-		var minNeed = await splitter.getMinWeiNeeded();
+		var minNeed = await splitter.getMinWeiNeeded(0);/*minNeedFix*/
 		var isNeed = await splitter.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 1e18);
 		assert.equal(minNeed.toNumber(), 0);
@@ -252,7 +252,7 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 		assert.equal(0, (await web3.eth.getBalance(milestone3.address)).toNumber() / 1e18);
 
 		var totalNeed = await splitter.getTotalWeiNeeded(0.88e18);
-		var minNeed = await splitter.getMinWeiNeeded();
+		var minNeed = await splitter.getMinWeiNeeded(0);/*minNeedFix*/
 		var isNeed = await splitter.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0.88e18);
 		assert.equal(minNeed.toNumber(), 0);
@@ -271,7 +271,7 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 		assert.equal(0.7, (await web3.eth.getBalance(milestone3.address)).toNumber() / 1e18);
 
 		var totalNeed = await splitter.getTotalWeiNeeded(0);
-		var minNeed = await splitter.getMinWeiNeeded();
+		var minNeed = await splitter.getMinWeiNeeded(0);/*minNeedFix*/
 		var isNeed = await splitter.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0);
 		assert.equal(minNeed.toNumber(), 0);
@@ -292,7 +292,7 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 		await splitter.addChild(stabFund.address);
 
 		var totalNeed = await splitter.getTotalWeiNeeded(1e18);
-		var minNeed = await splitter.getMinWeiNeeded();
+		var minNeed = await splitter.getMinWeiNeeded(0);/*minNeedFix*/
 		var isNeed = await splitter.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 1e18);
 		assert.equal(minNeed.toNumber(), 0);
@@ -315,7 +315,7 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 		assert.equal(0, (await web3.eth.getBalance(milestone3.address)).toNumber() / 1e18);
 
 		var totalNeed = await splitter.getTotalWeiNeeded(0.88e18);
-		var minNeed = await splitter.getMinWeiNeeded();
+		var minNeed = await splitter.getMinWeiNeeded(0);/*minNeedFix*/
 		var isNeed = await splitter.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0.88e18);
 		assert.equal(minNeed.toNumber(), 0);
@@ -334,7 +334,7 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 		assert.equal(0.7, (await web3.eth.getBalance(milestone3.address)).toNumber() / 1e18);
 
 		var totalNeed = await splitter.getTotalWeiNeeded(0);
-		var minNeed = await splitter.getMinWeiNeeded();
+		var minNeed = await splitter.getMinWeiNeeded(0);/*minNeedFix*/
 		var isNeed = await splitter.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0);
 		assert.equal(minNeed.toNumber(), 0);

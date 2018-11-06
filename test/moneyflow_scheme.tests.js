@@ -16,7 +16,6 @@ contract('Scheme', (accounts) => {
 	let token;
 	let store;
 	let daoBase;
-	let moneyflowInstance;
 	let moneyflowScheme;
 
 	let money = web3.toWei(0.001, 'ether');

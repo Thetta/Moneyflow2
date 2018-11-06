@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "./SplitterBase.sol";
+import "../interfaces/IWeiReceiver.sol";
 
 
 /**

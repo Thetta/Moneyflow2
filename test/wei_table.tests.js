@@ -206,7 +206,6 @@ contract('WeiTable tests', (accounts) => {
 	var token;
 	var store;
 	var daoBase;
-	var moneyflowInstance;
 
 	var neededAmount = 1e15;
 	var isPeriodic = false;
@@ -218,10 +217,6 @@ contract('WeiTable tests', (accounts) => {
 	const employee1 = accounts[1];
 	const employee2 = accounts[2];
 	const outsider = accounts[3];
-
-	beforeEach(async () => {
-		moneyflowInstance = await MoneyFlow.new();
-	});
 
 	// // 0->•abs
 	it('should process money with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
@@ -247,16 +242,9 @@ contract('WeiTable tests', (accounts) => {
 		assert.equal(id2, AbsoluteExpense2Id);
 		assert.equal(id3, AbsoluteExpense3Id);
 
-		// add WeiSplitter to the moneyflow
-		await moneyflowInstance.setRootWeiReceiver(weiTable.address);
-
-		var revenueEndpointAddress = await moneyflowInstance.getRevenueEndpoint();
-
-		assert.equal(revenueEndpointAddress, weiTable.address, 'weiTopDownSplitter.address saved in moneyflowInstance as revenueEndpointAddress');
-	
 		var totalNeed = await weiTable.getTotalWeiNeeded(6 * neededAmount);
 		assert.equal(totalNeed, 6 * neededAmount);
-		var minNeed = await weiTable.getMinWeiNeeded();
+		var minNeed = await weiTable.getMinWeiNeeded(0);/*minNeedFix*/
 		assert.equal(minNeed, 6 * neededAmount);
 		var need1 = await weiTable.isNeedsMoney();
 		// now send some money to the revenue endpoint
@@ -274,7 +262,7 @@ contract('WeiTable tests', (accounts) => {
 
 		var totalNeed = await weiTable.getTotalWeiNeeded(6 * neededAmount);
 		assert.equal(totalNeed.toNumber(), 0 * neededAmount);
-		var minNeed = await weiTable.getMinWeiNeeded();
+		var minNeed = await weiTable.getMinWeiNeeded(0);/*minNeedFix*/
 		assert.equal(minNeed.toNumber(), 0 * neededAmount);
 
 		var need2 = await weiTable.isNeedsMoney();
@@ -318,17 +306,10 @@ contract('WeiTable tests', (accounts) => {
 		await weiTable.addChildAt(unsortedSplitterId, AbsoluteExpense2Id);
 		await weiTable.addChildAt(unsortedSplitterId, AbsoluteExpense3Id);
 
-		// add WeiSplitter to the moneyflow
-		await moneyflowInstance.setRootWeiReceiver(weiTable.address);
-
-		var revenueEndpointAddress = await moneyflowInstance.getRevenueEndpoint();
-
-		assert.equal(revenueEndpointAddress, weiTable.address, 'weiTopDownSplitter.address saved in moneyflowInstance as revenueEndpointAddress');
-
 		// now send some money to the revenue endpoint
 		let totalNeed = await weiTable.getTotalWeiNeeded(6 * neededAmount);
 		assert.equal(totalNeed, 6 * neededAmount);
-		let minNeed = await weiTable.getMinWeiNeeded();
+		let minNeed = await weiTable.getMinWeiNeeded(0);/*minNeedFix*/
 		assert.equal(minNeed, 6 * neededAmount);
 
 		await weiTable.processFunds(6 * neededAmount, { value: 6 * neededAmount, from: creator });
@@ -356,20 +337,13 @@ contract('WeiTable tests', (accounts) => {
 		await weiTable.addChildAt(topDownSplitterId, RelativeExpense1Id);
 		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense3Id);
 
-		// add WeiSplitter to the moneyflow
-		await moneyflowInstance.setRootWeiReceiver(weiTable.address);
-
 		var id1 = await weiTable.getChildIdAt(topDownSplitterId, 0);
 		var id2 = await weiTable.getChildIdAt(topDownSplitterId, 1);
 		var id3 = await weiTable.getChildIdAt(topDownSplitterId, 2);
 
-		var revenueEndpointAddress = await moneyflowInstance.getRevenueEndpoint();
-
-		assert.equal(revenueEndpointAddress, weiTable.address, 'weiTopDownSplitter.address saved in moneyflowInstance as revenueEndpointAddress');
-	
 		let totalNeed = await weiTable.getTotalWeiNeeded(3 * neededAmount);
 		assert.equal(totalNeed.toNumber(), 3 * neededAmount);
-		let minNeed = await weiTable.getMinWeiNeeded();
+		let minNeed = await weiTable.getMinWeiNeeded(0);/*minNeedFix*/
 		assert.equal(minNeed.toNumber(), 3 * neededAmount);
 
 		// now send some money to the revenue endpoint
@@ -399,16 +373,9 @@ contract('WeiTable tests', (accounts) => {
 		await weiTable.addChildAt(SplitterId, RelativeExpense1Id);
 		await weiTable.addChildAt(SplitterId, AbsoluteExpense3Id);
 
-		// add WeiSplitter to the moneyflow
-		await moneyflowInstance.setRootWeiReceiver(weiTable.address);
-
-		var revenueEndpointAddress = await moneyflowInstance.getRevenueEndpoint();
-
-		global.assert.equal(revenueEndpointAddress, weiTable.address, 'weiSplitter.address saved in moneyflowInstance as revenueEndpointAddress');
-	
 		let totalNeed = await weiTable.getTotalWeiNeeded(20 * neededAmount);
 		global.assert.equal(totalNeed.toNumber(), 20 * neededAmount);
-		let minNeed = await weiTable.getMinWeiNeeded();
+		let minNeed = await weiTable.getMinWeiNeeded(0);/*minNeedFix*/
 		global.assert.equal(minNeed.toNumber(), 20 * neededAmount);
 
 		// now send some money to the revenue endpoint
@@ -607,16 +574,9 @@ contract('WeiTable tests', (accounts) => {
 		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense2Id);
 		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense3Id);
 
-		// add WeiSplitter to the moneyflow
-		await moneyflowInstance.setRootWeiReceiver(weiTable.address);
-
-		var revenueEndpointAddress = await moneyflowInstance.getRevenueEndpoint();
-
-		assert.equal(revenueEndpointAddress, weiTable.address, 'weiTopDownSplitter.address saved in moneyflowInstance as revenueEndpointAddress');
-	
 		var totalNeed = await weiTable.getTotalWeiNeeded(6 * neededAmount);
 		assert.equal(totalNeed, 6 * neededAmount);
-		var minNeed = await weiTable.getMinWeiNeeded();
+		var minNeed = await weiTable.getMinWeiNeeded(0);/*minNeedFix*/
 		assert.equal(minNeed, 6 * neededAmount);
 
 		var isOpen1At = await weiTable.isOpenAt(AbsoluteExpense1Id);
@@ -630,14 +590,14 @@ contract('WeiTable tests', (accounts) => {
 
 		var totalNeed = await weiTable.getTotalWeiNeeded(6 * neededAmount);
 		assert.equal(totalNeed, 3 * neededAmount);
-		var minNeed = await weiTable.getMinWeiNeeded();
+		var minNeed = await weiTable.getMinWeiNeeded(0);/*minNeedFix*/
 		assert.equal(minNeed, 3 * neededAmount);
 
 		await weiTable.closeAt(AbsoluteExpense1Id);
 
 		var totalNeed = await weiTable.getTotalWeiNeeded(6 * neededAmount);
 		assert.equal(totalNeed, 2 * neededAmount);
-		var minNeed = await weiTable.getMinWeiNeeded();
+		var minNeed = await weiTable.getMinWeiNeeded(0);/*minNeedFix*/
 		assert.equal(minNeed, 2 * neededAmount);
 
 		var isOpen1At = await weiTable.isOpenAt(AbsoluteExpense1Id);
