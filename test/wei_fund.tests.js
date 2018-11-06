@@ -6,7 +6,7 @@ var WeiAbsoluteExpense = artifacts.require('./WeiAbsoluteExpense');
 var WeiRelativeExpense = artifacts.require('./WeiRelativeExpense');
 var WeiAbsoluteExpenseWithPeriod = artifacts.require('./WeiAbsoluteExpenseWithPeriod');
 var WeiRelativeExpenseWithPeriod = artifacts.require('./WeiRelativeExpenseWithPeriod');
-
+var WeiAbsoluteExpenseWithPeriodSliding = artifacts.require('./WeiAbsoluteExpenseWithPeriodSliding');
 const getEId = o => o.logs.filter(l => l.event == 'elementAdded')[0].args._eId.toNumber();
 const KECCAK256 = x => web3.sha3(x);
 
@@ -26,7 +26,7 @@ require('chai')
 	.use(require('chai-bignumber')(BigNumber))
 	.should();
 
-contract('WeiExpense with minAmount==0', (accounts) => {
+contract('WeiFund', (accounts) => {
 	let money = web3.toWei(0.001, 'ether');
 
 	const creator = accounts[0];
@@ -37,15 +37,15 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 	beforeEach(async () => {
 	});
 
-	it('Should not create fund with wrong args', async () => {
-		await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 0, true, true).should.be.rejectedWith('revert');
-		await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 24, false, true).should.be.rejectedWith('revert');
-		await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 0, false, true).should.be.rejectedWith('revert');
-		await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 0, true, true).should.be.rejectedWith('revert');
-	});
+	/*it('Should not create fund with wrong args', async () => {
+		await WeiAbsoluteExpense.new(0, 1e18).should.be.rejectedWith('revert');
+		await WeiAbsoluteExpense.new(0, 1e18).should.be.rejectedWith('revert');
+		await WeiAbsoluteExpense.new(0, 1e18).should.be.rejectedWith('revert');
+		await WeiAbsoluteExpense.new(0, 1e18).should.be.rejectedWith('revert');
+	});*/
 
 	it('Should collect money, then revert if more, then flush', async () => {
-		let fund = await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 0, false, false);
+		let fund = await WeiAbsoluteExpense.new(0, 1e18);
 
 		var totalNeed = await fund.getTotalWeiNeeded(1e18);
 		var minNeed = await fund.getMinWeiNeeded(0);/*minNeedFix*/
@@ -89,7 +89,7 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 	});
 
 	it('Should collect money (periodic, not accumulate debt), then time passed, then need money again', async () => {
-		let fund = await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 24, true, false);
+		let fund = await WeiAbsoluteExpenseWithPeriodSliding.new(0, 1e18, 24);
 
 		var totalNeed = await fund.getTotalWeiNeeded(1e18);
 		var isNeed = await fund.isNeedsMoney();
@@ -147,7 +147,7 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 	});
 
 	it('Should collect money (periodic, accumulate debt), then time passed, then need money again', async () => {
-		let fund = await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 24, true, true);
+		let fund = await WeiAbsoluteExpenseWithPeriodSliding.new(0, 1e18, 24);
 
 		var totalNeed = await fund.getTotalWeiNeeded(1e18);
 		var isNeed = await fund.isNeedsMoney();
@@ -205,7 +205,7 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 	});
 
 	it('Should collect money (periodic, accumulate debt), then time passed, then need money again', async () => {
-		let fund = await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 24, true, true);
+		let fund = await WeiAbsoluteExpenseWithPeriodSliding.new(0, 1e18, 24);
 		var totalNeed = await fund.getTotalWeiNeeded(1e18);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 1e18);
@@ -221,9 +221,9 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 	it('Should implement roadmap pattern with funds (-> abs-abs-abs)', async () => {
 		let splitter = await WeiSplitter.new();
 
-		let milestone1 = await WeiAbsoluteExpense.new(0, 0, 0.1e18, 0, 0, false, false);
-		let milestone2 = await WeiAbsoluteExpense.new(0, 0, 0.2e18, 0, 0, false, false);
-		let milestone3 = await WeiAbsoluteExpense.new(0, 0, 0.7e18, 0, 0, false, false);
+		let milestone1 = await WeiAbsoluteExpense.new(0, 0.1e18);
+		let milestone2 = await WeiAbsoluteExpense.new(0, 0.2e18);
+		let milestone3 = await WeiAbsoluteExpense.new(0, 0.7e18);
 		await splitter.addChild(milestone1.address);
 		await splitter.addChild(milestone2.address);
 		await splitter.addChild(milestone3.address);
@@ -282,10 +282,10 @@ contract('WeiExpense with minAmount==0', (accounts) => {
 	it('Should implement roadmap pattern with funds (-> abs-abs-abs-bigCap)', async () => {
 		let splitter = await WeiSplitter.new();
 
-		let milestone1 = await WeiAbsoluteExpense.new(0, 0, 0.1e18, 0, 0, false, false);
-		let milestone2 = await WeiAbsoluteExpense.new(0, 0, 0.2e18, 0, 0, false, false);
-		let milestone3 = await WeiAbsoluteExpense.new(0, 0, 0.7e18, 0, 0, false, false);
-		let stabFund = await WeiAbsoluteExpense.new(0, 0, 1e30, 0, 0, false, false);
+		let milestone1 = await WeiAbsoluteExpense.new(0, 0.1e18);
+		let milestone2 = await WeiAbsoluteExpense.new(0, 0.2e18);
+		let milestone3 = await WeiAbsoluteExpense.new(0, 0.7e18);
+		let stabFund = await WeiAbsoluteExpense.new(0, 1e30);
 		await splitter.addChild(milestone1.address);
 		await splitter.addChild(milestone2.address);
 		await splitter.addChild(milestone3.address);

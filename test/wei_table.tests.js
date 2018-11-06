@@ -221,9 +221,9 @@ contract('WeiTable tests', (accounts) => {
 	// // 0->•abs
 	it('should process money with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
 		let weiTable = await WeiTable.new();
-		var output1 = await WeiAbsoluteExpense.new(neededAmount);
-		var output2 = await WeiAbsoluteExpense.new(2 * neededAmount);
-		var output3 = await WeiAbsoluteExpense.new(3 * neededAmount);
+		var output1 = await WeiAbsoluteExpense.new(neededAmount, neededAmount);
+		var output2 = await WeiAbsoluteExpense.new(2 * neededAmount, 2 * neededAmount);
+		var output3 = await WeiAbsoluteExpense.new(3 * neededAmount, 3 * neededAmount);
 		let topDownSplitterId =  getEId(await weiTable.addTopdownSplitter());
 		let AbsoluteExpense1Id = getEId(await weiTable.addAbsoluteExpense(1 * neededAmount, isPeriodic, isAccumulateDebt, periodHours));
 		let AbsoluteExpense2Id = getEId(await weiTable.addAbsoluteExpense(2 * neededAmount, isPeriodic, isAccumulateDebt, periodHours));

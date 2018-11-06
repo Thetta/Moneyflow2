@@ -68,11 +68,13 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		totalWeiNeed = _totalWeiNeed;
 		isSlidingAmount = _isSlidingAmount;
 		isPeriodic = _isPeriodic;
+		// TODO: UNCOMMENT
+		// require(!((_isSlidingAmount)&&(_periodHours==0)));
+		// require(!(!(_isPeriodic)&&(_periodHours!=0)));
+		// require(!((_isSlidingAmount)&&(!_isPeriodic)));
+		// require(_totalWeiNeed!=0);
 
-		require(!((_isSlidingAmount)&&(_periodHours==0)));
-		require(!(!(_isPeriodic)&&(_periodHours!=0)));
-		require(!((_isSlidingAmount)&&(!_isPeriodic)));
-		require(_totalWeiNeed!=0);
+
 		// TODO: _totalWeiNeed divide _minWeiAmount == INTEGER
 		// TODO: ppt and total => revert
 		// TODO: ppt and minWeiAmount => revert
