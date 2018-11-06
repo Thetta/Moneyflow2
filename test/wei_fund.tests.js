@@ -1,5 +1,4 @@
 var MoneyFlow = artifacts.require('./MoneyFlow');
-var WeiFund = artifacts.require('./WeiFund');
 var IWeiReceiver = artifacts.require('./IWeiReceiver');
 
 var WeiSplitter = artifacts.require('./WeiSplitter');
@@ -27,7 +26,7 @@ require('chai')
 	.use(require('chai-bignumber')(BigNumber))
 	.should();
 
-contract('WeiFund', (accounts) => {
+contract('WeiExpense with minAmount==0', (accounts) => {
 	let money = web3.toWei(0.001, 'ether');
 
 	const creator = accounts[0];
@@ -39,14 +38,14 @@ contract('WeiFund', (accounts) => {
 	});
 
 	it('Should not create fund with wrong args', async () => {
-		await WeiFund.new(1e18, true, true, 0).should.be.rejectedWith('revert');
-		await WeiFund.new(1e18, false, true, 24).should.be.rejectedWith('revert');
-		await WeiFund.new(1e18, false, true, 0).should.be.rejectedWith('revert');
-		await WeiFund.new(1e18, true, true, 0).should.be.rejectedWith('revert');
+		await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 0, true, true).should.be.rejectedWith('revert');
+		await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 24, false, true).should.be.rejectedWith('revert');
+		await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 0, false, true).should.be.rejectedWith('revert');
+		await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 0, true, true).should.be.rejectedWith('revert');
 	});
 
 	it('Should collect money, then revert if more, then flush', async () => {
-		let fund = await WeiFund.new(1e18, false, false, 0);
+		let fund = await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 0, false, false);
 
 		var totalNeed = await fund.getTotalWeiNeeded(1e18);
 		var minNeed = await fund.getMinWeiNeeded();
@@ -90,7 +89,7 @@ contract('WeiFund', (accounts) => {
 	});
 
 	it('Should collect money (periodic, not accumulate debt), then time passed, then need money again', async () => {
-		let fund = await WeiFund.new(1e18, true, false, 24);
+		let fund = await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 24, true, false);
 
 		var totalNeed = await fund.getTotalWeiNeeded(1e18);
 		var isNeed = await fund.isNeedsMoney();
@@ -148,7 +147,7 @@ contract('WeiFund', (accounts) => {
 	});
 
 	it('Should collect money (periodic, accumulate debt), then time passed, then need money again', async () => {
-		let fund = await WeiFund.new(1e18, true, true, 24);
+		let fund = await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 24, true, true);
 
 		var totalNeed = await fund.getTotalWeiNeeded(1e18);
 		var isNeed = await fund.isNeedsMoney();
@@ -206,7 +205,7 @@ contract('WeiFund', (accounts) => {
 	});
 
 	it('Should collect money (periodic, accumulate debt), then time passed, then need money again', async () => {
-		let fund = await WeiFund.new(1e18, true, true, 24);
+		let fund = await WeiAbsoluteExpense.new(0, 0, 1e18, 0, 24, true, true);
 		var totalNeed = await fund.getTotalWeiNeeded(1e18);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 1e18);
@@ -220,11 +219,11 @@ contract('WeiFund', (accounts) => {
 	});
 
 	it('Should implement roadmap pattern with funds (-> abs-abs-abs)', async () => {
-		let splitter = await WeiSplitter.new('Splitter');
+		let splitter = await WeiSplitter.new();
 
-		let milestone1 = await WeiFund.new(0.1e18, false, false, 0);
-		let milestone2 = await WeiFund.new(0.2e18, false, false, 0);
-		let milestone3 = await WeiFund.new(0.7e18, false, false, 0);
+		let milestone1 = await WeiAbsoluteExpense.new(0, 0, 0.1e18, 0, 0, false, false);
+		let milestone2 = await WeiAbsoluteExpense.new(0, 0, 0.2e18, 0, 0, false, false);
+		let milestone3 = await WeiAbsoluteExpense.new(0, 0, 0.7e18, 0, 0, false, false);
 		await splitter.addChild(milestone1.address);
 		await splitter.addChild(milestone2.address);
 		await splitter.addChild(milestone3.address);
@@ -281,12 +280,12 @@ contract('WeiFund', (accounts) => {
 	});
 
 	it('Should implement roadmap pattern with funds (-> abs-abs-abs-bigCap)', async () => {
-		let splitter = await WeiSplitter.new('Splitter');
+		let splitter = await WeiSplitter.new();
 
-		let milestone1 = await WeiFund.new(0.1e18, false, false, 0);
-		let milestone2 = await WeiFund.new(0.2e18, false, false, 0);
-		let milestone3 = await WeiFund.new(0.7e18, false, false, 0);
-		let stabFund = await WeiFund.new(1e30, false, false, 0);
+		let milestone1 = await WeiAbsoluteExpense.new(0, 0, 0.1e18, 0, 0, false, false);
+		let milestone2 = await WeiAbsoluteExpense.new(0, 0, 0.2e18, 0, 0, false, false);
+		let milestone3 = await WeiAbsoluteExpense.new(0, 0, 0.7e18, 0, 0, false, false);
+		let stabFund = await WeiAbsoluteExpense.new(0, 0, 1e30, 0, 0, false, false);
 		await splitter.addChild(milestone1.address);
 		await splitter.addChild(milestone2.address);
 		await splitter.addChild(milestone3.address);

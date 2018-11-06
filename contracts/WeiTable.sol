@@ -27,6 +27,10 @@ contract WeiTable is IWeiReceiver, Ownable {
 	mapping(uint=>Expense) expenses;
 	mapping(uint=>Splitter) splitters;
 
+	function getReceiverType() public view returns(Type) {
+		return Type.Table;
+	}
+
 	struct Expense {
 		uint neededAmount;
 		uint neededPpm;
@@ -290,7 +294,7 @@ contract WeiTable is IWeiReceiver, Ownable {
 		return processFundsAt(0, _currentFlow, msg.value);
 	}
 
-	function getMinWeiNeeded()public view returns(uint) {
+	function getMinWeiNeeded(uint _currentFlow)public view returns(uint) {
 		return getMinWeiNeededAt(0);
 	}
 

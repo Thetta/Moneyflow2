@@ -13,7 +13,8 @@ contract IWeiReceiver is IReceiver {
 	enum Type {
 		Absolute,
 		Relative,
-		Splitter
+		Splitter,
+		Table
 	}
 
 	// Will calculate only absolute outputs, but not take into account the Percents

@@ -16,7 +16,6 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	bool isMoneyReceived = false;
 
 	uint totalWeiReceived;
-	uint momentReceived;
 	uint balanceOnMomentReceived;
 	uint momentCreated;
 
@@ -42,10 +41,12 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	}
 
 	modifier zeroIfNoNeed() {
+		uint out;
 		if(!isNeedsMoney()) {
-			return 0;
+			out = 0;
+		} else {
+			_;
 		}
-		_;
 	}	
 
 	/**

@@ -18,17 +18,21 @@ contract SplitterBase is ISplitter, Ownable {
 	uint childrenCount = 0;
 	
 	modifier zeroIfClosed() {
+		uint out;
 		if(!isOpen()) {
-			return 0;
+			out = 0;
+		} else {
+			_;
 		}
-		_;
 	}
 
 	modifier falseIfClosed() {
+		bool out;
 		if(!isOpen()) {
-			return false;
+			out = false;
+		} else {
+			_;
 		}
-		_;
 	}
 
 	modifier onlyIfOpen() {
@@ -68,8 +72,5 @@ contract SplitterBase is ISplitter, Ownable {
 		emit SplitterBaseAddChild(_newChild);
 		children[childrenCount] = _newChild;
 		childrenCount = childrenCount + 1;	
-	}
-
-	function() public {
 	}	
 }

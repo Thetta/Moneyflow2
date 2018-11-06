@@ -1,7 +1,6 @@
 var WeiTable = artifacts.require('./WeiTable');
 
 var MoneyFlow = artifacts.require('./MoneyFlow');
-var WeiFund = artifacts.require('./WeiFund');
 var IWeiReceiver = artifacts.require('./IWeiReceiver');
 
 var WeiSplitter = artifacts.require('./WeiSplitter');
@@ -231,7 +230,7 @@ contract('WeiTable tests', (accounts) => {
 		var output2 = await WeiAbsoluteExpense.new(2 * neededAmount);
 		var output3 = await WeiAbsoluteExpense.new(3 * neededAmount);
 		let topDownSplitterId =  getEId(await weiTable.addTopdownSplitter());
-		let AbsoluteExpense1Id = getEId(await weiTable.addAbsoluteExpense(neededAmount, isPeriodic, isAccumulateDebt, periodHours));
+		let AbsoluteExpense1Id = getEId(await weiTable.addAbsoluteExpense(1 * neededAmount, isPeriodic, isAccumulateDebt, periodHours));
 		let AbsoluteExpense2Id = getEId(await weiTable.addAbsoluteExpense(2 * neededAmount, isPeriodic, isAccumulateDebt, periodHours));
 		let AbsoluteExpense3Id = getEId(await weiTable.addAbsoluteExpense(3 * neededAmount, isPeriodic, isAccumulateDebt, periodHours));
 

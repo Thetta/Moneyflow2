@@ -28,8 +28,9 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 	}
 
 	function getTotalWeiNeeded(uint _currentFlow)public view zeroIfClosed returns(uint out) {
-		FlowBuffer b = FlowBuffer(_currentFlow, false, 0, 0, 0);
+		FlowBuffer memory b = FlowBuffer(_currentFlow, false, 0, 0, 0);
 		for(uint i=0; i<childrenCount; ++i) {
+			b.i = i;
 			b = _relativesStreak(b);
 			out += b.need;
 			b = _modifyFlow(b);
@@ -46,8 +47,9 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 
 	function processFunds(uint _currentFlow) public payable onlyIfOpen {
 		emit SplitterBaseProcessFunds(msg.sender, msg.value, _currentFlow);
-		FlowBuffer b = FlowBuffer(_currentFlow, false, 0, 0, 0);
+		FlowBuffer memory b = FlowBuffer(_currentFlow, false, 0, 0, 0);
 		for(uint i=0; i<childrenCount; ++i) {
+			b.i = i;
 			b = _relativesStreak(b);
 			if(b.need==0) continue;
 			IWeiReceiver(children[i]).processFunds.value(b.need)(b.flow); 
@@ -56,8 +58,8 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 		require(this.balance == 0);
 	}
 
-	function _modifyFlow(FlowBuffer _b) internal view returns(FlowBuffer b) {
-		b = _b;
+	function _modifyFlow(FlowBuffer _b) internal view returns(FlowBuffer) {
+		FlowBuffer memory b = _b;
 		if(!b.relSeqQ) { 
 			if(b.flow >= b.needAcc) { 
 				b.flow -= b.needAcc; 
@@ -65,10 +67,11 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 				b.flow = 0;
 			}
 		}
+		return b;
 	}
 
-	function _relativesStreak(FlowBuffer _b) internal view returns(FlowBuffer b) {
-		b = _b;
+	function _relativesStreak(FlowBuffer _b) internal view returns(FlowBuffer) {
+		FlowBuffer memory b = _b;
 		b.need = IWeiReceiver(children[b.i]).getTotalWeiNeeded(b.flow); 
 		if(b.relSeqQ) {
 			b.needAcc += b.need; 
@@ -77,10 +80,13 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 			b.needAcc = b.need; 
 		}
 
-		if((b.i+1)>=childrenCount) continue;
-		if((IWeiReceiver(children[b.i]).getReceiverType()==Type.Relative)
-		 &&(IWeiReceiver(children[b.i+1]).getReceiverType()==Type.Relative)) {
-			b.relSeqQ = true; 
+		if((b.i+1)<childrenCount){
+			if((IWeiReceiver(children[b.i]).getReceiverType()==Type.Relative)
+			 &&(IWeiReceiver(children[b.i+1]).getReceiverType()==Type.Relative)) {
+				b.relSeqQ = true; 
+			}
 		}
+
+		return b;
 	}
 }

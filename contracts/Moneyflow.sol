@@ -2,7 +2,7 @@ pragma solidity ^0.4.22;
 import "./interfaces/IMoneyflow.sol";
 
 import "./FallbackToWeiReceiver.sol";
-import "./ether/WeiFund.sol";
+import "./ether/WeiAbsoluteExpense.sol";
 import "./ether/WeiExpense.sol";
 import "./ether/WeiRelativeExpenseWithPeriod.sol";
 
