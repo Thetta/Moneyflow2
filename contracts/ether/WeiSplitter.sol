@@ -60,8 +60,9 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 			b.i = i;
 			b.need = IWeiReceiver(children[b.i]).getTotalWeiNeeded(b.flow); 
 			b = _relativesStreak(b);
-			if(b.need==0) continue;
-			IWeiReceiver(children[i]).processFunds.value(b.need)(b.flow); 
+			if(b.need!=0) {
+				IWeiReceiver(children[i]).processFunds.value(b.need)(b.flow); 
+			}
 			b = _modifyFlow(b);
 		}
 		require(this.balance == 0);
@@ -88,7 +89,7 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 			b.needAcc = b.need; 
 		}
 
-		if((b.i+1)<childrenCount){
+		if((b.i+1)<childrenCount) {
 			if((IWeiReceiver(children[b.i]).getReceiverType()==Type.Relative)
 			 &&(IWeiReceiver(children[b.i+1]).getReceiverType()==Type.Relative)) {
 				b.relSeqQ = true; 
