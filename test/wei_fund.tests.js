@@ -88,7 +88,7 @@ contract('WeiFund', (accounts) => {
 		assert.equal(isNeed, false);
 	});
 
-	it('Should collect money (periodic, not accumulate debt), then time passed, then need money again', async () => {
+	/*it('Should collect money (periodic, not accumulate debt), then time passed, then need money again', async () => {
 		let fund = await WeiAbsoluteExpenseWithPeriodSliding.new(0, 1e18, 24);
 
 		var totalNeed = await fund.getTotalWeiNeeded(1e18);
@@ -202,7 +202,7 @@ contract('WeiFund', (accounts) => {
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0);
 		assert.equal(isNeed, false);
-	});
+	});*/
 
 	it('Should collect money (periodic, accumulate debt), then time passed, then need money again', async () => {
 		let fund = await WeiAbsoluteExpenseWithPeriodSliding.new(0, 1e18, 24);
