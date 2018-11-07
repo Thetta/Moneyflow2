@@ -68,10 +68,11 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		totalWeiNeed = _totalWeiNeed;
 		isSlidingAmount = _isSlidingAmount;
 		isPeriodic = _isPeriodic;
+		minWeiAmount = _minWeiAmount;
 		// TODO: UNCOMMENT
-		// require(!((_isSlidingAmount)&&(_periodHours==0)));
-		// require(!(!(_isPeriodic)&&(_periodHours!=0)));
-		// require(!((_isSlidingAmount)&&(!_isPeriodic)));
+		require(!((_isSlidingAmount)&&(_periodHours==0)));
+		require(!(!(_isPeriodic)&&(_periodHours!=0)));
+		require(!((_isSlidingAmount)&&(!_isPeriodic)));
 		// require(_totalWeiNeed!=0);
 
 
@@ -85,14 +86,15 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	function processFunds(uint _currentFlow) public payable {
 		emit WeiExpenseProcessFunds(msg.sender, msg.value, _currentFlow);
 		require(isNeedsMoney());
-		require(totalWeiReceived+msg.value<=getTotalWeiNeeded(_currentFlow)); // protect from extra money
+		// require(totalWeiReceived+msg.value<=getTotalWeiNeeded(_currentFlow)); // protect from extra money
 		require(msg.value >= getMinWeiNeeded(_currentFlow));
+		// require(msg.value <= getTotalWeiNeeded(_currentFlow));
+		require(msg.value == getTotalWeiNeeded(_currentFlow));
+		require(_currentFlow >= getMinWeiNeeded(_currentFlow));
+		require(_currentFlow >= msg.value);
 		// all inputs divide _minWeiAmount == INTEGER
 
-		// TODO: why not working without if????
-		if(isPeriodic) { 
-			momentReceived = uint(block.timestamp);
-		}
+		momentReceived = uint(block.timestamp);
 
 		totalWeiReceived += msg.value;
 		isMoneyReceived = true;
@@ -115,43 +117,68 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		if(0!=partsPerMillion) {
 			need = (getDebtMultiplier()*(partsPerMillion * _currentFlow)) / 1000000;
 		}else {
-			need = totalWeiNeed - totalWeiReceived;
+			if(getDebtMultiplier()*totalWeiNeed > totalWeiReceived) {
+				need = getDebtMultiplier()*totalWeiNeed - totalWeiReceived;
+			}else {
+				need = 0;
+			}
+
+			if((minWeiAmount==0)&&(totalWeiNeed>0)) {
+				if(need>_currentFlow) {
+					need = _currentFlow;
+				}				
+			}
+		
 		}
 	}
 
 	function getMinWeiNeeded(uint _currentFlow) public view zeroIfNoNeed returns(uint need) {
-		if((minWeiAmount==0)&&(totalWeiNeed>0)) { // Fund-like abs expense criterio
-			need = 0;
-		} else if(0!=partsPerMillion) { // relative expense criterio
-			need = getTotalWeiNeeded(_currentFlow);
-		} else {
-			need = minWeiAmount;
+		// if((minWeiAmount==0)&&(totalWeiNeed>0)) { // Fund-like abs expense criterio
+		// 	need = 0;
+		// } else if(0!=partsPerMillion) { // relative expense criterio
+		// 	need = getTotalWeiNeeded(_currentFlow);
+		// } else {
+		// 	need = minWeiAmount;
+		// }
+		if(  !isNeedsMoney() 
+		  || (0!=partsPerMillion) 
+		  || ((minWeiAmount==0)&&(totalWeiNeed>0)) 
+		) {
+			return 0;
 		}
+		return getTotalWeiNeeded(_currentFlow);		
 	}
 
 	function getMomentReceived()public view returns(uint) {
 		return momentReceived;
 	}
 
+	// function getTotalPeriodsPassed() public returns(uint) {
+	// 	return ((block.timestamp - momentCreated) / (periodHours * 3600 * 1000));
+	// }
+
+	// function getUnpayedPeriodCount() public returns(uint) {
+	// 	if(!isPeriodic) {
+	// 		return 0;
+	// 	} else if(!isSlidingAmount) {
+	// 		if(((block.timestamp - momentReceived) / (periodHours * 3600 * 1000)) >=1){
+	// 			return 1;
+	// 		} else {
+	// 			return 0;
+	// 		}
+	// 	} else {
+	// 		return ((block.timestamp - momentReceived) / (periodHours * 3600 * 1000));
+	// 	}
+	// }
+
 	function getDebtMultiplier()public view returns(uint) {
-		// TODO: rework it
-		if((minWeiAmount==0)&&(totalWeiNeed>0)) { // FUND
-
-			if((isPeriodic)&&(!isSlidingAmount)&&( (block.timestamp - momentReceived) / (periodHours * 3600 * 1000) >=1)) {
-				return (balanceOnMomentReceived/totalWeiNeed) + 1;
-			} else if((isPeriodic)&&(isSlidingAmount)) {
-				return 1 + ((block.timestamp - momentCreated) / (periodHours * 3600 * 1000));
-			}else {
-				return 1;
-			}		
-
-		} else { // NOT FUND
-			if((isSlidingAmount)&&(0!=momentReceived)) {
-				return ((block.timestamp - momentReceived) / (periodHours * 3600 * 1000));
-			} else {
-				return 1;
-			}
-		}	
+		if((isPeriodic)&&(!isSlidingAmount)&&((block.timestamp - momentReceived) / (periodHours * 3600 * 1000) >=1)) {
+			return (balanceOnMomentReceived/totalWeiNeed) + 1;
+		} else if((isPeriodic)&&(isSlidingAmount)) {
+			return 1 + ((block.timestamp - momentCreated) / (periodHours * 3600 * 1000));
+		}else {
+			return 1;
+		}
 	}
 
 	function isNeedsMoney()public view returns(bool isNeed) {

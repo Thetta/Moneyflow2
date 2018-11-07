@@ -23,34 +23,42 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 	}
 
 	function getMinWeiNeeded(uint _currentFlow) public view zeroIfClosed returns(uint out) {
-		for(uint j=childrenCount; j>0; --j) {
-			out += IWeiReceiver(children[j-1]).getMinWeiNeeded(_currentFlow);
-		}
-	}
-
-	function getTotalWeiNeeded(uint _currentFlow)public view zeroIfClosed returns(uint out) {
 		FlowBuffer memory b = FlowBuffer(_currentFlow, false, 0, 0, 0);
-		for(uint i=0; i<childrenCount; ++i) {
+		for(uint i=0; i<childrenCount; i++) {
 			b.i = i;
+			b.need = IWeiReceiver(children[b.i]).getMinWeiNeeded(b.flow); 
 			b = _relativesStreak(b);
 			out += b.need;
 			b = _modifyFlow(b);
 		}
 	}
 
-	function isNeedsMoney() public view falseIfClosed returns(bool out) {
-		for(uint j=childrenCount; j>0; --j) {
-			if(IWeiReceiver(children[j]).isNeedsMoney()) {
-				out = true;
+	function getTotalWeiNeeded(uint _currentFlow)public view zeroIfClosed returns(uint out) {
+		FlowBuffer memory b = FlowBuffer(_currentFlow, false, 0, 0, 0);
+		for(uint i=0; i<childrenCount; i++) {
+			b.i = i;
+			b.need = IWeiReceiver(children[b.i]).getTotalWeiNeeded(b.flow); 
+			b = _relativesStreak(b);
+			out += b.need;
+			b = _modifyFlow(b);
+		}
+	}
+
+	function isNeedsMoney() public view falseIfClosed returns(bool) {
+		for(uint i=0; i<childrenCount; i++) {
+			if(IWeiReceiver(children[i]).isNeedsMoney()) {
+				return true;
 			}
 		}
+		return false;
 	}
 
 	function processFunds(uint _currentFlow) public payable onlyIfOpen {
 		emit SplitterBaseProcessFunds(msg.sender, msg.value, _currentFlow);
 		FlowBuffer memory b = FlowBuffer(_currentFlow, false, 0, 0, 0);
-		for(uint i=0; i<childrenCount; ++i) {
+		for(uint i=0; i<childrenCount; i++) {
 			b.i = i;
+			b.need = IWeiReceiver(children[b.i]).getTotalWeiNeeded(b.flow); 
 			b = _relativesStreak(b);
 			if(b.need==0) continue;
 			IWeiReceiver(children[i]).processFunds.value(b.need)(b.flow); 
@@ -73,7 +81,6 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 
 	function _relativesStreak(FlowBuffer _b) internal view returns(FlowBuffer) {
 		FlowBuffer memory b = _b;
-		b.need = IWeiReceiver(children[b.i]).getTotalWeiNeeded(b.flow); 
 		if(b.relSeqQ) {
 			b.needAcc += b.need; 
 			b.relSeqQ = false;
