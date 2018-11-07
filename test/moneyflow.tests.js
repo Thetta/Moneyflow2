@@ -1,4 +1,3 @@
-var MoneyFlow = artifacts.require('./MoneyFlow');
 var IWeiReceiver = artifacts.require('./IWeiReceiver');
 
 var WeiSplitter = artifacts.require('./WeiSplitter');

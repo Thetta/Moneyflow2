@@ -1,5 +1,3 @@
-var MoneyFlow = artifacts.require('./MoneyFlow');
-
 var WeiSplitter = artifacts.require('./WeiSplitter');
 var WeiAbsoluteExpense = artifacts.require('./WeiAbsoluteExpense');
 var WeiRelativeExpense = artifacts.require('./WeiRelativeExpense');
