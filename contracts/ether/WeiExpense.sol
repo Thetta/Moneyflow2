@@ -94,8 +94,6 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		require(_currentFlow >= msg.value);
 		// all inputs divide _minWeiAmount == INTEGER
 
-		momentReceived = uint(block.timestamp);
-
 		totalWeiReceived += msg.value;
 		isMoneyReceived = true;
 
@@ -116,19 +114,16 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	function getTotalWeiNeeded(uint _currentFlow)public view zeroIfNoNeed returns(uint need) {
 		if(0!=partsPerMillion) {
 			need = (getDebtMultiplier()*(partsPerMillion * _currentFlow)) / 1000000;
-		}else {
-			if(getDebtMultiplier()*totalWeiNeed > totalWeiReceived) {
-				need = getDebtMultiplier()*totalWeiNeed - totalWeiReceived;
-			}else {
-				need = 0;
-			}
-
+		
+		}else if(getDebtMultiplier()*totalWeiNeed > totalWeiReceived) {
+			need = getDebtMultiplier()*totalWeiNeed - totalWeiReceived;
 			if((minWeiAmount==0)&&(totalWeiNeed>0)) {
 				if(need>_currentFlow) {
 					need = _currentFlow;
-				}				
+				}
 			}
-		
+		}else {
+			need = 0;
 		}
 	}
 
@@ -187,7 +182,7 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 				isNeed = true;
 			}
 		} else if((minWeiAmount==0)&&(totalWeiNeed>0)) {
-			isNeed = (totalWeiNeed - totalWeiReceived) > 0;
+			isNeed = (getDebtMultiplier()*totalWeiNeed - totalWeiReceived) > 0;
 		} else {
 			isNeed = !isMoneyReceived;
 		}

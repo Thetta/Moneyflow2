@@ -1,3 +1,4 @@
+var MoneyFlow = artifacts.require('./MoneyFlow');
 var IWeiReceiver = artifacts.require('./IWeiReceiver');
 
 var WeiSplitter = artifacts.require('./WeiSplitter');
@@ -46,8 +47,8 @@ contract('WeiFund', (accounts) => {
 	it('Should collect money, then revert if more, then flush', async () => {
 		let fund = await WeiAbsoluteExpense.new(0, 1e18);
 
-		var totalNeed = await fund.getTotalWeiNeeded(1e18);
-		var minNeed = await fund.getMinWeiNeeded(0);/*minNeedFix*/
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
+		var minNeed = await fund.getMinWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 1e18);
 		assert.equal(minNeed.toNumber(), 0);
@@ -56,8 +57,8 @@ contract('WeiFund', (accounts) => {
 		await fund.processFunds(3e17, { value: 3e17, from: creator });
 		await fund.processFunds(3e17, { value: 3e17, from: employee1 });
 
-		var totalNeed = await fund.getTotalWeiNeeded(4e17);
-		var minNeed = await fund.getMinWeiNeeded(0);/*minNeedFix*/
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
+		var minNeed = await fund.getMinWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 4e17);
 		assert.equal(minNeed.toNumber(), 0);
@@ -67,8 +68,8 @@ contract('WeiFund', (accounts) => {
 		await fund.processFunds(4e17, { value: 4e17, from: employee2 });
 		await fund.processFunds(1e17, { value: 1e17 }).should.be.rejectedWith('revert'); // overflow
 
-		var totalNeed = await fund.getTotalWeiNeeded(0);
-		var minNeed = await fund.getMinWeiNeeded(0);/*minNeedFix*/
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
+		var minNeed = await fund.getMinWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0);
 		assert.equal(minNeed.toNumber(), 0);
@@ -79,67 +80,125 @@ contract('WeiFund', (accounts) => {
 		var b2 = await web3.eth.getBalance(employee1);
 		assert.equal(b2.toNumber() - b1.toNumber(), 1e18);
 
-		var totalNeed = await fund.getTotalWeiNeeded(0);
-		var minNeed = await fund.getMinWeiNeeded(0);/*minNeedFix*/
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
+		var minNeed = await fund.getMinWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0);
 		assert.equal(minNeed.toNumber(), 0);
 		assert.equal(isNeed, false);
 	});
 
-	/*it('Should collect money (periodic, not accumulate debt), then time passed, then need money again', async () => {
-		let fund = await WeiAbsoluteExpenseWithPeriodSliding.new(0, 1e18, 24);
+	it('Should collect money (periodic, not accumulate debt), then time passed, then need money again', async () => {
+		let fund = await WeiAbsoluteExpenseWithPeriod.new(0, 1e18, 24);
 
-		var totalNeed = await fund.getTotalWeiNeeded(1e18);
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 1e18);
 		assert.equal(isNeed, true);
 
 		await fund.processFunds(1e18, { value: 1e18 });
 
-		var totalNeed = await fund.getTotalWeiNeeded(0);
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0);
 		assert.equal(isNeed, false);
 
 		await passHours(23);
 
-		var totalNeed = await fund.getTotalWeiNeeded(0);
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0);
 		assert.equal(isNeed, false);
 
 		await passHours(1);
 
-		var totalNeed = await fund.getTotalWeiNeeded(1e18);
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 1e18);
 		assert.equal(isNeed, true);
 	
 		await passHours(24);
 
-		var totalNeed = await fund.getTotalWeiNeeded(1e18);
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 1e18);
 		assert.equal(isNeed, true);
 
 		await fund.processFunds(5e17, { value: 5e17 });
 
-		var totalNeed = await fund.getTotalWeiNeeded(5e17);
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 5e17);
 		assert.equal(isNeed, true);
 
 		await passHours(24);
 
-		var totalNeed = await fund.getTotalWeiNeeded(5e17);
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 5e17);
 		assert.equal(isNeed, true);
 
 		await fund.processFunds(5e17, { value: 5e17 });
 
-		var totalNeed = await fund.getTotalWeiNeeded(0);
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
+		var isNeed = await fund.isNeedsMoney();
+		console.log('totalNeed:', totalNeed.toNumber(), 0);
+		assert.equal(isNeed, false);
+	});
+
+	it('Should collect money (periodic, accumulate debt), then time passed, then need money again', async () => {
+		let fund = await WeiAbsoluteExpenseWithPeriodSliding.new(0, 1e18, 24);
+
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
+		var isNeed = await fund.isNeedsMoney();
+		assert.equal(totalNeed.toNumber(), 1e18);
+		assert.equal(isNeed, true);
+
+		await fund.processFunds(1e18, { value: 1e18 });
+
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
+		var isNeed = await fund.isNeedsMoney();
+		assert.equal(totalNeed.toNumber(), 0);
+		assert.equal(isNeed, false);
+
+		await passHours(23);
+
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
+		var isNeed = await fund.isNeedsMoney();
+		assert.equal(totalNeed.toNumber(), 0);
+		assert.equal(isNeed, false);
+
+		await passHours(1);
+
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
+		var isNeed = await fund.isNeedsMoney();
+		assert.equal(totalNeed.toNumber(), 1e18);
+		assert.equal(isNeed, true);
+	
+		await passHours(24);
+
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
+		var isNeed = await fund.isNeedsMoney();
+		assert.equal(totalNeed.toNumber(), 2e18);
+		assert.equal(isNeed, true);
+
+		await fund.processFunds(5e17, { value: 5e17 });
+
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
+		var isNeed = await fund.isNeedsMoney();
+		assert.equal(totalNeed.toNumber(), 1.5e18);
+		assert.equal(isNeed, true);
+
+		await passHours(24);
+
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
+		var isNeed = await fund.isNeedsMoney();
+		assert.equal(totalNeed.toNumber(), 2.5e18);
+		assert.equal(isNeed, true);
+
+		await fund.processFunds(2.5e18, { value: 2.5e18 });
+
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0);
 		assert.equal(isNeed, false);
@@ -147,71 +206,13 @@ contract('WeiFund', (accounts) => {
 
 	it('Should collect money (periodic, accumulate debt), then time passed, then need money again', async () => {
 		let fund = await WeiAbsoluteExpenseWithPeriodSliding.new(0, 1e18, 24);
-
-		var totalNeed = await fund.getTotalWeiNeeded(1e18);
-		var isNeed = await fund.isNeedsMoney();
-		assert.equal(totalNeed.toNumber(), 1e18);
-		assert.equal(isNeed, true);
-
-		await fund.processFunds(1e18, { value: 1e18 });
-
-		var totalNeed = await fund.getTotalWeiNeeded(0);
-		var isNeed = await fund.isNeedsMoney();
-		assert.equal(totalNeed.toNumber(), 0);
-		assert.equal(isNeed, false);
-
-		await passHours(23);
-
-		var totalNeed = await fund.getTotalWeiNeeded(0);
-		var isNeed = await fund.isNeedsMoney();
-		assert.equal(totalNeed.toNumber(), 0);
-		assert.equal(isNeed, false);
-
-		await passHours(1);
-
-		var totalNeed = await fund.getTotalWeiNeeded(1e18);
-		var isNeed = await fund.isNeedsMoney();
-		assert.equal(totalNeed.toNumber(), 1e18);
-		assert.equal(isNeed, true);
-	
-		await passHours(24);
-
-		var totalNeed = await fund.getTotalWeiNeeded(2e18);
-		var isNeed = await fund.isNeedsMoney();
-		assert.equal(totalNeed.toNumber(), 2e18);
-		assert.equal(isNeed, true);
-
-		await fund.processFunds(5e17, { value: 5e17 });
-
-		var totalNeed = await fund.getTotalWeiNeeded(1.5e18);
-		var isNeed = await fund.isNeedsMoney();
-		assert.equal(totalNeed.toNumber(), 1.5e18);
-		assert.equal(isNeed, true);
-
-		await passHours(24);
-
-		var totalNeed = await fund.getTotalWeiNeeded(2.5e18);
-		var isNeed = await fund.isNeedsMoney();
-		assert.equal(totalNeed.toNumber(), 2.5e18);
-		assert.equal(isNeed, true);
-
-		await fund.processFunds(2.5e18, { value: 2.5e18 });
-
-		var totalNeed = await fund.getTotalWeiNeeded(0);
-		var isNeed = await fund.isNeedsMoney();
-		assert.equal(totalNeed.toNumber(), 0);
-		assert.equal(isNeed, false);
-	});*/
-
-	it('Should collect money (periodic, accumulate debt), then time passed, then need money again', async () => {
-		let fund = await WeiAbsoluteExpenseWithPeriodSliding.new(0, 1e18, 24);
-		var totalNeed = await fund.getTotalWeiNeeded(1e18);
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 1e18);
 		assert.equal(isNeed, true);
 
 		await passHours(48);
-		var totalNeed = await fund.getTotalWeiNeeded(3e18);
+		var totalNeed = await fund.getTotalWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 3e18);
 		assert.equal(isNeed, true);
@@ -227,8 +228,8 @@ contract('WeiFund', (accounts) => {
 		await splitter.addChild(milestone2.address);
 		await splitter.addChild(milestone3.address);
 
-		var totalNeed = await splitter.getTotalWeiNeeded(1e18);
-		var minNeed = await splitter.getMinWeiNeeded(0);/*minNeedFix*/
+		var totalNeed = await splitter.getTotalWeiNeeded(1e22);
+		var minNeed = await splitter.getMinWeiNeeded(1e22);
 		var isNeed = await splitter.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 1e18);
 		assert.equal(minNeed.toNumber(), 0);
@@ -250,8 +251,8 @@ contract('WeiFund', (accounts) => {
 		assert.equal(0.02, (await web3.eth.getBalance(milestone2.address)).toNumber() / 1e18);
 		assert.equal(0, (await web3.eth.getBalance(milestone3.address)).toNumber() / 1e18);
 
-		var totalNeed = await splitter.getTotalWeiNeeded(0.88e18);
-		var minNeed = await splitter.getMinWeiNeeded(0);/*minNeedFix*/
+		var totalNeed = await splitter.getTotalWeiNeeded(1e22);
+		var minNeed = await splitter.getMinWeiNeeded(1e22);
 		var isNeed = await splitter.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0.88e18);
 		assert.equal(minNeed.toNumber(), 0);
@@ -269,8 +270,8 @@ contract('WeiFund', (accounts) => {
 		assert.equal(0.2, (await web3.eth.getBalance(milestone2.address)).toNumber() / 1e18);
 		assert.equal(0.7, (await web3.eth.getBalance(milestone3.address)).toNumber() / 1e18);
 
-		var totalNeed = await splitter.getTotalWeiNeeded(0);
-		var minNeed = await splitter.getMinWeiNeeded(0);/*minNeedFix*/
+		var totalNeed = await splitter.getTotalWeiNeeded(1e22);
+		var minNeed = await splitter.getMinWeiNeeded(1e22);
 		var isNeed = await splitter.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0);
 		assert.equal(minNeed.toNumber(), 0);
@@ -291,7 +292,7 @@ contract('WeiFund', (accounts) => {
 		await splitter.addChild(stabFund.address);
 
 		var totalNeed = await splitter.getTotalWeiNeeded(1e18);
-		var minNeed = await splitter.getMinWeiNeeded(0);/*minNeedFix*/
+		var minNeed = await splitter.getMinWeiNeeded(1e18);
 		var isNeed = await splitter.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 1e18);
 		assert.equal(minNeed.toNumber(), 0);
@@ -314,7 +315,7 @@ contract('WeiFund', (accounts) => {
 		assert.equal(0, (await web3.eth.getBalance(milestone3.address)).toNumber() / 1e18);
 
 		var totalNeed = await splitter.getTotalWeiNeeded(0.88e18);
-		var minNeed = await splitter.getMinWeiNeeded(0);/*minNeedFix*/
+		var minNeed = await splitter.getMinWeiNeeded(0.88e18);
 		var isNeed = await splitter.isNeedsMoney();
 		assert.equal(totalNeed.toNumber(), 0.88e18);
 		assert.equal(minNeed.toNumber(), 0);
@@ -332,10 +333,10 @@ contract('WeiFund', (accounts) => {
 		assert.equal(0.2, (await web3.eth.getBalance(milestone2.address)).toNumber() / 1e18);
 		assert.equal(0.7, (await web3.eth.getBalance(milestone3.address)).toNumber() / 1e18);
 
-		var totalNeed = await splitter.getTotalWeiNeeded(0);
-		var minNeed = await splitter.getMinWeiNeeded(0);/*minNeedFix*/
+		var totalNeed = await splitter.getTotalWeiNeeded(1e18);
+		var minNeed = await splitter.getMinWeiNeeded(1e18);
 		var isNeed = await splitter.isNeedsMoney();
-		assert.equal(totalNeed.toNumber(), 0);
+		assert.equal(totalNeed.toNumber(), 1e18);
 		assert.equal(minNeed.toNumber(), 0);
 
 		await splitter.processFunds(0.3e18, { value: 0.3e18 });
