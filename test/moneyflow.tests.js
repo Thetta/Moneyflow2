@@ -218,13 +218,12 @@ contract('Moneyflow', (accounts) => {
 	const employee2 = accounts[2];
 	const outsider = accounts[3];
 
-	it('Should revert when some money stays on splitter (U-> abs-rel50%)', async () => {
+	it('Should revert when trying to add rel to abs splitter', async () => {
 		var abs = await WeiAbsoluteExpense.new(1e15, 1e15);
 		var splitter = await WeiSplitter.new();
 		var rel = await WeiRelativeExpense.new(500000);
 		await splitter.addChild(abs.address);
-		await splitter.addChild(rel.address);
-		await splitter.processFunds(1e16, { value: 1e16 }).should.be.rejectedWith('revert');
+		await splitter.addChild(rel.address).should.be.rejectedWith('revert');
 	});
 
 

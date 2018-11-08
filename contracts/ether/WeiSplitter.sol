@@ -10,6 +10,8 @@ import "../interfaces/IWeiReceiver.sol";
  * if they have ended. 
 */
 contract WeiSplitter is SplitterBase, IWeiReceiver {
+	Type splitterChildrenType = Type.Splitter;
+	
 	struct FlowBuffer {
 		uint flow;
 		bool relSeqQ;
@@ -98,4 +100,15 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 
 		return b;
 	}
+
+	function addChild(address _newChild) public onlyOwner {
+		if((splitterChildrenType!=Type.Splitter)
+		 &&(IWeiReceiver(_newChild).getReceiverType()!=Type.Splitter)) {		
+			require(IWeiReceiver(_newChild).getReceiverType()==splitterChildrenType);
+		} else {
+			splitterChildrenType = IWeiReceiver(_newChild).getReceiverType();
+		}
+
+		super.addChild(_newChild);
+	}	
 }
