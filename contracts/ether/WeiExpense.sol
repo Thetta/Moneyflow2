@@ -111,6 +111,7 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		return totalWeiNeed;
 	}
 
+	event minNeedEvent(uint need, uint _cf_div_minWeiAmount);
 	function getTotalWeiNeeded(uint _currentFlow)public view zeroIfNoNeed returns(uint need) {
 		if(0!=partsPerMillion) {
 			need = (getDebtMultiplier()*(partsPerMillion * _currentFlow)) / 1000000;
@@ -121,13 +122,15 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 				if(need>_currentFlow) {
 					need = _currentFlow;
 				}
-			} else if((minWeiAmount>0)&&(minWeiAmount<totalWeiNeed)) {
-				if(need>_currentFlow) {
-					need = _currentFlow - _currentFlow%minWeiAmount;
-				}				
+			} else if((minWeiAmount>0)&&(minWeiAmount<totalWeiNeed)) { // fund with discrete input
+				if(need>=_currentFlow) {
+					if(_currentFlow >= minWeiAmount) {
+						need = _currentFlow - (_currentFlow%minWeiAmount);
+					} else {
+						need = 0;
+					}
+				}
 			}
-
-
 		}else {
 			need = 0;
 		}
@@ -164,6 +167,8 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 			}
 		} else if((minWeiAmount==0)&&(totalWeiNeed>0)) {
 			isNeed = (getDebtMultiplier()*totalWeiNeed - totalWeiReceived) > 0;
+		} else if((minWeiAmount>0)&&(minWeiAmount<totalWeiNeed)) {
+			isNeed = totalWeiNeed - totalWeiReceived > 0;
 		} else {
 			isNeed = !isMoneyReceived;
 		}

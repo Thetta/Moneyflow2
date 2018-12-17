@@ -330,15 +330,6 @@ contract('Moneyflow', (accounts) => {
 		assert.equal(need1, true, 'should need money');
 		assert.equal(totalNeed1.toNumber(), 1000*money, 'should be 10% of 1000 money');
 
-		// await Splitter.processFunds(1000*money, { value: 1000*money, from: outsider, gasPrice: 0 });
-
-		// var taxBalance = await web3.eth.getBalance(tax.address);
-		// assert.equal(taxBalance.toNumber(), 1000*money, 'Tax receiver should get 100 money');
-
-		// var need2 = await Splitter.isNeedsMoney({ from: creator });
-		// var totalNeed2 = await Splitter.getTotalWeiNeeded(1000*money);
-		// assert.equal(need2, true, 'should need money');
-		// assert.equal(totalNeed2.toNumber(), 1000*money, 'should be 10% of 1000 money');
 		await Splitter.close(callParams);
 
 		var need3 = await Splitter.isNeedsMoney({ from: creator });
@@ -387,67 +378,6 @@ contract('Moneyflow', (accounts) => {
 		var weiAbsoluteExpense3Balance = await web3.eth.getBalance(weiAbsoluteExpense3.address);
 		assert.equal(weiAbsoluteExpense3Balance.toNumber(), 3*money, 'resource point received money from splitter');
 	});
-
-	/*it('should process money with WeiSplitter + 2 WeiAbsoluteExpense + WeiRelativeExpense', async () => {
-		// create WeiSplitter
-		var weiTopDownSplitter = await WeiSplitter.new();
-
-		var weiAbsoluteExpense1 = await WeiAbsoluteExpense.new(money, money, { from: creator, gasPrice: 0 });
-		// var weiRelativeExpense1 = await WeiRelativeExpense.new(500000, { from: creator, gasPrice: 0 });
-		var weiAbsoluteExpense3 = await WeiAbsoluteExpense.new(money, money, { from: creator, gasPrice: 0 });
-
-		// // add 3 WeiAbsoluteExpense outputs to the splitter
-		await weiTopDownSplitter.addChild(weiAbsoluteExpense1.address);
-		// await weiTopDownSplitter.addChild(weiRelativeExpense1.address);
-		await weiTopDownSplitter.addChild(weiAbsoluteExpense3.address);
-
-		// now send some money to the revenue endpoint
-		var minNeed = await weiTopDownSplitter.getMinWeiNeeded(3*money);
-		assert.equal(minNeed.toNumber(), 3*money);
-
-		await weiTopDownSplitter.processFunds(3*money, { value: 3*money, from: creator });
-
-		// money should end up in the outputs
-		var weiAbsoluteExpense1Balance = await web3.eth.getBalance(weiAbsoluteExpense1.address);
-		assert.equal(weiAbsoluteExpense1Balance.toNumber(), money, 'resource point received money from splitter');
-
-		var weiRelativeExpense1Balance = await web3.eth.getBalance(weiRelativeExpense1.address);
-		assert.equal(weiRelativeExpense1Balance.toNumber(), money, 'resource point received money from splitter');
-
-		var weiAbsoluteExpense3Balance = await web3.eth.getBalance(weiAbsoluteExpense3.address);
-		assert.equal(weiAbsoluteExpense3Balance.toNumber(), money, 'resource point received money from splitter');
-	});
-
-	it('should process money with WeiSplitter + 2 WeiAbsoluteExpense + WeiRelativeExpense', async () => {
-		// create WeiSplitter
-		var weiUnsortedSplitter = await WeiSplitter.new();
-
-		var weiAbsoluteExpense1 = await WeiAbsoluteExpense.new(money, money, { from: creator, gasPrice: 0 });
-		var weiRelativeExpense1 = await WeiRelativeExpense.new(900000, { from: creator, gasPrice: 0 });
-		var weiAbsoluteExpense3 = await WeiAbsoluteExpense.new(money, money, { from: creator, gasPrice: 0 });
-
-		// // add 3 WeiAbsoluteExpense outputs to the splitter
-		await weiUnsortedSplitter.addChild(weiAbsoluteExpense1.address);
-		await weiUnsortedSplitter.addChild(weiRelativeExpense1.address);
-		await weiUnsortedSplitter.addChild(weiAbsoluteExpense3.address);
-
-		// now send some money to the revenue endpoint
-
-		var minNeed = await weiUnsortedSplitter.getMinWeiNeeded(20*money);
-		assert.equal(minNeed.toNumber(), 20*money);
-
-		await weiUnsortedSplitter.processFunds(20*money, { value: 20*money, from: creator });
-
-		// money should end up in the outputs
-		var weiAbsoluteExpense1Balance = await web3.eth.getBalance(weiAbsoluteExpense1.address);
-		assert.equal(weiAbsoluteExpense1Balance.toNumber(), money, 'resource point received money from splitter');
-
-		var weiRelativeExpense1Balance = await web3.eth.getBalance(weiRelativeExpense1.address);
-		assert.equal(weiRelativeExpense1Balance.toNumber(), 18*money, 'resource point received money from splitter');
-
-		var weiAbsoluteExpense3Balance = await web3.eth.getBalance(weiAbsoluteExpense3.address);
-		assert.equal(weiAbsoluteExpense3Balance.toNumber(), money, 'resource point received money from splitter');
-	});*/
 
 	it('should process money with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
 		// create WeiSplitter
@@ -513,6 +443,147 @@ contract('Moneyflow', (accounts) => {
 		assert.equal(SalariesChildrenCount.toNumber(), 3, 'SalariesChildrenCount should be 3');
 
 		var th = await Salaries.processFunds(3300*money, { value: 3300*money, from: creator, gasPrice: 0 });
+	});
+
+	it('should process money in structure o-> o-o-o, while minAmount != totalAmount', async () => {
+		var Salaries = await WeiSplitter.new({ from: creator, gasPrice: 0 });
+		var Salaries = await WeiSplitter.new({ from: creator, gasPrice: 0 });
+
+		var Employee1 = await WeiAbsoluteExpense.new(500*money, 1000*money, { from: creator, gasPrice: 0 });
+		var Employee2 = await WeiAbsoluteExpense.new(200*money, 800*money, { from: creator, gasPrice: 0 });
+		var Employee3 = await WeiAbsoluteExpense.new(500*money, 1500*money, { from: creator, gasPrice: 0 });
+
+		await Salaries.addChild(Employee1.address, { from: creator, gasPrice: 0 });
+		await Salaries.addChild(Employee2.address, { from: creator, gasPrice: 0 });
+		await Salaries.addChild(Employee3.address, { from: creator, gasPrice: 0 });
+
+		var Employee1Needs = await Employee1.getTotalWeiNeeded(3300*money);
+		assert.equal(Employee1Needs.toNumber() / money, 1000);
+		var Employee2Needs = await Employee2.getTotalWeiNeeded(3300*money);
+		assert.equal(Employee2Needs.toNumber() / money, 800);
+		var Employee3Needs = await Employee3.getTotalWeiNeeded(3300*money);
+		assert.equal(Employee3Needs.toNumber() / money, 1500);
+
+		var SalariesNeeds = await Salaries.getTotalWeiNeeded(3300*money);
+		assert.equal(SalariesNeeds.toNumber() / money, 3300, 'Salaries Needs 3300 money');
+
+		assert.equal((await Salaries.getMinWeiNeeded(100*money)).toNumber() / money, 0);
+		assert.equal((await Salaries.getMinWeiNeeded(200*money)).toNumber() / money, 200);
+		assert.equal((await Salaries.getMinWeiNeeded(300*money)).toNumber() / money, 200);
+		assert.equal((await Salaries.getMinWeiNeeded(400*money)).toNumber() / money, 400);
+		assert.equal((await Salaries.getMinWeiNeeded(500*money)).toNumber() / money, 500);
+		assert.equal((await Salaries.getMinWeiNeeded(600*money)).toNumber() / money, 500);
+		assert.equal((await Salaries.getMinWeiNeeded(700*money)).toNumber() / money, 700);
+		assert.equal((await Salaries.getMinWeiNeeded(800*money)).toNumber() / money, 700);
+		assert.equal((await Salaries.getMinWeiNeeded(900*money)).toNumber() / money, 900);
+		assert.equal((await Salaries.getMinWeiNeeded(1000*money)).toNumber() / money, 1000);
+		assert.equal((await Salaries.getMinWeiNeeded(1100*money)).toNumber() / money, 1000);
+		assert.equal((await Salaries.getMinWeiNeeded(1200*money)).toNumber() / money, 1200);
+		assert.equal((await Salaries.getMinWeiNeeded(1300*money)).toNumber() / money, 1200);
+		assert.equal((await Salaries.getMinWeiNeeded(1400*money)).toNumber() / money, 1400);
+		assert.equal((await Salaries.getMinWeiNeeded(1500*money)).toNumber() / money, 1400);
+		assert.equal((await Salaries.getMinWeiNeeded(1600*money)).toNumber() / money, 1600);
+		assert.equal((await Salaries.getMinWeiNeeded(1700*money)).toNumber() / money, 1600);
+		assert.equal((await Salaries.getMinWeiNeeded(1800*money)).toNumber() / money, 1800);
+		assert.equal((await Salaries.getMinWeiNeeded(1900*money)).toNumber() / money, 1800);
+		assert.equal((await Salaries.getMinWeiNeeded(2000*money)).toNumber() / money, 1800);
+		assert.equal((await Salaries.getMinWeiNeeded(2100*money)).toNumber() / money, 1800);
+		assert.equal((await Salaries.getMinWeiNeeded(2200*money)).toNumber() / money, 1800);
+		assert.equal((await Salaries.getMinWeiNeeded(2300*money)).toNumber() / money, 2300);
+		assert.equal((await Salaries.getMinWeiNeeded(2400*money)).toNumber() / money, 2300);
+		assert.equal((await Salaries.getMinWeiNeeded(2500*money)).toNumber() / money, 2300);
+		assert.equal((await Salaries.getMinWeiNeeded(2600*money)).toNumber() / money, 2300);
+		assert.equal((await Salaries.getMinWeiNeeded(2700*money)).toNumber() / money, 2300);
+		assert.equal((await Salaries.getMinWeiNeeded(2800*money)).toNumber() / money, 2800);
+		assert.equal((await Salaries.getMinWeiNeeded(2900*money)).toNumber() / money, 2800);
+		assert.equal((await Salaries.getMinWeiNeeded(3000*money)).toNumber() / money, 2800);
+		assert.equal((await Salaries.getMinWeiNeeded(3100*money)).toNumber() / money, 2800);
+		assert.equal((await Salaries.getMinWeiNeeded(3200*money)).toNumber() / money, 2800);
+		assert.equal((await Salaries.getMinWeiNeeded(3300*money)).toNumber() / money, 3300);
+		assert.equal((await Salaries.getMinWeiNeeded(3400*money)).toNumber() / money, 3300);
+		assert.equal((await Salaries.getMinWeiNeeded(3500*money)).toNumber() / money, 3300);
+
+		var th = await Salaries.processFunds(700*money, { value:700*money, from: creator, gasPrice: 0 });
+		
+		assert.equal((await Salaries.getMinWeiNeeded(100*money)).toNumber() / money, 0);
+		assert.equal((await Salaries.getMinWeiNeeded(200*money)).toNumber() / money, 200);
+		assert.equal((await Salaries.getMinWeiNeeded(300*money)).toNumber() / money, 200);
+		assert.equal((await Salaries.getMinWeiNeeded(400*money)).toNumber() / money, 400);
+		assert.equal((await Salaries.getMinWeiNeeded(500*money)).toNumber() / money, 500);
+		assert.equal((await Salaries.getMinWeiNeeded(600*money)).toNumber() / money, 500);
+		assert.equal((await Salaries.getMinWeiNeeded(700*money)).toNumber() / money, 700);
+		assert.equal((await Salaries.getMinWeiNeeded(800*money)).toNumber() / money, 700);
+		assert.equal((await Salaries.getMinWeiNeeded(900*money)).toNumber() / money, 900);
+		assert.equal((await Salaries.getMinWeiNeeded(1000*money)).toNumber() / money, 900);
+		assert.equal((await Salaries.getMinWeiNeeded(1100*money)).toNumber() / money, 1100);
+		assert.equal((await Salaries.getMinWeiNeeded(1200*money)).toNumber() / money, 1100);
+		assert.equal((await Salaries.getMinWeiNeeded(1300*money)).toNumber() / money, 1100);
+		assert.equal((await Salaries.getMinWeiNeeded(1400*money)).toNumber() / money, 1100);
+		assert.equal((await Salaries.getMinWeiNeeded(1500*money)).toNumber() / money, 1100);
+		assert.equal((await Salaries.getMinWeiNeeded(1600*money)).toNumber() / money, 1600);
+		assert.equal((await Salaries.getMinWeiNeeded(1700*money)).toNumber() / money, 1600);
+		assert.equal((await Salaries.getMinWeiNeeded(1800*money)).toNumber() / money, 1600);
+		assert.equal((await Salaries.getMinWeiNeeded(1900*money)).toNumber() / money, 1600);
+		assert.equal((await Salaries.getMinWeiNeeded(2000*money)).toNumber() / money, 1600);
+		assert.equal((await Salaries.getMinWeiNeeded(2100*money)).toNumber() / money, 2100);
+		assert.equal((await Salaries.getMinWeiNeeded(2200*money)).toNumber() / money, 2100);
+		assert.equal((await Salaries.getMinWeiNeeded(2300*money)).toNumber() / money, 2100);
+		assert.equal((await Salaries.getMinWeiNeeded(2400*money)).toNumber() / money, 2100);
+		assert.equal((await Salaries.getMinWeiNeeded(2500*money)).toNumber() / money, 2100);
+		assert.equal((await Salaries.getMinWeiNeeded(2600*money)).toNumber() / money, 2600);
+		assert.equal((await Salaries.getMinWeiNeeded(2700*money)).toNumber() / money, 2600);
+		assert.equal((await Salaries.getMinWeiNeeded(2800*money)).toNumber() / money, 2600);
+		assert.equal((await Salaries.getMinWeiNeeded(2900*money)).toNumber() / money, 2600);
+		assert.equal((await Salaries.getMinWeiNeeded(3000*money)).toNumber() / money, 2600);
+		assert.equal((await Salaries.getMinWeiNeeded(3100*money)).toNumber() / money, 2600);
+		assert.equal((await Salaries.getMinWeiNeeded(3200*money)).toNumber() / money, 2600);
+		assert.equal((await Salaries.getMinWeiNeeded(3300*money)).toNumber() / money, 2600);
+		assert.equal((await Salaries.getMinWeiNeeded(3400*money)).toNumber() / money, 2600);
+		assert.equal((await Salaries.getMinWeiNeeded(3500*money)).toNumber() / money, 2600);
+
+		var th = await Salaries.processFunds(900*money, { value:900*money, from: creator, gasPrice: 0 });
+
+		assert.equal((await Salaries.getMinWeiNeeded(100*money)).toNumber() / money, 0);
+		assert.equal((await Salaries.getMinWeiNeeded(200*money)).toNumber() / money, 200);
+		assert.equal((await Salaries.getMinWeiNeeded(300*money)).toNumber() / money, 200);
+		assert.equal((await Salaries.getMinWeiNeeded(400*money)).toNumber() / money, 200);
+		assert.equal((await Salaries.getMinWeiNeeded(500*money)).toNumber() / money, 200);
+		assert.equal((await Salaries.getMinWeiNeeded(600*money)).toNumber() / money, 200);
+		assert.equal((await Salaries.getMinWeiNeeded(700*money)).toNumber() / money, 700);
+		assert.equal((await Salaries.getMinWeiNeeded(800*money)).toNumber() / money, 700);
+		assert.equal((await Salaries.getMinWeiNeeded(900*money)).toNumber() / money, 700);
+		assert.equal((await Salaries.getMinWeiNeeded(1000*money)).toNumber() / money, 700);
+		assert.equal((await Salaries.getMinWeiNeeded(1100*money)).toNumber() / money, 700);
+		assert.equal((await Salaries.getMinWeiNeeded(1200*money)).toNumber() / money, 1200);
+		assert.equal((await Salaries.getMinWeiNeeded(1300*money)).toNumber() / money, 1200);
+		assert.equal((await Salaries.getMinWeiNeeded(1400*money)).toNumber() / money, 1200);
+		assert.equal((await Salaries.getMinWeiNeeded(1500*money)).toNumber() / money, 1200);
+		assert.equal((await Salaries.getMinWeiNeeded(1600*money)).toNumber() / money, 1200);
+		assert.equal((await Salaries.getMinWeiNeeded(1700*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(1800*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(1900*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(2000*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(2100*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(2200*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(2300*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(2400*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(2500*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(2600*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(2700*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(2800*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(2900*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(3000*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(3100*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(3200*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(3300*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(3400*money)).toNumber() / money, 1700);
+		assert.equal((await Salaries.getMinWeiNeeded(3500*money)).toNumber() / money, 1700);
+
+		var th = await Salaries.processFunds(200*money, { value:200*money, from: creator, gasPrice: 0 });
+
+		var th = await Salaries.processFunds(1500*money, { value:1500*money, from: creator, gasPrice: 0 });
+
+		var th = await Salaries.processFunds(200*money, { value:200*money, from: creator, gasPrice: 0 }).should.be.rejectedWith('revert');
 	});
 
 	it('should process money with a scheme just like in the paper: 75/25 others, send MORE than minNeed; ', async () => {
@@ -597,7 +668,7 @@ contract('Moneyflow', (accounts) => {
 
 		await struct.AllOutpults.processFunds(1000*money, { value: 1000*money, from: creator }).should.be.rejectedWith('revert');
 		await struct.AllOutpults.processFunds(1000000*money, { value: 1000*money, from: creator }).should.be.rejectedWith('revert');
-		// await struct.AllOutpults.processFunds(1000*money, { value: 1000000*money, from: creator }).should.be.rejectedWith('revert');
+		await struct.AllOutpults.processFunds(1000*money, { value: 1000000*money, from: creator }).should.be.rejectedWith('revert');
 	});
 
 	it('should process money with a scheme just like in the paper: 10/15 others, send MORE than minNeed; ', async () => {
@@ -703,6 +774,6 @@ contract('Moneyflow', (accounts) => {
 
 		await struct.AllOutpults.processFunds(1000*money, { value: 1000*money, from: creator }).should.be.rejectedWith('revert');
 		await struct.AllOutpults.processFunds(1000000*money, { value: 1000*money, from: creator }).should.be.rejectedWith('revert');
-		// await struct.AllOutpults.processFunds(1000*money, { value: 1000000*money, from: creator }).should.be.rejectedWith('revert');
+		await struct.AllOutpults.processFunds(1000*money, { value: 1000000*money, from: creator }).should.be.rejectedWith('revert');
 	});
 });
