@@ -41,10 +41,7 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	}
 
 	modifier zeroIfNoNeed() {
-		uint out;
-		if(!isNeedsMoney()) {
-			out = 0;
-		} else {
+		if(isNeedsMoney()) {
 			_;
 		}
 	}	
@@ -97,7 +94,8 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		totalWeiReceived += msg.value;
 		isMoneyReceived = true;
 
-		if(getTotalWeiNeeded(msg.value)==0) {
+
+		if((getTotalWeiNeeded(msg.value)==0) || (isPeriodic)) {
 			momentReceived = block.timestamp;
 			balanceOnMomentReceived = totalWeiReceived;
 		}
@@ -111,10 +109,9 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		return totalWeiNeed;
 	}
 
-	event minNeedEvent(uint need, uint _cf_div_minWeiAmount);
 	function getTotalWeiNeeded(uint _currentFlow)public view zeroIfNoNeed returns(uint need) {
 		if(0!=partsPerMillion) {
-			need = (getDebtMultiplier()*(partsPerMillion * _currentFlow)) / 1000000;
+			need = ((getDebtMultiplier()*(partsPerMillion * _currentFlow)) / 1000000);
 		
 		}else if(getDebtMultiplier()*totalWeiNeed > totalWeiReceived) {
 			need = getDebtMultiplier()*totalWeiNeed - totalWeiReceived;
@@ -136,14 +133,11 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		}
 	}
 
-	function getMinWeiNeeded(uint _currentFlow) public view zeroIfNoNeed returns(uint need) {
-		if(  !isNeedsMoney() 
-		  || (0!=partsPerMillion) 
-		  || ((minWeiAmount==0)&&(totalWeiNeed>0)) 
-		) {
-			return 0;
-		}
-		return getTotalWeiNeeded(_currentFlow);		
+	function getMinWeiNeeded(uint _currentFlow) public zeroIfNoNeed view returns(uint need) {
+		if( !((minWeiAmount==0) && (totalWeiNeed>0)) 
+		 && !(partsPerMillion > 0) ) {
+			need = getTotalWeiNeeded(_currentFlow);
+		}	
 	}
 
 	function getMomentReceived()public view returns(uint) {
@@ -152,7 +146,11 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 
 	function getDebtMultiplier()public view returns(uint) {
 		if((isPeriodic)&&(!isSlidingAmount)&&((block.timestamp - momentReceived) / (periodHours * 3600 * 1000) >=1)) {
-			return (balanceOnMomentReceived/totalWeiNeed) + 1;
+			if(0!=partsPerMillion) {
+				return 1;
+			} else {
+				return (balanceOnMomentReceived/totalWeiNeed) + 1;
+			}		
 		} else if((isPeriodic)&&(isSlidingAmount)) {
 			return 1 + ((block.timestamp - momentCreated) / (periodHours * 3600 * 1000));
 		}else {

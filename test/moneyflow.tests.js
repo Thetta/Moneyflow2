@@ -18,6 +18,25 @@ async function passHours (hours) {
 	}, function (err) { if (err) console.log('err:', err); });
 }
 
+
+async function checkMinNeed (targets, flowArr, needArr) {
+	for(var i=0; i<targets.length; i++) {
+		assert.equal((await targets[i].getMinWeiNeeded(flowArr[i]*1e14)).toNumber() / 1e14, needArr[i]);	
+	}
+}
+
+async function checkTotalNeed (targets, flowArr, needArr) {
+	for(var i=0; i<targets.length; i++) {
+		assert.equal((await targets[i].getTotalWeiNeeded(flowArr[i]*1e14)).toNumber() / 1e14, needArr[i]);	
+	}
+}		
+
+async function checkIsNeed (targets, needArr) {
+	for(var i=0; i<targets.length; i++) {
+		assert.equal((await targets[i].isNeedsMoney()), needArr[i]);	
+	}
+}	
+
 function KECCAK256 (x) {
 	return web3.sha3(x);
 }
@@ -776,4 +795,71 @@ contract('Moneyflow', (accounts) => {
 		await struct.AllOutpults.processFunds(1000000*money, { value: 1000*money, from: creator }).should.be.rejectedWith('revert');
 		await struct.AllOutpults.processFunds(1000*money, { value: 1000000*money, from: creator }).should.be.rejectedWith('revert');
 	});
+
+	it('should process money with WeiSplitter + 3 WeiRelativeExpenseWithPeriod', async () => {
+		// create WeiSplitter
+		var splitter = await WeiSplitter.new();
+
+		var rel1 = await WeiRelativeExpenseWithPeriod.new(100000, 24, { from: creator, gasPrice: 0 });
+		var rel2 = await WeiRelativeExpenseWithPeriod.new(250000, 24, { from: creator, gasPrice: 0 });
+		var rel3 = await WeiRelativeExpenseWithPeriod.new(370000, 48, { from: creator, gasPrice: 0 });
+
+		// // add 3 rel expense outputs to the splitter
+		await splitter.addChild(rel1.address);
+		await splitter.addChild(rel2.address);
+		await splitter.addChild(rel3.address);
+		
+		var targets = [splitter, rel1, rel2, rel3];
+		var flowArr = [1000, 1000, 1000, 1000];
+
+		await checkMinNeed(targets, flowArr, [0, 0, 0, 0]);
+		await checkTotalNeed(targets, flowArr, [720, 100, 250, 370]);
+		await checkIsNeed(targets, [true, true, true, true]);
+
+		// now send some money to the revenue endpoint
+		await splitter.processFunds(1000*money, {value:720*money, from: creator});
+
+		assert.equal((await web3.eth.getBalance(rel1.address)).toNumber(), 100*money);
+		assert.equal((await web3.eth.getBalance(rel2.address)).toNumber(), 250*money);
+		assert.equal((await web3.eth.getBalance(rel3.address)).toNumber(), 370*money);
+
+		await checkMinNeed(targets, flowArr, [0, 0, 0, 0]);
+		await checkTotalNeed(targets, flowArr, [0, 0, 0, 0]);
+		await checkIsNeed(targets, [false, false, false, false]);
+
+		await passHours(24);
+
+		await checkMinNeed(targets, flowArr, [0, 0, 0, 0]);
+		await checkTotalNeed(targets, flowArr, [350, 100, 250, 0]);
+		await checkIsNeed(targets, [true, true, true, false]);
+
+		await passHours(24);
+
+		await checkMinNeed(targets, flowArr, [0, 0, 0, 0]);
+		await checkTotalNeed(targets, flowArr, [720, 100, 250, 370]);
+		await checkIsNeed(targets, [true, true, true, true]);
+
+		await splitter.processFunds(1000*money, { value: 720*money, from: creator });
+
+		await checkMinNeed(targets, flowArr, [0, 0, 0, 0]);
+		await checkTotalNeed(targets, flowArr, [0, 0, 0, 0]);
+		await checkIsNeed(targets, [false, false, false, false]);
+
+		// money should end up in the outputs
+		assert.equal((await web3.eth.getBalance(rel1.address)).toNumber(), 200*money);
+		assert.equal((await web3.eth.getBalance(rel2.address)).toNumber(), 500*money);
+		assert.equal((await web3.eth.getBalance(rel3.address)).toNumber(), 740*money);
+
+		await passHours(24);	
+
+		await checkMinNeed(targets, flowArr, [0, 0, 0, 0]);
+		await checkTotalNeed(targets, flowArr, [350, 100, 250, 0]);
+		await checkIsNeed(targets, [true, true, true, false]);
+
+		await splitter.processFunds(1000*money, { value: 350*money, from: creator });	
+		
+		await checkMinNeed(targets, flowArr, [0, 0, 0, 0]);
+		await checkTotalNeed(targets, flowArr, [0, 0, 0, 0]);
+		await checkIsNeed(targets, [false, false, false, false]);		
+	});	
 });
