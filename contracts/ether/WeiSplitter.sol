@@ -24,35 +24,34 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 		return Type.Splitter;
 	}
 
-	function getMinWeiNeeded(uint _currentFlow) public view zeroIfClosed returns(uint out) {
+	function getMinWeiNeeded(uint _currentFlow) public view zeroIfClosed returns(uint minNeed) {
 		FlowBuffer memory b = FlowBuffer(_currentFlow, false, 0, 0, 0);
 		for(uint i=0; i<childrenCount; i++) {
 			b.i = i;
 			b.need = IWeiReceiver(children[b.i]).getMinWeiNeeded(b.flow); 
 			b = _relativesStreak(b);
-			out += b.need;
+			minNeed += b.need;
 			b = _modifyFlow(b);
 		}
 	}
 
-	function getTotalWeiNeeded(uint _currentFlow)public view zeroIfClosed returns(uint out) {
+	function getTotalWeiNeeded(uint _currentFlow)public view zeroIfClosed returns(uint totalNeed) {
 		FlowBuffer memory b = FlowBuffer(_currentFlow, false, 0, 0, 0);
 		for(uint i=0; i<childrenCount; i++) {
 			b.i = i;
 			b.need = IWeiReceiver(children[b.i]).getTotalWeiNeeded(b.flow); 
 			b = _relativesStreak(b);
-			out += b.need;
+			totalNeed += b.need;
 			b = _modifyFlow(b);
 		}
 	}
 
-	function isNeedsMoney() public view falseIfClosed returns(bool) {
+	function isNeedsMoney() public view falseIfClosed returns(bool isNeed) {
 		for(uint i=0; i<childrenCount; i++) {
 			if(IWeiReceiver(children[i]).isNeedsMoney()) {
-				return true;
+				isNeed = true;
 			}
 		}
-		return false;
 	}
 
 	function processFunds(uint _currentFlow) public payable onlyIfOpen {

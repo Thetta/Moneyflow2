@@ -17,22 +17,16 @@ contract SplitterBase is ISplitter, Ownable {
 	uint childrenCount = 0;
 	
 	modifier zeroIfClosed() {
-		uint out;
-		if(!isOpen()) {
-			out = 0;
-		} else {
+		if(isOpen()) {
 			_;
 		}
 	}
 
 	modifier falseIfClosed() {
-		bool out;
-		if(!isOpen()) {
-			out = false;
-		} else {
+		if(isOpen()) {
 			_;
 		}
-	}
+	}	
 
 	modifier onlyIfOpen() {
 		require(isOpen());

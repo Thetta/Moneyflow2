@@ -14,16 +14,16 @@ contract Roadmap {
 
 	constructor(uint _sum1, uint _sum2, uint _sum3) {
 		WeiTable weiTable = new WeiTable();
-		weiTable.addTopdownSplitter();
+		weiTable.addSplitter();
 		uint roadmap = weiTable.getLastNodeId();
 
-		weiTable.addFund(_sum1, false, false, 0);
+		weiTable.addAbsoluteExpense(_sum1, 0, false, false, 0);
 		uint milestone1 = weiTable.getLastNodeId();
 
-		weiTable.addFund(_sum2, false, false, 0);
+		weiTable.addAbsoluteExpense(_sum2, 0, false, false, 0);
 		uint milestone2 = weiTable.getLastNodeId();
 
-		weiTable.addFund(_sum3, false, false, 0);
+		weiTable.addAbsoluteExpense(_sum3, 0, false, false, 0);
 		uint milestone3 = weiTable.getLastNodeId();
 
 		weiTable.addChildAt(roadmap, milestone1);

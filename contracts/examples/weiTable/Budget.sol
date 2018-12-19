@@ -53,25 +53,25 @@ contract Budget is Ownable {
 	}
 
 	function createLayout() internal {
-		weiTable.addTopdownSplitter();
+		weiTable.addSplitter();
 		uint bubgetEntry = weiTable.getLastNodeId();
 		
-		weiTable.addUnsortedSplitter();
+		weiTable.addSplitter();
 		uint spends = weiTable.getLastNodeId();
 		
-		weiTable.addUnsortedSplitter();
+		weiTable.addSplitter();
 		uint salaries = weiTable.getLastNodeId();
 
-		weiTable.addUnsortedSplitter();
+		weiTable.addSplitter();
 		uint tasks = weiTable.getLastNodeId();
 	
-		weiTable.addTopdownSplitter();
+		weiTable.addSplitter();
 		uint bonuses = weiTable.getLastNodeId();
 
-		weiTable.addTopdownSplitter();
+		weiTable.addSplitter();
 		uint oneTimeUtils = weiTable.getLastNodeId();
 		
-		weiTable.addTopdownSplitter();
+		weiTable.addSplitter();
 		uint funds = weiTable.getLastNodeId();
 
 		weiTable.addChildAt(bubgetEntry, spends);
@@ -84,7 +84,7 @@ contract Budget is Ownable {
 
 	function addEmployees(uint[] _employeeSalaries) public onlyOwner {
 		for(uint i=0; i<_employeeSalaries.length; i++) {
-			weiTable.addAbsoluteExpense(_employeeSalaries[i], true, true, budgetPeriod);
+			weiTable.addAbsoluteExpense(_employeeSalaries[i], _employeeSalaries[i], true, true, budgetPeriod);
 			uint employee = weiTable.getLastNodeId();
 			weiTable.addChildAt(salaries, employee);
 		}
@@ -116,7 +116,7 @@ contract Budget is Ownable {
 
 	function addFunds(uint[] _funds) public onlyOwner {
 		for(uint i=0; i<_funds.length; i++) {
-			weiTable.addFund(_funds[i], false, false, 0);
+			weiTable.addAbsoluteExpense(_funds[i], 0, false, false, 0);
 			uint fund = weiTable.getLastNodeId();
 			weiTable.addChildAt(funds, fund);
 		}
