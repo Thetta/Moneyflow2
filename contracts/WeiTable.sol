@@ -187,7 +187,7 @@ contract WeiTable is IWeiReceiver, Ownable {
 				return (e.balanceOnMomentReceived/e.totalWeiNeeded) + 1;
 			}		
 		} else if((e.isPeriodic) && (e.isSlidingAmount)) {
-			return 1 + ((block.timestamp - e.momentReceived) / (e.periodHours * 3600 * 1000));
+			return 1 + ((block.timestamp - e.momentCreated) / (e.periodHours * 3600 * 1000));
 		} else {
 			return 1;
 		}			

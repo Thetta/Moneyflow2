@@ -153,7 +153,7 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 				return (balanceAtMomentReceived / totalWeiNeed) + 1;
 			}		
 		} else if((isPeriodic) && (isSlidingAmount)) {
-			return 1 + ((block.timestamp - momentReceived) / (periodHours * 3600 * 1000));
+			return 1 + ((block.timestamp - momentCreated) / (periodHours * 3600 * 1000));
 		}else {
 			return 1;
 		}
