@@ -146,7 +146,7 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 
 	function getDebtMultiplier()public view returns(uint) {
 		// if periodic, period already passed from last receive, but amount is not sliding
-		if((isPeriodic) && (!isSlidingAmount) && (((block.timestamp - momentReceived) / (periodHours * 3600 * 1000)) > 1)) {
+		if((isPeriodic) && (!isSlidingAmount) && (((block.timestamp - momentReceived) / (periodHours * 3600 * 1000)) >= 1)) {
 			if(0 != partsPerMillion) {
 				return 1;
 			} else {

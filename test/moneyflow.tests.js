@@ -264,7 +264,7 @@ contract('Moneyflow', (accounts) => {
 		var needsEmployee1 = await Employee1.isNeedsMoney({ from: creator });
 		assert.equal(needsEmployee1, false, 'Dont need money, because he got it');
 
-		await passHours(timePeriod);
+		await passHours(timePeriod + 1);
 		var needsEmployee2 = await Employee1.isNeedsMoney({ from: creator });
 		assert.equal(needsEmployee2, true, 'Need money, because 24 hours passed');
 
@@ -307,15 +307,15 @@ contract('Moneyflow', (accounts) => {
 		var need = await Employee1.getTotalWeiNeeded(10000*money);
 		assert.equal(need.toNumber(), 0);
 
-		await passHours(1*timePeriod);
+		await passHours(1*timePeriod + 1);
 		var need = await Employee1.getTotalWeiNeeded(10000*money);
 		assert.equal(need.toNumber(), 1000*money);
 
-		await passHours(1*timePeriod);
+		await passHours(1*timePeriod + 1);
 		var need = await Employee1.getTotalWeiNeeded(10000*money);
 		assert.equal(need.toNumber(), 2000*money);
 
-		await passHours(1*timePeriod);
+		await passHours(1*timePeriod + 1);
 		var need = await Employee1.getTotalWeiNeeded(10000*money);
 		assert.equal(need.toNumber(), 3000*money);
 
