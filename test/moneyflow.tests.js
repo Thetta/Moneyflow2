@@ -466,7 +466,6 @@ contract('Moneyflow', (accounts) => {
 
 	it('should process money in structure o-> o-o-o, while minAmount != totalAmount', async () => {
 		var Salaries = await WeiSplitter.new({ from: creator, gasPrice: 0 });
-		var Salaries = await WeiSplitter.new({ from: creator, gasPrice: 0 });
 
 		var Employee1 = await WeiAbsoluteExpense.new(500*money, 1000*money, { from: creator, gasPrice: 0 });
 		var Employee2 = await WeiAbsoluteExpense.new(200*money, 800*money, { from: creator, gasPrice: 0 });

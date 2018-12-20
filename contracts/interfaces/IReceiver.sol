@@ -14,5 +14,5 @@ contract IReceiver {
 	function processFunds(uint _currentFlow) public payable;
 
 	// non payable!
-	// function() public;
+	function() public;
 }

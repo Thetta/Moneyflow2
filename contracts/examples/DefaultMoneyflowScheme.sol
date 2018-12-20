@@ -79,7 +79,7 @@ contract DefaultMoneyflowScheme {
 	}
 
 	function deployRoot() public {
-		root = new WeiSplitter();
+		// root = new WeiSplitter();
 	}
 
 ////////////////////////////////////////////////////////////////

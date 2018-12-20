@@ -30,4 +30,6 @@ contract Roadmap {
 		weiTable.addChildAt(roadmap, milestone2);
 		weiTable.addChildAt(roadmap, milestone3);
 	}
+
+	function() public {}
 }

@@ -24,29 +24,41 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 		return Type.Splitter;
 	}
 
-	function getMinWeiNeeded(uint _currentFlow) public view zeroIfClosed returns(uint minNeed) {
+	function getMinWeiNeeded(uint _currentFlow) public view returns(uint minNeed) {
+		if(!isNeedsMoney()) {
+			return 0;
+		}
+		
 		FlowBuffer memory b = FlowBuffer(_currentFlow, false, 0, 0, 0);
 		for(uint i=0; i<childrenCount; i++) {
 			b.i = i;
 			b.need = IWeiReceiver(children[b.i]).getMinWeiNeeded(b.flow); 
-			b = _relativesStreak(b);
+			b = _processRelativeSeries(b);
 			minNeed += b.need;
 			b = _modifyFlow(b);
 		}
 	}
 
-	function getTotalWeiNeeded(uint _currentFlow)public view zeroIfClosed returns(uint totalNeed) {
+	function getTotalWeiNeeded(uint _currentFlow)public view returns(uint totalNeed) {
+		if(!isNeedsMoney()) {
+			return 0;
+		}
+
 		FlowBuffer memory b = FlowBuffer(_currentFlow, false, 0, 0, 0);
 		for(uint i=0; i<childrenCount; i++) {
 			b.i = i;
 			b.need = IWeiReceiver(children[b.i]).getTotalWeiNeeded(b.flow); 
-			b = _relativesStreak(b);
+			b = _processRelativeSeries(b);
 			totalNeed += b.need;
 			b = _modifyFlow(b);
 		}
 	}
 
-	function isNeedsMoney() public view falseIfClosed returns(bool isNeed) {
+	function isNeedsMoney() public view returns(bool isNeed) {
+		if(!opened) {
+			return false;
+		}
+
 		for(uint i=0; i<childrenCount; i++) {
 			if(IWeiReceiver(children[i]).isNeedsMoney()) {
 				isNeed = true;
@@ -54,13 +66,14 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 		}
 	}
 
-	function processFunds(uint _currentFlow) public payable onlyIfOpen {
+	function processFunds(uint _currentFlow) public payable {
+		require(isNeedsMoney());
 		emit SplitterBaseProcessFunds(msg.sender, msg.value, _currentFlow);
 		FlowBuffer memory b = FlowBuffer(_currentFlow, false, 0, 0, 0);
 		for(uint i=0; i<childrenCount; i++) {
 			b.i = i;
 			b.need = IWeiReceiver(children[b.i]).getTotalWeiNeeded(b.flow); 
-			b = _relativesStreak(b);
+			b = _processRelativeSeries(b);
 			if(b.need!=0) {
 				IWeiReceiver(children[i]).processFunds.value(b.need)(b.flow); 
 			}
@@ -81,7 +94,7 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 		return b;
 	}
 
-	function _relativesStreak(FlowBuffer _b) internal view returns(FlowBuffer) {
+	function _processRelativeSeries(FlowBuffer _b) internal view returns(FlowBuffer) {
 		FlowBuffer memory b = _b;
 		if(b.relSeqQ) {
 			b.needAcc += b.need; 
@@ -109,5 +122,7 @@ contract WeiSplitter is SplitterBase, IWeiReceiver {
 		}
 
 		super.addChild(_newChild);
-	}	
+	}
+
+	function() public {}	
 }

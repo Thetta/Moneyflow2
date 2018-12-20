@@ -16,7 +16,7 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	bool isMoneyReceived = false;
 
 	uint totalWeiReceived;
-	uint balanceOnMomentReceived;
+	uint balanceAtMomentReceived;
 	uint momentCreated;
 
 	bool isSlidingAmount = false;
@@ -32,14 +32,6 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	event WeiExpenseSetPercents(uint _partsPerMillion);
 	event WeiExpenseProcessFunds(address _sender, uint _value, uint _currentFlow);
 
-	function getReceiverType() public view returns(Type) {
-		if(0!=partsPerMillion) {
-			return Type.Relative;
-		} else {
-			return Type.Absolute;
-		}
-	}
-
 	modifier zeroIfNoNeed() {
 		if(isNeedsMoney()) {
 			_;
@@ -50,9 +42,9 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	* @dev Constructor
 	* @param _totalWeiNeed - absolute value. how much Ether this expense should receive (in Wei). Can be zero (use _partsPerMillion in this case)
 	* @param _partsPerMillion - if need to get % out of the input flow -> specify this parameter (1% is 10000 units)
-	* @param _periodHours - if not isPeriodic and periodHours>0 ->no sense. if isPeriodic and periodHours==0 -> needs money everytime. if isPeriodic and periodHours>0 -> needs money every period.
+	* @param _periodHours - if not isPeriodic and periodHours>0 ->no sense. if isPeriodic and periodHours == 0 -> needs money everytime. if isPeriodic and periodHours>0 -> needs money every period.
 	* @param _isSlidingAmount - if you don't pay in the current period -> will accumulate the needed amount (only for _totalWeiNeed!)
-	* @param _isPeriodic - if isPeriodic and periodHours>0 -> needs money every period. if isPeriodic and periodHours==0 -> needs money everytime.
+	* @param _isPeriodic - if isPeriodic and periodHours>0 -> needs money every period. if isPeriodic and periodHours == 0 -> needs money everytime.
 	*/
 
 	// _totalWeiNeed divide _minWeiAmount == INTEGER
@@ -67,20 +59,28 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		isPeriodic = _isPeriodic;
 		minWeiAmount = _minWeiAmount;
 
-		require(!((_isSlidingAmount)&&(_periodHours==0)));
-		require(!(!(_isPeriodic)&&(_periodHours!=0)));
-		require(!((_isSlidingAmount)&&(!_isPeriodic)));
-		require(!((_totalWeiNeed==0)&&(_minWeiAmount!=0)));
-		require(!((_partsPerMillion!=0)&&(_minWeiAmount!=0)));
-		require(!((_partsPerMillion!=0)&&(_totalWeiNeed!=0)));
-		require(_minWeiAmount<=_totalWeiNeed);
-		if(_minWeiAmount!=0) {
-			require(_totalWeiNeed%_minWeiAmount==0);
+		require(!((_isSlidingAmount) && (_periodHours == 0)));
+		require(!(!(_isPeriodic) && (_periodHours != 0)));
+		require(!((_isSlidingAmount) && (!_isPeriodic)));
+		require(!((_totalWeiNeed == 0) && (_minWeiAmount != 0)));
+		require(!((_partsPerMillion != 0) && (_minWeiAmount != 0)));
+		require(!((_partsPerMillion != 0) && (_totalWeiNeed != 0)));
+		require(_minWeiAmount <= _totalWeiNeed);
+		if(_minWeiAmount != 0) {
+			require((_totalWeiNeed % _minWeiAmount) == 0);
 		}
 
 		// TODO: _totalWeiNeed divide _minWeiAmount == INTEGER
 		momentCreated = block.timestamp;
 	}
+
+	function getReceiverType() public view returns(Type) {
+		if(0 != partsPerMillion) {
+			return Type.Relative;
+		} else {
+			return Type.Absolute;
+		}
+	}	
 
 	function processFunds(uint _currentFlow) public payable {
 		emit WeiExpenseProcessFunds(msg.sender, msg.value, _currentFlow);
@@ -95,9 +95,9 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		isMoneyReceived = true;
 
 
-		if((getTotalWeiNeeded(msg.value)==0) || (isPeriodic)) {
+		if((getTotalWeiNeeded(msg.value) == 0) || (isPeriodic)) {
 			momentReceived = block.timestamp;
-			balanceOnMomentReceived = totalWeiReceived;
+			balanceAtMomentReceived = totalWeiReceived;
 		}
 	}
 
@@ -110,19 +110,19 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	}
 
 	function getTotalWeiNeeded(uint _currentFlow)public view zeroIfNoNeed returns(uint need) {
-		if(0!=partsPerMillion) {
+		if(0 != partsPerMillion) {
 			need = ((getDebtMultiplier()*(partsPerMillion * _currentFlow)) / 1000000);
 		
-		}else if(getDebtMultiplier()*totalWeiNeed > totalWeiReceived) {
-			need = getDebtMultiplier()*totalWeiNeed - totalWeiReceived;
-			if((minWeiAmount==0)&&(totalWeiNeed>0)) {
-				if(need>_currentFlow) {
+		}else if((getDebtMultiplier() * totalWeiNeed) > totalWeiReceived) { // if need > 0 for absolute expense
+			need = (getDebtMultiplier() * totalWeiNeed) - totalWeiReceived;
+			if((minWeiAmount == 0) && (totalWeiNeed > 0)) { // fund with any input
+				if(need >= _currentFlow) { // change need for fund (with any input) if need >= _currentFlow
 					need = _currentFlow;
 				}
-			} else if((minWeiAmount>0)&&(minWeiAmount<totalWeiNeed)) { // fund with discrete input
-				if(need>=_currentFlow) {
-					if(_currentFlow >= minWeiAmount) {
-						need = _currentFlow - (_currentFlow%minWeiAmount);
+			} else if((minWeiAmount > 0) && (minWeiAmount < totalWeiNeed)) { // fund with discrete input
+				if(need >= _currentFlow) { // change need for fund (with discrete input) if need >= _currentFlow
+					if(_currentFlow >= minWeiAmount) { // if at least 1 minWeiAmount in _currentFlow
+						need = _currentFlow - (_currentFlow % minWeiAmount); // get as mach minWeiAmount, as it can
 					} else {
 						need = 0;
 					}
@@ -134,7 +134,7 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	}
 
 	function getMinWeiNeeded(uint _currentFlow) public zeroIfNoNeed view returns(uint need) {
-		if( !((minWeiAmount==0) && (totalWeiNeed>0)) 
+		if( !((minWeiAmount == 0) && (totalWeiNeed > 0)) 
 		 && !(partsPerMillion > 0) ) {
 			need = getTotalWeiNeeded(_currentFlow);
 		}	
@@ -145,14 +145,15 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	}
 
 	function getDebtMultiplier()public view returns(uint) {
-		if((isPeriodic)&&(!isSlidingAmount)&&((block.timestamp - momentReceived) / (periodHours * 3600 * 1000) >=1)) {
-			if(0!=partsPerMillion) {
+		// if periodic, period already passed from last receive, but amount is not sliding
+		if((isPeriodic) && (!isSlidingAmount) && (((block.timestamp - momentReceived) / (periodHours * 3600 * 1000)) > 1)) {
+			if(0 != partsPerMillion) {
 				return 1;
 			} else {
-				return (balanceOnMomentReceived/totalWeiNeed) + 1;
+				return (balanceAtMomentReceived / totalWeiNeed) + 1;
 			}		
-		} else if((isPeriodic)&&(isSlidingAmount)) {
-			return 1 + ((block.timestamp - momentCreated) / (periodHours * 3600 * 1000));
+		} else if((isPeriodic) && (isSlidingAmount)) {
+			return 1 + ((block.timestamp - momentReceived) / (periodHours * 3600 * 1000));
 		}else {
 			return 1;
 		}
@@ -163,9 +164,9 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 			if ((uint64(block.timestamp) - momentReceived) >= periodHours * 3600 * 1000) { 
 				isNeed = true;
 			}
-		} else if((minWeiAmount==0)&&(totalWeiNeed>0)) {
+		} else if((minWeiAmount == 0) && (totalWeiNeed > 0)) {
 			isNeed = (getDebtMultiplier()*totalWeiNeed - totalWeiReceived) > 0;
-		} else if((minWeiAmount>0)&&(minWeiAmount<totalWeiNeed)) {
+		} else if((minWeiAmount > 0) && (minWeiAmount < totalWeiNeed)) {
 			isNeed = totalWeiNeed - totalWeiReceived > 0;
 		} else {
 			isNeed = !isMoneyReceived;
@@ -196,6 +197,5 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		partsPerMillion = _partsPerMillion;
 	}
 
-	function()public {
-	}
+	function() public {}
 }

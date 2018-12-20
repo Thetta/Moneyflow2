@@ -120,5 +120,7 @@ contract Budget is Ownable {
 			uint fund = weiTable.getLastNodeId();
 			weiTable.addChildAt(funds, fund);
 		}
-	}	
+	}
+
+	function() public {}
 }

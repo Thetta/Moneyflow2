@@ -15,18 +15,6 @@ contract SplitterBase is ISplitter, Ownable {
 	bool opened = true;
 	mapping (uint=>address) children;
 	uint childrenCount = 0;
-	
-	modifier zeroIfClosed() {
-		if(isOpen()) {
-			_;
-		}
-	}
-
-	modifier falseIfClosed() {
-		if(isOpen()) {
-			_;
-		}
-	}	
 
 	modifier onlyIfOpen() {
 		require(isOpen());
