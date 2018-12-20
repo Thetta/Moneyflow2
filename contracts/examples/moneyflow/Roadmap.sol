@@ -9,9 +9,9 @@ contract Roadmap {
 	constructor(uint _sum1, uint _sum2, uint _sum3) {
 		WeiSplitter roadmap = new WeiSplitter();
 
-		WeiAbsoluteExpense milestone1 = new WeiAbsoluteExpense(_sum1, 0);
-		WeiAbsoluteExpense milestone2 = new WeiAbsoluteExpense(_sum2, 0);
-		WeiAbsoluteExpense milestone3 = new WeiAbsoluteExpense(_sum3, 0);
+		WeiAbsoluteExpense milestone1 = new WeiAbsoluteExpense(0, _sum1);
+		WeiAbsoluteExpense milestone2 = new WeiAbsoluteExpense(0, _sum2);
+		WeiAbsoluteExpense milestone3 = new WeiAbsoluteExpense(0, _sum3);
 		roadmap.addChild(milestone1);
 		roadmap.addChild(milestone2);
 		roadmap.addChild(milestone3);

@@ -32,12 +32,6 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	event WeiExpenseSetPercents(uint _partsPerMillion);
 	event WeiExpenseProcessFunds(address _sender, uint _value, uint _currentFlow);
 
-	modifier zeroIfNoNeed() {
-		if(isNeedsMoney()) {
-			_;
-		}
-	}	
-
 	/**
 	* @dev Constructor
 	* @param _totalWeiNeed - absolute value. how much Ether this expense should receive (in Wei). Can be zero (use _partsPerMillion in this case)
@@ -51,7 +45,7 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 	// all inputs divide _minWeiAmount == INTEGER
 	// if _totalWeiNeed == 100 and _minWeiAmount == 5
 	// you can send 5,10,15, but not 1, 2, 3, 4, 6, ...
-	constructor(uint _minWeiAmount, uint _totalWeiNeed, uint _partsPerMillion, uint _periodHours, bool _isSlidingAmount, bool _isPeriodic) public {
+	constructor(uint _totalWeiNeed, uint _minWeiAmount, uint _partsPerMillion, uint _periodHours, bool _isSlidingAmount, bool _isPeriodic) public {
 		partsPerMillion = _partsPerMillion;
 		periodHours = _periodHours;
 		totalWeiNeed = _totalWeiNeed;
@@ -84,10 +78,8 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 
 	function processFunds(uint _currentFlow) public payable {
 		emit WeiExpenseProcessFunds(msg.sender, msg.value, _currentFlow);
-		require(isNeedsMoney());
-		require(msg.value >= getMinWeiNeeded(_currentFlow));
+		// require(msg.value >= getMinWeiNeeded(_currentFlow));
 		require(msg.value == getTotalWeiNeeded(_currentFlow));
-		require(_currentFlow >= getMinWeiNeeded(_currentFlow));
 		require(_currentFlow >= msg.value);
 		// all inputs divide _minWeiAmount == INTEGER
 
@@ -109,68 +101,115 @@ contract WeiExpense is IWeiReceiver, IDestination, Ownable {
 		return totalWeiNeed;
 	}
 
-	function getTotalWeiNeeded(uint _currentFlow)public view zeroIfNoNeed returns(uint need) {
-		if(0 != partsPerMillion) {
-			need = ((getDebtMultiplier()*(partsPerMillion * _currentFlow)) / 1000000);
+	function getTotalWeiNeeded(uint _currentFlow)public view returns(uint out) {
+		uint receiveTimeDelta = (block.timestamp - momentReceived);
+		uint creationTimeDelta = (block.timestamp - momentCreated);
+		uint periodLength = (periodHours * 3600 * 1000);
+		uint need;
 		
-		}else if((getDebtMultiplier() * totalWeiNeed) > totalWeiReceived) { // if need > 0 for absolute expense
-			need = (getDebtMultiplier() * totalWeiNeed) - totalWeiReceived;
-			if((minWeiAmount == 0) && (totalWeiNeed > 0)) { // fund with any input
-				if(need >= _currentFlow) { // change need for fund (with any input) if need >= _currentFlow
-					need = _currentFlow;
+		if(partsPerMillion != 0) { // if Absolute and (minWeiAmount == totalWeiNeed)
+			need = ((partsPerMillion * _currentFlow) / 1000000);
+		} else {
+			need = totalWeiNeed;
+		}
+
+		if(minWeiAmount == totalWeiNeed) {
+			if(!isPeriodic) {
+				out = need;	
+			} else if(isPeriodic && !isSlidingAmount) {
+				if(receiveTimeDelta >= periodLength) {
+					out = need;
 				}
-			} else if((minWeiAmount > 0) && (minWeiAmount < totalWeiNeed)) { // fund with discrete input
-				if(need >= _currentFlow) { // change need for fund (with discrete input) if need >= _currentFlow
-					if(_currentFlow >= minWeiAmount) { // if at least 1 minWeiAmount in _currentFlow
-						need = _currentFlow - (_currentFlow % minWeiAmount); // get as mach minWeiAmount, as it can
-					} else {
-						need = 0;
+			} else if(isPeriodic && isSlidingAmount) {
+				if(receiveTimeDelta >= periodLength) {
+					out = (need * numberOfEntitiesPlusOne(receiveTimeDelta, periodLength)) - totalWeiReceived;
+					if(momentReceived == 0) {
+						out = need;
 					}
 				}
+				if((out > _currentFlow) && (_currentFlow > totalWeiNeed)) {
+					out = (totalWeiNeed * (_currentFlow / totalWeiNeed)) - totalWeiReceived;
+				}				
 			}
-		}else {
-			need = 0;
+
+		} else if(minWeiAmount == 0) {
+			if(!isPeriodic) {
+				if(_currentFlow >= (totalWeiNeed - totalWeiReceived)) {
+					return (totalWeiNeed - totalWeiReceived);
+				} else {
+					return _currentFlow;
+				}
+			} else if(isPeriodic && !isSlidingAmount) {
+				out = getDebtIfNoSliding();
+				if(out > _currentFlow) {
+					out = _currentFlow;
+				}
+			} else if(isPeriodic && isSlidingAmount) {
+				out = ((numberOfEntitiesPlusOne(creationTimeDelta, periodLength) * totalWeiNeed) - totalWeiReceived);
+				if(out > _currentFlow) {
+					out = _currentFlow;
+				}			
+			}
+
+		} else if(minWeiAmount < totalWeiNeed) {
+			if(!isPeriodic) {
+	 			if(_currentFlow >= (totalWeiNeed - totalWeiReceived)) {
+					out = (totalWeiNeed - totalWeiReceived);
+				} else if((_currentFlow < totalWeiNeed) && (_currentFlow >= minWeiAmount)) { // change need for fund (with discrete input) if need >= _currentFlow
+					out = _currentFlow - (_currentFlow % minWeiAmount);
+				}
+			} else if(isPeriodic && !isSlidingAmount) {
+				out = getDebtIfNoSliding();
+				if((_currentFlow < totalWeiNeed) && (_currentFlow >= minWeiAmount)) { // change need for fund (with discrete input) if need >= _currentFlow
+					out = _currentFlow - (_currentFlow % minWeiAmount);
+				}				
+			} else if(isPeriodic && isSlidingAmount) {
+				out = ((numberOfEntitiesPlusOne(creationTimeDelta, periodLength) * totalWeiNeed) - totalWeiReceived);
+				if((_currentFlow < out) && (_currentFlow >= minWeiAmount)) { // change need for fund (with discrete input) if need >= _currentFlow
+					out = _currentFlow - (_currentFlow % minWeiAmount);
+				}
+			}
 		}
 	}
 
-	function getMinWeiNeeded(uint _currentFlow) public zeroIfNoNeed view returns(uint need) {
+	function numberOfEntitiesPlusOne(uint _inclusive, uint _inluded) public pure returns(uint count) {
+		if(_inclusive < _inluded) {
+			count = 1;
+		} else {
+			count = 1 + (_inclusive / _inluded);
+		}
+	}
+
+	function getDebtIfNoSliding() internal view returns(uint) {
+		uint receiveTimeDelta = (block.timestamp - momentReceived);
+		uint creationTimeDelta = (block.timestamp - momentCreated);
+		uint periodLength = (periodHours * 3600 * 1000);
+
+		uint debtForAllPeriods = ((numberOfEntitiesPlusOne(creationTimeDelta, periodLength) * totalWeiNeed) - totalWeiReceived);
+		if(debtForAllPeriods == 0) {
+			return 0;
+		} else if((debtForAllPeriods % totalWeiNeed) > 0 ) {
+			return (debtForAllPeriods % totalWeiNeed);
+		} else if(numberOfEntitiesPlusOne(receiveTimeDelta, periodLength) > 1){
+			return totalWeiNeed;
+		} else {
+			return 0;
+		}
+	}
+
+	function getMinWeiNeeded(uint _currentFlow) public view returns(uint minNeed) {
 		if( !((minWeiAmount == 0) && (totalWeiNeed > 0)) 
 		 && !(partsPerMillion > 0) ) {
-			need = getTotalWeiNeeded(_currentFlow);
-		}	
+			minNeed = getTotalWeiNeeded(_currentFlow);
+		}
 	}
 
 	function getMomentReceived()public view returns(uint) {
 		return momentReceived;
 	}
 
-	function getDebtMultiplier()public view returns(uint) {
-		// if periodic, period already passed from last receive, but amount is not sliding
-		if((isPeriodic) && (!isSlidingAmount) && (((block.timestamp - momentReceived) / (periodHours * 3600 * 1000)) >= 1)) {
-			if(0 != partsPerMillion) {
-				return 1;
-			} else {
-				return (balanceAtMomentReceived / totalWeiNeed) + 1;
-			}		
-		} else if((isPeriodic) && (isSlidingAmount)) {
-			return 1 + ((block.timestamp - momentCreated) / (periodHours * 3600 * 1000));
-		}else {
-			return 1;
-		}
-	}
-
 	function isNeedsMoney()public view returns(bool isNeed) {
-		if(isPeriodic) { // For period Weiexpense
-			if ((uint64(block.timestamp) - momentReceived) >= periodHours * 3600 * 1000) { 
-				isNeed = true;
-			}
-		} else if((minWeiAmount == 0) && (totalWeiNeed > 0)) {
-			isNeed = (getDebtMultiplier()*totalWeiNeed - totalWeiReceived) > 0;
-		} else if((minWeiAmount > 0) && (minWeiAmount < totalWeiNeed)) {
-			isNeed = totalWeiNeed - totalWeiReceived > 0;
-		} else {
-			isNeed = !isMoneyReceived;
-		}
+		isNeed = (getTotalWeiNeeded(1e30) > 0);
 	}
 
 	function getPartsPerMillion()public view returns(uint) {
