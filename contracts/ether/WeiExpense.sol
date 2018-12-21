@@ -35,11 +35,11 @@ contract WeiExpense is ExpenseBase, IWeiReceiver, IDestination, Ownable {
 	}
 
 	function getIsMoneyReceived() public view returns(bool) {
-		return expense.totalWeiReceived > 0;
+		return expense.totalReceived > 0;
 	}
 
 	function getNeededWei() public view returns(uint) {
-		return expense.totalWeiNeeded;
+		return expense.totalNeeded;
 	}
 
 	function getTotalWeiNeeded(uint _currentFlow)public view returns(uint) {
@@ -74,8 +74,8 @@ contract WeiExpense is ExpenseBase, IWeiReceiver, IDestination, Ownable {
 	}
 
 	function setNeededWei(uint _totalWeiNeeded) public onlyOwner {
-		emit ExpenseSetNeededWei(_totalWeiNeeded);
-		expense.totalWeiNeeded = uint128(_totalWeiNeeded);
+		emit ExpenseSetNeeded(_totalWeiNeeded);
+		expense.totalNeeded = uint128(_totalWeiNeeded);
 	}
 
 	function setPercents(uint _partsPerMillion) public onlyOwner {
