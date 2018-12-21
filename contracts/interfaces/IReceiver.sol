@@ -12,7 +12,4 @@ contract IReceiver {
 
 	// WeiReceiver should process all tokens here (hold it or send it somewhere else)
 	function processFunds(uint _currentFlow) public payable;
-
-	// non payable!
-	function() public;
 }

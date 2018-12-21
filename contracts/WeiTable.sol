@@ -1,10 +1,12 @@
 pragma solidity ^0.4.24;
 
+import "./ExpenseBase.sol";
+
 import "./interfaces/IWeiReceiver.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
-contract WeiTable is IWeiReceiver, Ownable {
+contract WeiTable is ExpenseBase, IWeiReceiver, Ownable {
 	uint public nodesCount = 0;
 
 	struct FlowBuffer {
@@ -26,25 +28,6 @@ contract WeiTable is IWeiReceiver, Ownable {
 	mapping(uint=>Type) nodesType;
 	mapping(uint=>Expense) expenses;
 	mapping(uint=>Splitter) splitters;
-
-	struct Expense {
-		uint totalWeiNeeded;
-		uint minWeiAmount;
-		uint neededPpm;
-		
-		uint periodHours;
-
-		bool isPeriodic;
-		bool isSlidingAmount;
-
-		uint momentReceived;
-		bool isMoneyReceived;
-		bool isOpen;
-		uint balance;
-		uint totalWeiReceived;
-		uint momentCreated;
-		uint balanceOnMomentReceived;
-	}
 
 	struct Splitter {
 		bool isOpen;
@@ -71,7 +54,7 @@ contract WeiTable is IWeiReceiver, Ownable {
 
 	// -------------------- INTERNAL IWEIRECEIVER FUNCTIONS -------------------- for nodes
 	function getPartsPerMillionAt(uint _eId) public view isCorrectId(_eId) returns(uint ppm) {
-		ppm = expenses[_eId].neededPpm;
+		ppm = expenses[_eId].partsPerMillion;
 	}
 
 	function isNeedsMoneyAt(uint _eId) public view isCorrectId(_eId) returns(bool) {
@@ -95,18 +78,7 @@ contract WeiTable is IWeiReceiver, Ownable {
 	}
 
 	function isNeedsMoneyExpenseAt(uint _eId) internal view returns(bool isNeed) {
-		Expense e = expenses[_eId];
-		if(e.isPeriodic) {
-			if ((uint64(block.timestamp) - e.momentReceived) >= e.periodHours * 3600 * 1000) { 
-				isNeed = true;
-			}
-		} else if((e.minWeiAmount == 0) && (e.totalWeiNeeded>0)) {
-			isNeed = ((getDebtMultiplierAt(_eId) * e.totalWeiNeeded) - e.totalWeiReceived) > 0;
-		} else if((e.minWeiAmount>0) && (e.minWeiAmount < e.totalWeiNeeded)) {
-			isNeed = (e.totalWeiNeeded - e.totalWeiReceived) > 0;
-		} else {
-			isNeed = !e.isMoneyReceived;
-		}		
+		return super.isNeedsMoney(expenses[_eId]);		
 	}
 
 	function processFundsAt(uint _eId, uint _currentFlow, uint _amount) internal isCorrectId(_eId) {
@@ -137,21 +109,10 @@ contract WeiTable is IWeiReceiver, Ownable {
 	}
 
 	function processFundsExpenseAt(uint _eId, uint _currentFlow, uint _amount) internal {
-		expenses[_eId].totalWeiReceived += _amount;
-		expenses[_eId].balance += _amount;
-		expenses[_eId].isMoneyReceived = true;
-
-		if((getTotalWeiNeededAt(_eId, _amount) == 0) || (expenses[_eId].isPeriodic)) {
-			expenses[_eId].momentReceived = block.timestamp;
-			expenses[_eId].balanceOnMomentReceived = expenses[_eId].totalWeiReceived;
-		}
+		expenses[_eId] = processWeiFunds(expenses[_eId], _currentFlow, _amount);
 	}
 
 	function getMinWeiNeededAt(uint _eId, uint _currentFlow) public view isCorrectId(_eId) returns(uint) {
-		if(!isNeedsMoneyAt(_eId)) {
-			return 0;
-		}
-
 		if(isExpenseAt(_eId)) {
 			return getMinWeiNeededExpenseAt(_eId, _currentFlow);	
 		}else {
@@ -171,35 +132,12 @@ contract WeiTable is IWeiReceiver, Ownable {
 	}
 
 	function getMinWeiNeededExpenseAt(uint _eId, uint _currentFlow) internal view returns(uint totalNeed) {
-		if( !((expenses[_eId].minWeiAmount == 0) && (expenses[_eId].totalWeiNeeded > 0)) 
-		 && !(expenses[_eId].neededPpm > 0) ) {
-			totalNeed = getTotalWeiNeededAt(_eId, _currentFlow);
-		}	
-	}
-
-	function getDebtMultiplierAt(uint _eId) internal isCorrectId(_eId) view returns(uint) {
-		Expense e = expenses[_eId];
-		// if periodic, not sliding amount and periods Count From Last Receive > 1
-		if((e.isPeriodic) && (!e.isSlidingAmount) && (((block.timestamp - e.momentReceived) / (e.periodHours * 3600 * 1000)) >= 1)) { 
-			if(0 != e.neededPpm) {
-				return 1;
-			} else {
-				return (e.balanceOnMomentReceived/e.totalWeiNeeded) + 1;
-			}		
-		} else if((e.isPeriodic) && (e.isSlidingAmount)) {
-			return 1 + ((block.timestamp - e.momentCreated) / (e.periodHours * 3600 * 1000));
-		} else {
-			return 1;
-		}			
+		return getMinNeeded(expenses[_eId], _currentFlow);	
 	}
 
 	function getTotalWeiNeededAt(uint _eId, uint _currentFlow) public view  isCorrectId(_eId) returns(uint) {
-		if(!isNeedsMoneyAt(_eId)) {
-			return 0;
-		}
-
 		if(isExpenseAt(_eId)) {
-			return getTotalWeiNeededExpenseAt(_eId, _currentFlow);
+			return getTotalNeeded(expenses[_eId], _currentFlow);
 		} else {
 			return getTotalWeiNeededSplitterAt(_eId, _currentFlow);	
 		}
@@ -216,30 +154,9 @@ contract WeiTable is IWeiReceiver, Ownable {
 		}		
 	}
 
-	function getTotalWeiNeededExpenseAt(uint _eId, uint _currentFlow)internal view returns(uint totalNeed) {
-		Expense e = expenses[_eId];
-		if(0 != e.neededPpm) {
-			totalNeed = ((getDebtMultiplierAt(_eId) * (e.neededPpm * _currentFlow)) / 1000000);
-		
-		} else if(getDebtMultiplierAt(_eId) * e.totalWeiNeeded > e.totalWeiReceived) {
-			totalNeed = getDebtMultiplierAt(_eId) * e.totalWeiNeeded - e.totalWeiReceived;
-			if((e.minWeiAmount == 0) && (e.totalWeiNeeded>0)) {
-				if(totalNeed > _currentFlow) {
-					totalNeed = _currentFlow;
-				}
-			} else if((e.minWeiAmount > 0) && (e.minWeiAmount < e.totalWeiNeeded)) { // fund with discrete input
-				if(totalNeed >= _currentFlow) {
-					if(_currentFlow >= e.minWeiAmount) {
-						totalNeed = _currentFlow - (_currentFlow % e.minWeiAmount);
-					} else {
-						totalNeed = 0;
-					}
-				}
-			}
-		} else {
-			totalNeed = 0;
-		}		
-	}
+	// function getTotalWeiNeededExpenseAt(uint _eId, uint _currentFlow)internal view returns(uint) {
+	// 	return getTotalNeeded(expenses[_eId], _currentFlow);
+	// }
 
 	function balanceAt(uint _eId) public view isCorrectId(_eId) returns(uint) {
 		return expenses[_eId].balance;
@@ -269,40 +186,16 @@ contract WeiTable is IWeiReceiver, Ownable {
 	}
 
 	// -------------------- public SCHEME FUNCTIONS -------------------- 
-	function addAbsoluteExpense(uint _totalWeiNeeded, uint _minWeiAmount, bool _isPeriodic, bool _isSlidingAmount, uint _periodHours) public onlyOwner {
-		expenses[nodesCount] = Expense(
-			_totalWeiNeeded, _minWeiAmount, 0,
-			_periodHours, _isPeriodic, _isSlidingAmount,
-			0, false, true, 0, 0, now, 0
-		);
-		nodesType[nodesCount] = Type.Absolute;
-		emit NodeAdded(nodesCount, Type.Absolute);
-		nodesCount += 1;
-		// TODO: add requires
-		require(!((_isSlidingAmount) && (_periodHours == 0)));
-		require(!(!(_isPeriodic) && (_periodHours != 0)));
-		require(!((_isSlidingAmount) && (!_isPeriodic)));
-		require(!((_totalWeiNeeded == 0) && (_minWeiAmount != 0)));
-
-		require(_minWeiAmount <= _totalWeiNeeded);
-		if(_minWeiAmount != 0) {
-			require(_totalWeiNeeded%_minWeiAmount == 0);
-		}		
+	function addAbsoluteExpense(uint128 _totalWeiNeeded, uint128 _minWeiAmount, bool _isPeriodic, bool _isSlidingAmount, uint32 _periodHours) public onlyOwner {
+		emit NodeAdded(nodesCount, Type.Absolute);	
+		expenses[nodesCount] = constructExpense(_totalWeiNeeded, _minWeiAmount, 0, _periodHours, _isSlidingAmount, _isPeriodic);
+		nodesCount += 1;	
 	}
 
-	function addRelativeExpense(uint _neededPpm, bool _isPeriodic, bool _isSlidingAmount, uint _periodHours) public onlyOwner {
-		// TODO: add requires
-		require(!((_isSlidingAmount) && (_periodHours == 0)));
-		require(!(!(_isPeriodic) && (_periodHours != 0)));
-		require(!((_isSlidingAmount) && (!_isPeriodic)));		
-		expenses[nodesCount] = Expense(
-			0, 0, _neededPpm,
-			_periodHours, _isPeriodic, _isSlidingAmount,
-			0, false, true, 0, 0, now, 0
-		);	
-		nodesType[nodesCount] = Type.Relative;
+	function addRelativeExpense(uint32 _partsPerMillion, bool _isPeriodic, bool _isSlidingAmount, uint32 _periodHours) public onlyOwner {
 		emit NodeAdded(nodesCount, Type.Relative);	
-		nodesCount += 1;
+		expenses[nodesCount] = constructExpense(0, 0, _partsPerMillion, _periodHours, _isSlidingAmount, _isPeriodic);
+		nodesCount += 1;		
 	}
 
 	function addSplitter() public onlyOwner {
@@ -327,7 +220,7 @@ contract WeiTable is IWeiReceiver, Ownable {
 	// -------------------- public CONTROL FUNCTIONS -------------------- 
 	function getReceiverTypeAt(uint _eId) internal isCorrectId(_eId) returns(Type nodeType) {
 		if(isExpenseAt(_eId)) {
-			if(expenses[_eId].neededPpm > 0) {
+			if(expenses[_eId].partsPerMillion > 0) {
 				nodeType = Type.Relative;
 			} else {
 				nodeType = Type.Absolute;

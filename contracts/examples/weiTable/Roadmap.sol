@@ -12,7 +12,7 @@ contract Roadmap {
 	uint milestone2;
 	uint milestone3;
 
-	constructor(uint _sum1, uint _sum2, uint _sum3) {
+	constructor(uint128 _sum1, uint128 _sum2, uint128 _sum3) {
 		WeiTable weiTable = new WeiTable();
 		weiTable.addSplitter();
 		uint roadmap = weiTable.getLastNodeId();

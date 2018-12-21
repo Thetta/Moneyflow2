@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
-pragma experimental ABIEncoderV2;
-import "./ExpenseBase.sol";
+
+import "../ExpenseBase.sol";
 
 import "../interfaces/IDestination.sol";
 import "../interfaces/IWeiReceiver.sol";
@@ -66,11 +66,13 @@ contract WeiExpense is ExpenseBase, IWeiReceiver, IDestination, Ownable {
 	function flush()public onlyOwner {
 		emit ExpenseFlush(owner, address(this).balance);
 		owner.transfer(address(this).balance);
+		expense.balance = 0;
 	}
 
 	function flushTo(address _to) public onlyOwner {
 		emit ExpenseFlush(_to, address(this).balance);
 		_to.transfer(address(this).balance);
+		expense.balance = 0;
 	}
 
 	function setNeededWei(uint _totalWeiNeeded) public onlyOwner {

@@ -216,7 +216,7 @@ contract('WeiTable tests', (accounts) => {
 	const employee2 = accounts[2];
 	const outsider = accounts[3];
 
-	// // 0->•abs
+	// 0->•abs
 	it('should process money with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
 		let weiTable = await WeiTable.new();
 		var output1 = await WeiAbsoluteExpense.new(money, money);
@@ -245,9 +245,10 @@ contract('WeiTable tests', (accounts) => {
 		var minNeed = await weiTable.getMinWeiNeeded(0);/*minNeedFix*/
 		assert.equal(minNeed, 6 * money);
 		var need1 = await weiTable.isNeedsMoney();
+		assert.equal(need1, true);
 		// now send some money to the revenue endpoint
 		await weiTable.processFunds(6 * money, { value: 6 * money, from: creator });
-		assert.equal(need1, true);
+		
 		// money should end up in the outputs
 		var absoluteExpense1Balance = await weiTable.balanceAt(AbsoluteExpense1Id);
 		assert.equal(absoluteExpense1Balance.toNumber(), 1 * money, 'resource point received money from splitter');
@@ -257,6 +258,10 @@ contract('WeiTable tests', (accounts) => {
 
 		var absoluteExpense3Balance = await weiTable.balanceAt(AbsoluteExpense3Id);
 		assert.equal(absoluteExpense3Balance.toNumber(), 3 * money, 'resource point received money from splitter');
+
+		assert.equal((await weiTable.getTotalWeiNeededAt(AbsoluteExpense1Id, 6 * money)).toNumber(), 0);
+		assert.equal((await weiTable.getTotalWeiNeededAt(AbsoluteExpense2Id, 6 * money)).toNumber(), 0);
+		assert.equal((await weiTable.getTotalWeiNeededAt(AbsoluteExpense3Id, 6 * money)).toNumber(), 0);	
 
 		var totalNeed = await weiTable.getTotalWeiNeeded(6 * money);
 		assert.equal(totalNeed.toNumber(), 0 * money);
@@ -519,7 +524,7 @@ contract('WeiTable tests', (accounts) => {
 		await weiTable.closeAt(AbsoluteExpense3Id);
 
 		var totalNeed = await weiTable.getTotalWeiNeeded(6 * money);
-		assert.equal(totalNeed, 3 * money);
+		assert.equal(totalNeed.toNumber(), 3 * money);
 		var minNeed = await weiTable.getMinWeiNeeded(0);/*minNeedFix*/
 		assert.equal(minNeed, 3 * money);
 

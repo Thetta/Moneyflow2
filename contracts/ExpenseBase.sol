@@ -1,12 +1,4 @@
 pragma solidity ^0.4.24;
-pragma experimental ABIEncoderV2;
-
-import "../interfaces/IDestination.sol";
-import "../interfaces/IWeiReceiver.sol";
-
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
-
 
 /**
  * @title ExpenseBase
@@ -32,6 +24,8 @@ contract ExpenseBase {
 		
 		uint128 totalReceived;
 		uint32 momentCreated;
+
+		bool isOpen;
 	}
 
 	enum PeriodType {
@@ -69,6 +63,7 @@ contract ExpenseBase {
 		e.totalNeeded = _totalNeeded;
 		e.minAmount = _minAmount;
 		e.momentCreated = uint32(block.timestamp);
+		e.isOpen = true;
 
 		if(!_isPeriodic) {
 			e.periodType = PeriodType.NonPeriodic;
@@ -86,12 +81,10 @@ contract ExpenseBase {
 		// all inputs divide _minAmount == INTEGER
 
 		e.totalReceived += uint128(_value);
-		// e.isMoneyReceived = true;
-
+		e.balance += uint128(_value);
 
 		if((getTotalNeeded(_e, _value) == 0) || (_e.periodType == PeriodType.Periodic)) {
 			e.momentReceived = uint32(block.timestamp);
-			// e.balanceOnMomentReceived = e.totalReceived;
 		}
 	}
 
@@ -107,9 +100,14 @@ contract ExpenseBase {
 			baseNeed = _e.totalNeeded;
 		}
 
-		if(_e.minAmount == _e.totalNeeded) {
+		if(!_e.isOpen) {
+			need = 0;
+
+		} else if(_e.minAmount == _e.totalNeeded) {
 			if(_e.periodType == PeriodType.NonPeriodic) {
-				need = baseNeed;
+				if(_e.balance == 0) {
+					need = baseNeed;
+				}
 			} else if(_e.periodType == PeriodType.Periodic) {
 				if(receiveTimeDelta >= periodLength) {
 					need = baseNeed;
@@ -129,9 +127,9 @@ contract ExpenseBase {
 		} else if(_e.minAmount == 0) {
 			if(_e.periodType == PeriodType.NonPeriodic) {
 				if(_currentFlow >= (_e.totalNeeded - _e.totalReceived)) {
-					return (_e.totalNeeded - _e.totalReceived);
+					need = (_e.totalNeeded - _e.totalReceived);
 				} else {
-					return _currentFlow;
+					need = _currentFlow;
 				}
 			} else if(_e.periodType == PeriodType.Periodic) {
 				need = getDebtIfNoSliding(_e);
@@ -177,7 +175,6 @@ contract ExpenseBase {
 		isNeed = (getTotalNeeded(_e, 1e30) > 0);
 	}	
 
-
 	// -------------------- INTERNAL FUNCTIONS
 	function numberOfEntitiesPlusOne(uint _inclusive, uint _inluded) internal view returns(uint count) {
 		if(_inclusive < _inluded) {
@@ -202,6 +199,5 @@ contract ExpenseBase {
 		} else {
 			return 0;
 		}
-	}	
-
+	}
 }
