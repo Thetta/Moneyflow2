@@ -54,7 +54,8 @@ contract SplitterBase {
 
 		if((_s.childrenType != IReceiver.Type.Splitter)
 		 &&(childType != IReceiver.Type.Splitter)) {
-			require(_s.childrenType == childType);
+		 	// splitter type should be equal children types
+			require(_s.childrenType == childType); 
 		} else {
 			_s.childrenType = childType;
 		}
@@ -142,13 +143,14 @@ contract SplitterBase {
 			
 			if(_s.isTableSplitter && b.need > 0) {
 				ITable(address(this)).processFundsAt(_s.outputs[i], b.flow, b.need);
-			} else if(!_s.isTableSplitter && b.need > 0){
+			} else if(!_s.isTableSplitter && b.need > 0) {
 				IWeiReceiver(_s.addresses[i]).processFunds.value(b.need)(b.flow); 
 			}
 
 			b = _modifyFlow(b);
 		}
-		require(b.sent == _value);
+		// all value was sent
+		require(b.sent == _value); 
 	}
 
 	function constructSplitter(bool _isTableSplitter) internal view returns(Splitter s) {

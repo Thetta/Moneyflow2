@@ -7,6 +7,7 @@ import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../interfaces/ISplitter.sol";
 import "../interfaces/IWeiReceiver.sol";
 
+
 /**
  * @title WeiSplitter 
  * @dev Will split money from top to down (order matters!). It is possible for some children to not receive money 

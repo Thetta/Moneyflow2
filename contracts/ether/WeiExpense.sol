@@ -46,7 +46,6 @@ contract WeiExpense is ExpenseBase, IWeiReceiver, IDestination, Ownable {
 		return getExpenseTotalNeeded(expense, _currentFlow);
 	}
 
-
 	function getMinWeiNeeded(uint _currentFlow) public view returns(uint) {
 		return getExpenseMinNeeded(expense, _currentFlow);
 	}

@@ -1,5 +1,6 @@
 pragma solidity ^0.4.24;
 
+
 /**
  * @title ExpenseBase
  * @dev library-like contract for WeiExpense, WeiTable, ERC20Expense, ERC20Table
@@ -46,7 +47,7 @@ contract ExpenseBase {
 	// all inputs divide _minAmount == INTEGER
 	// if _totalNeeded == 100 and _minAmount == 5
 	// you can send 5,10,15, but not 1, 2, 3, 4, 6, ...
-	function constructExpense(uint128 _totalNeeded, uint128 _minAmount, uint32 _partsPerMillion, uint32 _periodHours, bool _isSlidingAmount, bool _isPeriodic) internal view returns(Expense e){
+	function constructExpense(uint128 _totalNeeded, uint128 _minAmount, uint32 _partsPerMillion, uint32 _periodHours, bool _isSlidingAmount, bool _isPeriodic) internal view returns(Expense e) {
 		require(!((_isSlidingAmount) && (_periodHours == 0)));
 		require(!(!(_isPeriodic) && (_periodHours != 0)));
 		require(!((_isSlidingAmount) && (!_isPeriodic)));
@@ -153,7 +154,7 @@ contract ExpenseBase {
 
 		} else if(_e.minAmount < _e.totalNeeded) {
 			if(_e.periodType == PeriodType.NonPeriodic) {
-	 			if(_currentFlow >= (_e.totalNeeded - _e.totalReceived)) {
+				if(_currentFlow >= (_e.totalNeeded - _e.totalReceived)) {
 					need = (_e.totalNeeded - _e.totalReceived);
 				} else if((_currentFlow < _e.totalNeeded) && (_currentFlow >= _e.minAmount)) { // change need for fund (with discrete input) if baseNeed >= _currentFlow
 					need = _currentFlow - (_currentFlow % _e.minAmount);
@@ -202,7 +203,7 @@ contract ExpenseBase {
 			return 0;
 		} else if((debtForAllPeriods % _e.totalNeeded) > 0 ) {
 			return (debtForAllPeriods % _e.totalNeeded);
-		} else if(numberOfEntitiesPlusOne(receiveTimeDelta, periodLength) > 1){
+		} else if(numberOfEntitiesPlusOne(receiveTimeDelta, periodLength) > 1) {
 			return _e.totalNeeded;
 		} else {
 			return 0;
