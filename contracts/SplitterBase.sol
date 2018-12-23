@@ -4,6 +4,7 @@ import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./interfaces/IReceiver.sol";
 import "./interfaces/ITable.sol";
 
+
 /**
  * @title SplitterBase 
  * @dev Splitter has multiple outputs (allows to send money only to THESE addresses)
@@ -198,6 +199,7 @@ contract SplitterBase {
 			t = IWeiReceiver(_s.addresses[_childNum]).getReceiverType();
 		}
 	}
+	
 	function getChildrenCount(Splitter _s) internal pure returns(uint) {
 		if(_s.isTableSplitter) {
 			return _s.outputs.length;

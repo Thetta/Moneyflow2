@@ -7,6 +7,7 @@ import "./interfaces/ITable.sol";
 import "./ExpenseBase.sol";
 import "./SplitterBase.sol";
 
+
 /**
  * @title TableBase 
  * @dev contract for WeiTable and ERC20Table
