@@ -6,6 +6,13 @@ pragma solidity ^0.4.24;
  * @dev Something that needs funds 
 */
 contract IReceiver {
+	enum Type {
+		Absolute,
+		Relative,
+		Splitter,
+		Table
+	}
+
 	// If this output needs more funds -> will return true
 	// If this output does not need more funds -> will return false 
 	function isNeedsMoney() public view returns(bool);

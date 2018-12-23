@@ -22,5 +22,5 @@ contract ITable {
 	function flushAt(uint _eId) public;
 	function flushToAt(uint _eId, address _to) public;
 
-	function getReceiverTypeAt(uint _eId) public returns(IWeiReceiver.Type);
+	function getReceiverTypeAt(uint _eId) public returns(IReceiver.Type);
 }

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.23;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "./interfaces/IWeiReceiver.sol";
+import "./interfaces/IReceiver.sol";
 import "./interfaces/ITable.sol";
 
 /**
@@ -14,7 +14,7 @@ contract SplitterBase {
 		bool isTableSplitter;
 		uint[] outputs;
 		address[] addresses;
-		IWeiReceiver.Type childrenType;
+		IReceiver.Type childrenType;
 	}
 
 	struct FlowBuffer {
@@ -44,7 +44,7 @@ contract SplitterBase {
 
 	function addChildToSplitter(Splitter storage _s, uint _id, address _addr) internal {
 		emit SplitterBaseAddChild(_id, _addr);
-		IWeiReceiver.Type childType;
+		IReceiver.Type childType;
 		
 		if(_s.isTableSplitter) {
 			childType = ITable(address(this)).getReceiverTypeAt(_id);
@@ -52,8 +52,8 @@ contract SplitterBase {
 			childType = IWeiReceiver(_addr).getReceiverType();
 		}		
 
-		if((_s.childrenType != IWeiReceiver.Type.Splitter)
-		 &&(childType != IWeiReceiver.Type.Splitter)) {
+		if((_s.childrenType != IReceiver.Type.Splitter)
+		 &&(childType != IReceiver.Type.Splitter)) {
 			require(_s.childrenType == childType);
 		} else {
 			_s.childrenType = childType;
@@ -154,7 +154,7 @@ contract SplitterBase {
 	function constructSplitter(bool _isTableSplitter) internal view returns(Splitter s) {
 		uint[] memory emptyOutputs;
 		address[] memory emptyAddresses;
-		return Splitter(true, _isTableSplitter, emptyOutputs, emptyAddresses, IWeiReceiver.Type.Splitter);
+		return Splitter(true, _isTableSplitter, emptyOutputs, emptyAddresses, IReceiver.Type.Splitter);
 	}
 
 	function _modifyFlow(FlowBuffer _b) internal pure returns(FlowBuffer) {
@@ -179,8 +179,8 @@ contract SplitterBase {
 		}
 
 		if((b.i+1) < getChildrenCount(_s)) {
-			if((getReceiverTypeBase(_s, b.i) == IWeiReceiver.Type.Relative)
-			 && (getReceiverTypeBase(_s, (b.i + 1)) == IWeiReceiver.Type.Relative)) {
+			if((getReceiverTypeBase(_s, b.i) == IReceiver.Type.Relative)
+			 && (getReceiverTypeBase(_s, (b.i + 1)) == IReceiver.Type.Relative)) {
 				b.relSeqQ = true; 
 			}
 		}
@@ -189,7 +189,7 @@ contract SplitterBase {
 		return b;
 	}
 
-	function getReceiverTypeBase(Splitter _s, uint _childNum) internal view returns(IWeiReceiver.Type t) {
+	function getReceiverTypeBase(Splitter _s, uint _childNum) internal view returns(IReceiver.Type t) {
 		if(_s.isTableSplitter) {
 			t = ITable(address(this)).getReceiverTypeAt(_s.outputs[_childNum]);
 		} else {

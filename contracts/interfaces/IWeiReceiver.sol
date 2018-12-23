@@ -9,14 +9,6 @@ import "./IReceiver.sol";
 // "Absolute": fixed amount of Wei
 // "Relative": percents of input 
 contract IWeiReceiver is IReceiver {
-
-	enum Type {
-		Absolute,
-		Relative,
-		Splitter,
-		Table
-	}
-
 	// Will calculate only absolute outputs, but not take into account the Percents
 	function getMinWeiNeeded(uint _inputWei) public view returns(uint);
 
