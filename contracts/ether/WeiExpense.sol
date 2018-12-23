@@ -31,7 +31,7 @@ contract WeiExpense is ExpenseBase, IWeiReceiver, IDestination, Ownable {
 
 	function processFunds(uint _currentFlow) public payable {
 		emit ExpenseProcessFunds(msg.sender, msg.value, _currentFlow);
-		expense = processWeiFunds(expense, _currentFlow, msg.value);
+		expense = processWeiExpenseFunds(expense, _currentFlow, msg.value);
 	}
 
 	function getIsMoneyReceived() public view returns(bool) {
@@ -43,12 +43,12 @@ contract WeiExpense is ExpenseBase, IWeiReceiver, IDestination, Ownable {
 	}
 
 	function getTotalWeiNeeded(uint _currentFlow)public view returns(uint) {
-		return getTotalNeeded(expense, _currentFlow);
+		return getExpenseTotalNeeded(expense, _currentFlow);
 	}
 
 
 	function getMinWeiNeeded(uint _currentFlow) public view returns(uint) {
-		return getMinNeeded(expense, _currentFlow);
+		return getExpenseMinNeeded(expense, _currentFlow);
 	}
 
 	function getMomentReceived()public view returns(uint) {
@@ -56,7 +56,7 @@ contract WeiExpense is ExpenseBase, IWeiReceiver, IDestination, Ownable {
 	}
 
 	function isNeedsMoney()public view returns(bool) {
-		return super.isNeedsMoney(expense);
+		return isExpenseNeeds(expense);
 	}
 
 	function getPartsPerMillion()public view returns(uint) {

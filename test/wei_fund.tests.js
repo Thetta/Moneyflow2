@@ -138,7 +138,6 @@ contract('WeiFund', (accounts) => {
 
 		var totalNeed = await fund.getTotalWeiNeeded(1e22);
 		var isNeed = await fund.isNeedsMoney();
-		console.log('totalNeed:', totalNeed.toNumber(), 0);
 		assert.equal(isNeed, false);
 	});
 
@@ -344,5 +343,4 @@ contract('WeiFund', (accounts) => {
 		assert.equal(0.7, (await web3.eth.getBalance(milestone3.address)).toNumber() / 1e18);
 		assert.equal(1.5, (await web3.eth.getBalance(stabFund.address)).toNumber() / 1e18);
 	});
-
 });

@@ -74,21 +74,29 @@ contract ExpenseBase {
 		}		
 	}
 
-	function processWeiFunds(Expense _e, uint _currentFlow, uint _value) internal view returns(Expense e) {
+	function processWeiExpenseFunds(Expense _e, uint _currentFlow, uint _value) internal view returns(Expense e) {
 		e = _e;
-		require(_value == getTotalNeeded(e, _currentFlow));
+		require(_value == getExpenseTotalNeeded(e, _currentFlow));
 		require(_currentFlow >= _value);
 		// all inputs divide _minAmount == INTEGER
 
 		e.totalReceived += uint128(_value);
 		e.balance += uint128(_value);
 
-		if((getTotalNeeded(_e, _value) == 0) || (_e.periodType == PeriodType.Periodic)) {
+		if((getExpenseTotalNeeded(_e, _value) == 0) || (_e.periodType == PeriodType.Periodic)) {
 			e.momentReceived = uint32(block.timestamp);
 		}
 	}
 
-	function getTotalNeeded(Expense _e, uint _currentFlow)internal view returns(uint need) {
+	function openExpense(Expense storage _e) internal {
+		_e.isOpen = true;
+	}
+
+	function closeExpense(Expense storage _e) internal {
+		_e.isOpen = false;
+	}	
+
+	function getExpenseTotalNeeded(Expense _e, uint _currentFlow) internal view returns(uint need) {
 		uint receiveTimeDelta = (block.timestamp - _e.momentReceived);
 		uint creationTimeDelta = (block.timestamp - _e.momentCreated);
 		uint periodLength = (_e.periodHours * 3600 * 1000);
@@ -164,15 +172,15 @@ contract ExpenseBase {
 		}
 	}
 
-	function getMinNeeded(Expense _e, uint _currentFlow) internal view returns(uint minNeed) {
+	function getExpenseMinNeeded(Expense _e, uint _currentFlow) internal view returns(uint minNeed) {
 		if( !((_e.minAmount == 0) && (_e.totalNeeded > 0)) 
 		 && !(_e.partsPerMillion > 0) ) {
-			minNeed = getTotalNeeded(_e, _currentFlow);
+			minNeed = getExpenseTotalNeeded(_e, _currentFlow);
 		}
 	}
 
-	function isNeedsMoney(Expense _e)internal view returns(bool isNeed) {
-		isNeed = (getTotalNeeded(_e, 1e30) > 0);
+	function isExpenseNeeds(Expense _e)internal view returns(bool isNeed) {
+		isNeed = (getExpenseTotalNeeded(_e, 1e30) > 0);
 	}	
 
 	// -------------------- INTERNAL FUNCTIONS

@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../../WeiTable.sol";
+import "../../ether/WeiTable.sol";
 
 
 // this contract is an owner of weiTable; so, no one else can modify scheme

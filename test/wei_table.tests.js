@@ -134,26 +134,26 @@ async function getBalances (i) {
 
 async function getSplitterParams (money, i, CURRENT_INPUT) {
 	var o = {};
-	o.AllOutpultsTotalNeed = await i.weiTable.getTotalWeiNeededAt(i.AllOutpultsId, CURRENT_INPUT * money);
-	o.AllOutpultsMinNeed = await i.weiTable.getMinWeiNeededAt(i.AllOutpultsId, CURRENT_INPUT * money);
+	o.AllOutpultsTotalNeed = await i.weiTable.getTotalNeededAt(i.AllOutpultsId, CURRENT_INPUT * money);
+	o.AllOutpultsMinNeed = await i.weiTable.getMinNeededAt(i.AllOutpultsId, CURRENT_INPUT * money);
 	o.AllOutpultsChildrenCount = await i.weiTable.getChildrenCountAt(i.AllOutpultsId);
-	o.SpendsTotalNeed = await i.weiTable.getTotalWeiNeededAt(i.SpendsId, CURRENT_INPUT * money);
-	o.SpendsMinNeed = await i.weiTable.getMinWeiNeededAt(i.SpendsId, CURRENT_INPUT * money);
+	o.SpendsTotalNeed = await i.weiTable.getTotalNeededAt(i.SpendsId, CURRENT_INPUT * money);
+	o.SpendsMinNeed = await i.weiTable.getMinNeededAt(i.SpendsId, CURRENT_INPUT * money);
 	o.SpendsChildrenCount = await i.weiTable.getChildrenCountAt(i.SpendsId);
-	o.SalariesTotalNeed = await i.weiTable.getTotalWeiNeededAt(i.SalariesId, CURRENT_INPUT * money);
-	o.SalariesMinNeed = await i.weiTable.getMinWeiNeededAt(i.SalariesId, CURRENT_INPUT * money);
+	o.SalariesTotalNeed = await i.weiTable.getTotalNeededAt(i.SalariesId, CURRENT_INPUT * money);
+	o.SalariesMinNeed = await i.weiTable.getMinNeededAt(i.SalariesId, CURRENT_INPUT * money);
 	o.SalariesChildrenCount = await i.weiTable.getChildrenCountAt(i.SalariesId);
-	o.OtherTotalNeed = await i.weiTable.getTotalWeiNeededAt(i.OtherId, CURRENT_INPUT * money);
-	o.OtherMinNeed = await i.weiTable.getMinWeiNeededAt(i.OtherId, CURRENT_INPUT * money);
+	o.OtherTotalNeed = await i.weiTable.getTotalNeededAt(i.OtherId, CURRENT_INPUT * money);
+	o.OtherMinNeed = await i.weiTable.getMinNeededAt(i.OtherId, CURRENT_INPUT * money);
 	o.OtherChildrenCount = await i.weiTable.getChildrenCountAt(i.OtherId);
-	o.TasksTotalNeed = await i.weiTable.getTotalWeiNeededAt(i.TasksId, CURRENT_INPUT * money);
-	o.TasksMinNeed = await i.weiTable.getMinWeiNeededAt(i.TasksId, CURRENT_INPUT * money);
+	o.TasksTotalNeed = await i.weiTable.getTotalNeededAt(i.TasksId, CURRENT_INPUT * money);
+	o.TasksMinNeed = await i.weiTable.getMinNeededAt(i.TasksId, CURRENT_INPUT * money);
 	o.TasksChildrenCount = await i.weiTable.getChildrenCountAt(i.TasksId);
-	o.BonusesTotalNeed = await i.weiTable.getTotalWeiNeededAt(i.BonusesId, CURRENT_INPUT * money);
-	o.BonusesMinNeed = await i.weiTable.getMinWeiNeededAt(i.BonusesId, CURRENT_INPUT * money);
+	o.BonusesTotalNeed = await i.weiTable.getTotalNeededAt(i.BonusesId, CURRENT_INPUT * money);
+	o.BonusesMinNeed = await i.weiTable.getMinNeededAt(i.BonusesId, CURRENT_INPUT * money);
 	o.BonusesChildrenCount = await i.weiTable.getChildrenCountAt(i.BonusesId);
-	o.RestTotalNeed = await i.weiTable.getTotalWeiNeededAt(i.RestId, CURRENT_INPUT * money);
-	o.RestMinNeed = await i.weiTable.getMinWeiNeededAt(i.RestId, CURRENT_INPUT * money);
+	o.RestTotalNeed = await i.weiTable.getTotalNeededAt(i.RestId, CURRENT_INPUT * money);
+	o.RestMinNeed = await i.weiTable.getMinNeededAt(i.RestId, CURRENT_INPUT * money);
 	o.RestChildrenCount = await i.weiTable.getChildrenCountAt(i.RestId);
 
 	return o;
@@ -216,25 +216,25 @@ contract('WeiTable tests', (accounts) => {
 	const employee2 = accounts[2];
 	const outsider = accounts[3];
 
-	// 0->•abs
+	// // 0->•abs
 	it('should process money with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
 		let weiTable = await WeiTable.new();
 		var output1 = await WeiAbsoluteExpense.new(money, money);
 		var output2 = await WeiAbsoluteExpense.new(2 * money, 2 * money);
 		var output3 = await WeiAbsoluteExpense.new(3 * money, 3 * money);
-		let topDownSplitterId =  getEId(await weiTable.addSplitter());
+		let splitterId =  getEId(await weiTable.addSplitter());
 		let AbsoluteExpense1Id = getEId(await weiTable.addAbsoluteExpense(1 * money, 1 * money, isPeriodic, isAccumulateDebt, periodHours));
 		let AbsoluteExpense2Id = getEId(await weiTable.addAbsoluteExpense(2 * money, 2 * money, isPeriodic, isAccumulateDebt, periodHours));
 		let AbsoluteExpense3Id = getEId(await weiTable.addAbsoluteExpense(3 * money, 3 * money, isPeriodic, isAccumulateDebt, periodHours));
 
 		// add 3 WeiAbsoluteExpense outputs to the splitter
-		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense1Id);
-		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense2Id);
-		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense3Id);
+		await weiTable.addChildAt(splitterId, AbsoluteExpense1Id);
+		await weiTable.addChildAt(splitterId, AbsoluteExpense2Id);
+		await weiTable.addChildAt(splitterId, AbsoluteExpense3Id);
 
-		var id1 = await weiTable.getChildIdAt(topDownSplitterId, 0);
-		var id2 = await weiTable.getChildIdAt(topDownSplitterId, 1);
-		var id3 = await weiTable.getChildIdAt(topDownSplitterId, 2);
+		var id1 = await weiTable.getChildIdAt(splitterId, 0);
+		var id2 = await weiTable.getChildIdAt(splitterId, 1);
+		var id3 = await weiTable.getChildIdAt(splitterId, 2);
 
 		assert.equal(id1, AbsoluteExpense1Id);
 		assert.equal(id2, AbsoluteExpense2Id);
@@ -259,9 +259,9 @@ contract('WeiTable tests', (accounts) => {
 		var absoluteExpense3Balance = await weiTable.balanceAt(AbsoluteExpense3Id);
 		assert.equal(absoluteExpense3Balance.toNumber(), 3 * money, 'resource point received money from splitter');
 
-		assert.equal((await weiTable.getTotalWeiNeededAt(AbsoluteExpense1Id, 6 * money)).toNumber(), 0);
-		assert.equal((await weiTable.getTotalWeiNeededAt(AbsoluteExpense2Id, 6 * money)).toNumber(), 0);
-		assert.equal((await weiTable.getTotalWeiNeededAt(AbsoluteExpense3Id, 6 * money)).toNumber(), 0);	
+		assert.equal((await weiTable.getTotalNeededAt(AbsoluteExpense1Id, 6 * money)).toNumber(), 0);
+		assert.equal((await weiTable.getTotalNeededAt(AbsoluteExpense2Id, 6 * money)).toNumber(), 0);
+		assert.equal((await weiTable.getTotalNeededAt(AbsoluteExpense3Id, 6 * money)).toNumber(), 0);	
 
 		var totalNeed = await weiTable.getTotalWeiNeeded(6 * money);
 		assert.equal(totalNeed.toNumber(), 0 * money);
@@ -499,15 +499,15 @@ contract('WeiTable tests', (accounts) => {
 	it('should process money when opened and not process when closed with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
 		let weiTable = await WeiTable.new();
 
-		let topDownSplitterId = getEId(await weiTable.addSplitter());
+		let splitterId = getEId(await weiTable.addSplitter());
 		let AbsoluteExpense1Id = getEId(await weiTable.addAbsoluteExpense(money, money, isPeriodic, isAccumulateDebt, periodHours));
 		let AbsoluteExpense2Id = getEId(await weiTable.addAbsoluteExpense(2 * money, 2 * money, isPeriodic, isAccumulateDebt, periodHours));
 		let AbsoluteExpense3Id = getEId(await weiTable.addAbsoluteExpense(3 * money, 3 * money, isPeriodic, isAccumulateDebt, periodHours));
 
 		// add 3 WeiAbsoluteExpense outputs to the splitter
-		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense1Id);
-		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense2Id);
-		await weiTable.addChildAt(topDownSplitterId, AbsoluteExpense3Id);
+		await weiTable.addChildAt(splitterId, AbsoluteExpense1Id);
+		await weiTable.addChildAt(splitterId, AbsoluteExpense2Id);
+		await weiTable.addChildAt(splitterId, AbsoluteExpense3Id);
 
 		var totalNeed = await weiTable.getTotalWeiNeeded(6 * money);
 		assert.equal(totalNeed, 6 * money);

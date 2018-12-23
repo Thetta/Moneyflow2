@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../../WeiTable.sol";
+import "../../ether/WeiTable.sol";
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
