@@ -14,7 +14,7 @@ contract DefaultMoneyflowSchemeWithUnpackers is DefaultMoneyflowScheme {
 	}
 
 	function addNewTaskGeneric(bytes32[] _params) view public {
-		IWeiReceiver _iwr = IWeiReceiver(address(_params[0]));
+		IReceiver _iwr = IReceiver(address(_params[0]));
 		addNewTask(_iwr);
 	}
 

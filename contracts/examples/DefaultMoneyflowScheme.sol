@@ -74,7 +74,7 @@ contract DefaultMoneyflowScheme {
 		// rest.addChild(dividendsFund);
 	}
 
-	function getRootReceiver() public view returns(IWeiReceiver) {
+	function getRootReceiver() public view returns(IReceiver) {
 		return root;
 	}
 
@@ -84,7 +84,7 @@ contract DefaultMoneyflowScheme {
 
 ////////////////////////////////////////////////////////////////
 	// use MoneyflowAuto to add new task with voting! 
-	function addNewTask(IWeiReceiver _wr) view public {
+	function addNewTask(IReceiver _wr) view public {
 		// 1 - add new task immediately
 		//tasks.addChild(_wr);
 	}

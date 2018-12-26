@@ -1,6 +1,6 @@
 pragma solidity ^0.4.23;
 
-import "./interfaces/IWeiReceiver.sol";
+import "./interfaces/IReceiver.sol";
 
 
 /**
@@ -11,13 +11,13 @@ import "./interfaces/IWeiReceiver.sol";
 contract FallbackToWeiReceiver {
 	address output = 0x0;
 
-	// _output should be IWeiReceiver
+	// _output should be IReceiver
 	constructor(address _output) public {
 		output = _output;
 	}
 
 	function()public payable {
-		IWeiReceiver iwr = IWeiReceiver(output);
+		IReceiver iwr = IReceiver(output);
 		iwr.processFunds.value(msg.value)(msg.value);
 	}
 }

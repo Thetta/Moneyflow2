@@ -4,6 +4,6 @@ import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
-contract Erc20Fund {
+contract Erc20Table {
 
 }

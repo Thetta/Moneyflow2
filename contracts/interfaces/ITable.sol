@@ -1,13 +1,12 @@
 pragma solidity ^0.4.24;
 
 import "./IReceiver.sol";
-import "./IWeiReceiver.sol";
+import "./IReceiver.sol";
 
 
 contract ITable {
 	function getPartsPerMillionAt(uint _eId) public view returns(uint ppm);
 	function isNeedsAt(uint _eId) public view returns(bool);
-	function processFundsAt(uint _eId, uint _currentFlow, uint _amount) public;		
 	function getMinNeededAt(uint _eId, uint _currentFlow) public view returns(uint);
 	function getTotalNeededAt(uint _eId, uint _currentFlow) public view returns(uint);
 	function balanceAt(uint _eId) public view returns(uint);

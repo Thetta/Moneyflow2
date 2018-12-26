@@ -1,35 +1,73 @@
 pragma solidity ^0.4.23;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "./interfaces/IWeiReceiver.sol";
+import "./interfaces/IReceiver.sol";
 import "./interfaces/ITable.sol";
 
-import "./ExpenseBase.sol";
-import "./SplitterBase.sol";
+import "./ExpenseLib.sol";
+import "./SplitterLib.sol";
 
 
 /**
  * @title TableBase 
  * @dev contract for WeiTable and ERC20Table
 */
-contract TableBase is ExpenseBase, SplitterBase, Ownable {
+contract TableBase is ExpenseLib, SplitterLib, Ownable {
 	uint public nodesCount = 0;
 
 	event NodeAdded(uint _eId, IReceiver.Type _eType);
 	event FundNeed(uint _eId, uint _inputWei, uint need);
-	event FundStart(uint _eId, uint _totalWeiNeeded);
+	event FundStart(uint _eId, uint _totalNeeded);
 
 	event NodeConnected(uint _splitterId, uint _childId);
 	event NodeFlushTo(uint _eId, address _to, uint _balance);
 	event SplitterNeeded(uint _eId, uint _needed, uint _total, uint _currentFlow);
  
 	mapping(uint=>IReceiver.Type) nodesType;
-	mapping(uint=>ExpenseBase.Expense) expenses;
-	mapping(uint=>SplitterBase.Splitter) splitters;
+	mapping(uint=>ExpenseLib.Expense) expenses;
+	mapping(uint=>SplitterLib.Splitter) splitters;
 
 	modifier isCorrectId(uint _eId) {
 		require(_eId <= (nodesCount - 1));	
 		_;
+	}
+
+	function getReceiverType() public view returns(IReceiver.Type) {
+		return IReceiver.Type.Table;
+	}
+
+	// -------------------- IRECEIVER FUNCTIONS --------------------
+	function isNeeds() public view returns(bool) {
+		return isNeedsAt(0);
+	}
+
+	function getPartsPerMillion() public view returns(uint) {
+		return getPartsPerMillionAt(0);
+	}
+
+	function processFunds(uint _currentFlow) public payable {
+		return _processFundsAt(0, _currentFlow, msg.value);
+	}
+
+	function _processFundsAt(uint _eId, uint _currentFlow, uint _value) internal {
+		if(isExpenseAt(_eId)) {
+			expenses[_eId] = _processFunds(expenses[_eId], _currentFlow, _value);
+		}else {
+			_processFunds(splitters[_eId], _currentFlow, _value);
+		}
+	}
+
+	function getMinNeeded(uint _currentFlow) public view returns(uint) {
+		return getMinNeededAt(0, _currentFlow);
+	}
+
+	function getTotalNeeded(uint _currentFlow) public view returns(uint) {
+		return getTotalNeededAt(0, _currentFlow);
+	}
+
+	function _processFlushToAt(uint _eId, address _to) internal view returns(Expense e) {
+		emit NodeFlushTo(_eId, _to, expenses[_eId].balance);
+		expenses[_eId].balance = 0;
 	}
 
 	function getLastNodeId() public returns(uint) {
@@ -46,25 +84,25 @@ contract TableBase is ExpenseBase, SplitterBase, Ownable {
 
 	function isNeedsAt(uint _eId) public view isCorrectId(_eId) returns(bool) {
 		if(isExpenseAt(_eId)) {
-			return isExpenseNeeds(expenses[_eId]);
+			return _isNeeds(expenses[_eId]);
 		}else {
-			return isSplitterNeeds(splitters[_eId]);
+			return _isNeeds(splitters[_eId]);
 		}
 	}
 
 	function getMinNeededAt(uint _eId, uint _currentFlow) public view isCorrectId(_eId) returns(uint) {
 		if(isExpenseAt(_eId)) {
-			return getExpenseMinNeeded(expenses[_eId], _currentFlow);
+			return _getMinNeeded(expenses[_eId], _currentFlow);
 		}else {
-			return getSplitterMinNeeded(splitters[_eId], _currentFlow);
+			return _getMinNeeded(splitters[_eId], _currentFlow);
 		}
 	}
 
 	function getTotalNeededAt(uint _eId, uint _currentFlow) public view isCorrectId(_eId) returns(uint) {
 		if(isExpenseAt(_eId)) {
-			return getExpenseTotalNeeded(expenses[_eId], _currentFlow);
+			return _getTotalNeeded(expenses[_eId], _currentFlow);
 		} else {
-			return getSplitterTotalNeeded(splitters[_eId], _currentFlow);
+			return _getTotalNeeded(splitters[_eId], _currentFlow);
 		}
 	}
 
@@ -73,22 +111,22 @@ contract TableBase is ExpenseBase, SplitterBase, Ownable {
 	}
 
 	// -------------------- public SCHEME FUNCTIONS -------------------- 
-	function addAbsoluteExpense(uint128 _totalWeiNeeded, uint128 _minWeiAmount, bool _isPeriodic, bool _isSlidingAmount, uint32 _periodHours) public onlyOwner {
+	function addAbsoluteExpense(uint128 _totalNeeded, uint128 _minWeiAmount, bool _isPeriodic, bool _isSlidingAmount, uint32 _periodHours) public onlyOwner {
 		emit NodeAdded(nodesCount, IReceiver.Type.Absolute);	
-		expenses[nodesCount] = constructExpense(_totalWeiNeeded, _minWeiAmount, 0, _periodHours, _isSlidingAmount, _isPeriodic);
+		expenses[nodesCount] = _constructExpense(_totalNeeded, _minWeiAmount, 0, _periodHours, _isSlidingAmount, _isPeriodic);
 		nodesType[nodesCount] = IReceiver.Type.Absolute;
 		nodesCount += 1;	
 	}
 
 	function addRelativeExpense(uint32 _partsPerMillion, bool _isPeriodic, bool _isSlidingAmount, uint32 _periodHours) public onlyOwner {
 		emit NodeAdded(nodesCount, IReceiver.Type.Relative);	
-		expenses[nodesCount] = constructExpense(0, 0, _partsPerMillion, _periodHours, _isSlidingAmount, _isPeriodic);
+		expenses[nodesCount] = _constructExpense(0, 0, _partsPerMillion, _periodHours, _isSlidingAmount, _isPeriodic);
 		nodesType[nodesCount] = IReceiver.Type.Relative;
 		nodesCount += 1;		
 	}
 
 	function addSplitter() public onlyOwner {
-		splitters[nodesCount] = constructSplitter(true);
+		splitters[nodesCount] = _constructSplitter(true);
 		emit NodeAdded(nodesCount, IReceiver.Type.Splitter);
 		nodesType[nodesCount] = IReceiver.Type.Splitter;	
 		nodesCount += 1;
@@ -131,17 +169,17 @@ contract TableBase is ExpenseBase, SplitterBase, Ownable {
 
 	function openAt(uint _eId) public onlyOwner isCorrectId(_eId) {
 		if(isExpenseAt(_eId)) {
-			openExpense(expenses[_eId]);
+			_open(expenses[_eId]);
 		}else {
-			openSplitter(splitters[_eId]);
+			_open(splitters[_eId]);
 		}
 	}
 
 	function closeAt(uint _eId) public onlyOwner isCorrectId(_eId) {		
 		if(isExpenseAt(_eId)) {
-			closeExpense(expenses[_eId]);
+			_close(expenses[_eId]);
 		}else {
-			closeSplitter(splitters[_eId]);
+			_close(splitters[_eId]);
 		}
 	}
 
@@ -162,6 +200,5 @@ contract TableBase is ExpenseBase, SplitterBase, Ownable {
 		require(isSplitterAt(_eId));
 		require(splitters[_eId].outputs.length > _index);
 		return splitters[_eId].outputs[_index];
-	}	
-
+	}
 }
