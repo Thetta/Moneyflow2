@@ -1,8 +1,8 @@
 pragma solidity ^0.4.23;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "./interfaces/IReceiver.sol";
-import "./interfaces/ITable.sol";
+import "../interfaces/IReceiver.sol";
+import "../interfaces/ITable.sol";
 
 
 /**

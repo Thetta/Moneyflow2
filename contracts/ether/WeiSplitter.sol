@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../SplitterBase.sol";
+import "../bases/SplitterBase.sol";
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 

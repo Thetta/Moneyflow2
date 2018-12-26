@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
-import "../TableBase.sol";
-import "../ExpenseBase.sol";
-import "../SplitterBase.sol";
+import "../bases/TableBase.sol";
+import "../bases/ExpenseBase.sol";
+import "../bases/SplitterBase.sol";
 
 import "../interfaces/IReceiver.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";

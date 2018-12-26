@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../ExpenseBase.sol";
+import "../bases/ExpenseBase.sol";
 
 import "../interfaces/IDestination.sol";
 import "../interfaces/IReceiver.sol";

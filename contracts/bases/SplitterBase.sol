@@ -1,11 +1,11 @@
 pragma solidity ^0.4.24;
 
-import "./SplitterLib.sol";
+import "../libs/SplitterLib.sol";
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
-import "./interfaces/ISplitter.sol";
-import "./interfaces/IReceiver.sol";
+import "../interfaces/ISplitter.sol";
+import "../interfaces/IReceiver.sol";
 
 
 /**

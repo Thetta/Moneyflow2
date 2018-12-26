@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
-import "./ExpenseLib.sol";
+import "../libs/ExpenseLib.sol";
 
-import "./interfaces/IDestination.sol";
-import "./interfaces/IReceiver.sol";
+import "../interfaces/IDestination.sol";
+import "../interfaces/IReceiver.sol";
 
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
