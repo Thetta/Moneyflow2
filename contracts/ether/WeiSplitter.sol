@@ -5,6 +5,7 @@ import "../bases/SplitterBase.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 import "../interfaces/ISplitter.sol";
+import "../interfaces/IWeiReceiver.sol";
 import "../interfaces/IReceiver.sol";
 
 
@@ -13,12 +14,16 @@ import "../interfaces/IReceiver.sol";
  * @dev Will split money from top to down (order matters!). It is possible for some children to not receive money 
  * if they have ended. 
 */
-contract WeiSplitter is SplitterBase {
+contract WeiSplitter is IWeiReceiver, SplitterBase {
 	constructor() public {
 		splitter = _constructSplitter(false);
 	}
 
 	function _elementProcessing(address _target, uint _flow, uint _need) internal {
-		IReceiver(_target).processFunds.value(_need)(_flow); 
+		IWeiReceiver(_target).processFunds.value(_need)(_flow); 
 	}	
+
+	function processFunds(uint _currentFlow) public payable {
+		_processAmount(splitter, _currentFlow, msg.value);
+	}
 }

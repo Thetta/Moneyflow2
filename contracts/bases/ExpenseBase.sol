@@ -1,5 +1,5 @@
 pragma solidity ^0.4.24;
-
+pragma experimental ABIEncoderV2;
 import "../libs/ExpenseLib.sol";
 
 import "../interfaces/IDestination.sol";
@@ -14,7 +14,7 @@ import "zeppelin-solidity/contracts/ownership/Ownable.sol";
  * @dev Something that needs money (task, salary, bonus, etc)
  * Should be used in the Moneyflow so will automatically receive Wei.
 */
-contract ExpenseBase is ExpenseLib, IReceiver, IDestination, Ownable {
+contract ExpenseBase is ExpenseLib, IReceiver, Ownable {
 	Expense public expense;
 	
 	function getReceiverType() public view returns(Type) {
@@ -25,20 +25,18 @@ contract ExpenseBase is ExpenseLib, IReceiver, IDestination, Ownable {
 		}
 	}
 
-	function processFunds(uint _currentFlow) public payable {
-		emit ExpenseProcessFunds(msg.sender, msg.value, _currentFlow);
-		expense = _processFunds(expense, _currentFlow, msg.value);
+	function getExpenseParams() public view returns(uint128 totalNeeded, uint128 minAmount, uint32 partsPerMillion, uint32 periodHours, uint32 momentReceived, uint128 balance, uint128 totalReceived, uint32 momentCreated) {
+		totalNeeded = expense.totalNeeded;
+		minAmount = expense.minAmount;
+		partsPerMillion = expense.partsPerMillion;
+		periodHours = expense.periodHours;
+		momentReceived = expense.momentReceived;
+		balance = expense.balance;
+		totalReceived = expense.totalReceived;
+		momentCreated = expense.momentCreated;
 	}
 
-	function getIsMoneyReceived() public view returns(bool) {
-		return expense.totalReceived > 0;
-	}
-
-	function getNeededWei() public view returns(uint) {
-		return expense.totalNeeded;
-	}
-
-	function getTotalNeeded(uint _currentFlow)public view returns(uint) {
+	function getTotalNeeded(uint _currentFlow) public view returns(uint) {
 		return _getTotalNeeded(expense, _currentFlow);
 	}
 
@@ -46,28 +44,8 @@ contract ExpenseBase is ExpenseLib, IReceiver, IDestination, Ownable {
 		return _getMinNeeded(expense, _currentFlow);
 	}
 
-	function getMomentReceived()public view returns(uint) {
-		return expense.momentReceived;
-	}
-
-	function isNeeds()public view returns(bool) {
+	function isNeeds() public view returns(bool) {
 		return _isNeeds(expense);
-	}
-
-	function getPartsPerMillion()public view returns(uint) {
-		return expense.partsPerMillion;
-	}
-
-	function flush()public onlyOwner {
-		emit ExpenseFlush(owner, address(this).balance);
-		owner.transfer(address(this).balance);
-		expense.balance = 0;
-	}
-
-	function flushTo(address _to) public onlyOwner {
-		emit ExpenseFlush(_to, address(this).balance);
-		_to.transfer(address(this).balance);
-		expense.balance = 0;
 	}
 
 	function setNeededWei(uint _totalNeeded) public onlyOwner {
@@ -81,5 +59,4 @@ contract ExpenseBase is ExpenseLib, IReceiver, IDestination, Ownable {
 	}
 
 	function() public {}
-
 }

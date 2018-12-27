@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../interfaces/IReceiver.sol";
@@ -127,7 +127,7 @@ contract SplitterLib {
 		}
 	}
 
-	function _processFunds(Splitter _s, uint _currentFlow, uint _value) internal {
+	function _processAmount(Splitter _s, uint _currentFlow, uint _value) internal {
 		require(_s.isOpen);
 		require(_isNeeds(_s));
 		FlowBuffer memory b = FlowBuffer(_currentFlow, false, 0, 0, 0, 0);

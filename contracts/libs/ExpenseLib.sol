@@ -75,7 +75,8 @@ contract ExpenseLib {
 		}		
 	}
 
-	function _processFunds(Expense _e, uint _currentFlow, uint _value) internal view returns(Expense e) {
+	function _processAmount(Expense _e, uint _currentFlow, uint _value) internal view returns(Expense e) {
+		emit ExpenseProcessFunds(msg.sender, _value, _currentFlow);
 		e = _e;
 		require(_value == _getTotalNeeded(e, _currentFlow));
 		require(_currentFlow >= _value);
@@ -84,7 +85,7 @@ contract ExpenseLib {
 		e.totalReceived += uint128(_value);
 		e.balance += uint128(_value);
 
-		if((_getTotalNeeded(_e, _value) == 0) || (_e.periodType == PeriodType.Periodic)) {
+		if((_getTotalNeeded(_e, _value) == 0) || (_e.periodType == PeriodType.Periodic) || (_e.periodType == PeriodType.PeriodicSliding)) {
 			e.momentReceived = uint32(block.timestamp);
 		}
 	}
@@ -208,5 +209,11 @@ contract ExpenseLib {
 		} else {
 			return 0;
 		}
+	}
+
+	function _processFlushTo(Expense _e, address _to) internal view returns(Expense e)  {
+		e = _e;
+		emit ExpenseFlush(_to, e.balance);
+		e.balance = 0;
 	}
 }

@@ -213,7 +213,7 @@ async function splitterBalancesAsserts (i, money, allOutpultsBalance, spendsBala
 	assert.equal(i.RestBalance.toNumber() / money, restBalance, `Rest balance should be ${restBalance} money`);
 }
 
-contract('Moneyflow', (accounts) => {
+contract('WeiExpense', (accounts) => {
 	var token;
 	var store;
 	var daoBase;

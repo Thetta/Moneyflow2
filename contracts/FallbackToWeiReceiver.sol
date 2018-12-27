@@ -1,6 +1,6 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
-import "./interfaces/IReceiver.sol";
+import "./interfaces/IWeiReceiver.sol";
 
 
 /**
@@ -16,8 +16,8 @@ contract FallbackToWeiReceiver {
 		output = _output;
 	}
 
-	function()public payable {
-		IReceiver iwr = IReceiver(output);
+	function() public payable {
+		IWeiReceiver iwr = IWeiReceiver(output);
 		iwr.processFunds.value(msg.value)(msg.value);
 	}
 }

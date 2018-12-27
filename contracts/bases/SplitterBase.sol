@@ -21,16 +21,12 @@ contract SplitterBase is SplitterLib, IReceiver, ISplitter, Ownable {
 		return _getMinNeeded(splitter, _currentFlow);
 	}
 
-	function getTotalNeeded(uint _currentFlow)public view returns(uint) {
+	function getTotalNeeded(uint _currentFlow) public view returns(uint) {
 		return _getTotalNeeded(splitter, _currentFlow);
 	}
 
 	function isNeeds() public view returns(bool) {
 		return _isNeeds(splitter);
-	}
-
-	function processFunds(uint _currentFlow) public payable {
-		_processFunds(splitter, _currentFlow, msg.value);
 	}
 
 	function open() public onlyOwner {

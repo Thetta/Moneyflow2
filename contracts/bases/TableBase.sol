@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../interfaces/IReceiver.sol";
@@ -45,15 +45,11 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 		return getPartsPerMillionAt(0);
 	}
 
-	function processFunds(uint _currentFlow) public payable {
-		return _processFundsAt(0, _currentFlow, msg.value);
-	}
-
-	function _processFundsAt(uint _eId, uint _currentFlow, uint _value) internal {
+	function _processAmountAt(uint _eId, uint _currentFlow, uint _value) internal {
 		if(isExpenseAt(_eId)) {
-			expenses[_eId] = _processFunds(expenses[_eId], _currentFlow, _value);
+			expenses[_eId] = _processAmount(expenses[_eId], _currentFlow, _value);
 		}else {
-			_processFunds(splitters[_eId], _currentFlow, _value);
+			_processAmount(splitters[_eId], _currentFlow, _value);
 		}
 	}
 
@@ -201,4 +197,10 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 		require(splitters[_eId].outputs.length > _index);
 		return splitters[_eId].outputs[_index];
 	}
+
+	function _tableProcessing(address _target, uint _eId, uint _flow, uint _need) internal {
+		_processAmountAt(_eId, _flow, _need);
+	}
+
+	function() public {}	
 }
