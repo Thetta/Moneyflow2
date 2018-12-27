@@ -16,14 +16,7 @@ import "zeppelin-solidity/contracts/ownership/Ownable.sol";
  * Should be used in the Moneyflow so will automatically receive Wei.
 */
 contract WeiExpense is IWeiReceiver, IDestination, ExpenseBase {
-		constructor(
-		uint _totalNeeded, 
-		uint _minWeiAmount, 
-		uint _partsPerMillion, 
-		uint _periodHours, 
-		bool _isSlidingAmount, 
-		bool _isPeriodic) public 
-	{
+	constructor(uint _totalNeeded, uint _minWeiAmount, uint _partsPerMillion, uint _periodHours, bool _isSlidingAmount, bool _isPeriodic) public {
 		expense = _constructExpense(uint128(_totalNeeded), uint128(_minWeiAmount), uint32(_partsPerMillion), uint32(_periodHours), _isSlidingAmount, _isPeriodic);
 	}
 

@@ -211,7 +211,7 @@ contract ExpenseLib {
 		}
 	}
 
-	function _processFlushTo(Expense _e, address _to) internal view returns(Expense e)  {
+	function _processFlushTo(Expense _e, address _to) internal view returns(Expense e) {
 		e = _e;
 		emit ExpenseFlush(_to, e.balance);
 		e.balance = 0;
