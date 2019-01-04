@@ -6,17 +6,11 @@ var WeiRelativeExpenseWithPeriod = artifacts.require('./WeiRelativeExpenseWithPe
 
 var DefaultMoneyflowSchemeWithUnpackers = artifacts.require('./DefaultMoneyflowSchemeWithUnpackers');
 
-function KECCAK256 (x) {
-	return web3.sha3(x);
-}
-
 contract('Scheme', (accounts) => {
 	let token;
-	let store;
-	let daoBase;
 	let moneyflowScheme;
 
-	let money = web3.toWei(0.001, 'ether');
+	let money = 1e14;
 
 	const creator = accounts[0];
 	const employee1 = accounts[1];
