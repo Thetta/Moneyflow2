@@ -40,7 +40,7 @@ contract('ERC20Table tests', (accounts) => {
 	});
 
 	// 0->•abs
-	it('1: should process with ERC20Splitter + 3 ERC20AbsoluteExpense', async () => {
+	it('Should process with ERC20Splitter + 3 ERC20AbsoluteExpense', async () => {
 		let table = await ERC20Table.new(token.address);
 		var output1 = await ERC20AbsoluteExpense.new(token.address,multiplier, multiplier);
 		var output2 = await ERC20AbsoluteExpense.new(token.address,2 * multiplier, 2 * multiplier);
@@ -65,7 +65,7 @@ contract('ERC20Table tests', (accounts) => {
 
 		var totalNeed = await table.getTotalNeeded(6 * multiplier);
 		assert.equal(totalNeed, 6 * multiplier);
-		var minNeed = await table.getMinNeeded(0);/*minNeedFix*/
+		var minNeed = await table.getMinNeeded(6 * multiplier);
 		assert.equal(minNeed, 6 * multiplier);
 		var need1 = await table.isNeeds();
 		assert.equal(need1, true);
@@ -89,7 +89,7 @@ contract('ERC20Table tests', (accounts) => {
 
 		var totalNeed = await table.getTotalNeeded(6 * multiplier);
 		assert.equal(totalNeed.toNumber(), 0 * multiplier);
-		var minNeed = await table.getMinNeeded(0);/*minNeedFix*/
+		var minNeed = await table.getMinNeeded(6 * multiplier);
 		assert.equal(minNeed.toNumber(), 0 * multiplier);
 
 		var need2 = await table.isNeeds();
@@ -121,7 +121,7 @@ contract('ERC20Table tests', (accounts) => {
 		var need2 = await table.isNeeds();
 	});
 
-	it('2: should process with ERC20Splitter + 3 ERC20AbsoluteExpense', async () => {
+	it('Should process with ERC20Splitter + 3 ERC20AbsoluteExpense', async () => {
 		let table = await ERC20Table.new(token.address);
 		
 		let unsortedSplitterId = getNodeId(await table.addSplitter());
@@ -136,7 +136,7 @@ contract('ERC20Table tests', (accounts) => {
 		// now send some to the revenue endpoint
 		let totalNeed = await table.getTotalNeeded(6 * multiplier);
 		assert.equal(totalNeed, 6 * multiplier);
-		let minNeed = await table.getMinNeeded(0);/*minNeedFix*/
+		let minNeed = await table.getMinNeeded(6 * multiplier);
 		assert.equal(minNeed, 6 * multiplier);
 
 		await token.approve(table.address, 6 * multiplier, {from:creator});
@@ -152,7 +152,7 @@ contract('ERC20Table tests', (accounts) => {
 		assert.equal(absoluteExpense3Balance.toNumber(), 3 * multiplier, 'resource point received from splitter');
 	});
 
-	it('3: should process with a scheme just like in the paper: 75/25 others, send MORE than minNeed; ', async () => {
+	it('Should process with a scheme just like in the paper: 75/25 others, send MORE than minNeed; ', async () => {
 		var params = {token:token.address, CURRENT_INPUT:30900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -169,7 +169,7 @@ contract('ERC20Table tests', (accounts) => {
 		await balancesAssertsTable(balances, params);
 	});
 
-	it('4: should process with a scheme just like in the paper: 75/25 others, send EQUAL to minNeed', async () => {
+	it('Should process with a scheme just like in the paper: 75/25 others, send EQUAL to minNeed', async () => {
 		var params = {token:token.address, CURRENT_INPUT:5900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -186,7 +186,7 @@ contract('ERC20Table tests', (accounts) => {
 		await balancesAssertsTable(balances, params);
 	});
 
-	it('5: should not process multiplier: send LESS than minNeed', async () => {
+	it('Should not process multiplier: send LESS than minNeed', async () => {
 		var params = {token:token.address, CURRENT_INPUT:30900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -204,7 +204,7 @@ contract('ERC20Table tests', (accounts) => {
 		await struct.table.processTokens(params.CURRENT_INPUT * multiplier / 100, params.CURRENT_INPUT * multiplier, {from: creator, gasPrice: 0 }).should.be.rejectedWith('revert');
 	});
 
-	it('6: should process with a scheme just like in the paper: 10/15 others, send MORE than minNeed; ', async () => {
+	it('Should process with a scheme just like in the paper: 10/15 others, send MORE than minNeed; ', async () => {
 		var params = {token:token.address, CURRENT_INPUT:20900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -221,7 +221,7 @@ contract('ERC20Table tests', (accounts) => {
 		await balancesAssertsTable(balances, params);
 	});
 
-	it('7: should process with a scheme just like in the paper: 10/15 others, send EQUAL to minNeed; ', async () => {
+	it('Should process with a scheme just like in the paper: 10/15 others, send EQUAL to minNeed; ', async () => {
 		var params = {token:token.address, CURRENT_INPUT:5900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -238,7 +238,7 @@ contract('ERC20Table tests', (accounts) => {
 		await balancesAssertsTable(balances, params);
 	});
 
-	it('8: should not process multiplier: send LESS than minNeed; ', async () => {
+	it('Should not process multiplier: send LESS than minNeed; ', async () => {
 		var params = {token:token.address, CURRENT_INPUT:30900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -256,7 +256,7 @@ contract('ERC20Table tests', (accounts) => {
 		await struct.table.processTokens(params.CURRENT_INPUT * multiplier / 100, params.CURRENT_INPUT * multiplier, {from: creator, gasPrice: 0 }).should.be.rejectedWith('revert');
 	});
 
-	it('9: should process when opened and not process when closed with ERC20Splitter + 3 ERC20AbsoluteExpense', async () => {
+	it('Should process when opened and not process when closed with ERC20Splitter + 3 ERC20AbsoluteExpense', async () => {
 		let table = await ERC20Table.new(token.address);
 
 		let splitterId = getNodeId(await table.addSplitter());
@@ -271,7 +271,7 @@ contract('ERC20Table tests', (accounts) => {
 
 		var totalNeed = await table.getTotalNeeded(6 * multiplier);
 		assert.equal(totalNeed, 6 * multiplier);
-		var minNeed = await table.getMinNeeded(0);/*minNeedFix*/
+		var minNeed = await table.getMinNeeded(6 * multiplier);
 		assert.equal(minNeed, 6 * multiplier);
 
 		var isOpen1At = await table.isOpenAt(AbsoluteExpense1Id);
@@ -285,14 +285,14 @@ contract('ERC20Table tests', (accounts) => {
 
 		var totalNeed = await table.getTotalNeeded(6 * multiplier);
 		assert.equal(totalNeed.toNumber(), 3 * multiplier);
-		var minNeed = await table.getMinNeeded(0);/*minNeedFix*/
+		var minNeed = await table.getMinNeeded(6 * multiplier);
 		assert.equal(minNeed, 3 * multiplier);
 
 		await table.closeAt(AbsoluteExpense1Id);
 
 		var totalNeed = await table.getTotalNeeded(6 * multiplier);
 		assert.equal(totalNeed, 2 * multiplier);
-		var minNeed = await table.getMinNeeded(0);/*minNeedFix*/
+		var minNeed = await table.getMinNeeded(6 * multiplier);
 		assert.equal(minNeed, 2 * multiplier);
 
 		var isOpen1At = await table.isOpenAt(AbsoluteExpense1Id);

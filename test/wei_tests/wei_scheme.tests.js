@@ -21,7 +21,7 @@ contract('Scheme', (accounts) => {
 		await moneyflowScheme.deployRoot({ from: creator, gasPrice: 1 });
 	});
 
-	it('should set everything correctly', async () => {
+	it('Should set everything correctly', async () => {
 		// TODO: test DefaultMoneyflowScheme
 	});
 });

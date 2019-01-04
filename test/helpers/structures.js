@@ -372,9 +372,7 @@ async function balancesAssertsTable(i, p) {
 
 module.exports = {
 	checkNeededArrs,
-	checkMinNeedCycle,
-	checkTotalNeedCycle,
-	checkIsNeedCycle,
+	checkParamsCycle,
 	createStructure,
 	totalAndMinNeedsAsserts,
 	getBalances,

@@ -38,7 +38,7 @@ contract('ERC20Expense', (accounts) => {
 		}		
 	});
 
-	it('1: Should revert when trying to add rel to abs splitter', async () => {
+	it('Should revert when trying to add rel to abs splitter', async () => {
 		var abs = await ERC20AbsoluteExpense.new(token.address,1e15, 1e15);
 		var splitter = await ERC20Splitter.new(token.address);
 		var rel = await ERC20RelativeExpense.new(token.address,500000);
@@ -46,7 +46,7 @@ contract('ERC20Expense', (accounts) => {
 		await splitter.addChild(rel.address).should.be.rejectedWith('revert');
 	});
 
-	it('2: should process amount with ERC20AbsoluteExpenseWithPeriod, then 25 hours, then amount needs again', async () => {
+	it('Should process amount with ERC20AbsoluteExpenseWithPeriod, then 25 hours, then amount needs again', async () => {
 		var timePeriod = 25;
 		var callParams = { from: creator, gasPrice: 0 };
 		var struct = {};
@@ -86,7 +86,7 @@ contract('ERC20Expense', (accounts) => {
 		assert.equal(needsEmployee3, false, 'Dont need amount, because he got it');
 	});
 
-	it('3: should process amount with ERC20AbsoluteExpenseWithPeriod, then 75 hours, then amount needs again x3', async () => {
+	it('Should process amount with ERC20AbsoluteExpenseWithPeriod, then 75 hours, then amount needs again x3', async () => {
 		var timePeriod = 25;
 		var callParams = { from: creator, gasPrice: 0 };
 		var struct = {};
@@ -141,7 +141,7 @@ contract('ERC20Expense', (accounts) => {
 		assert.equal(needsEmployee3, false, 'Dont need amount, because he got it');
 	});
 
-	it('4: Splitter should access amount then close then not accept', async () => {
+	it('Splitter should access amount then close then not accept', async () => {
 		var callParams = { from: creator, gasPrice: 0 };
 		var balance0 = await token.balanceOf(creator);
 
@@ -152,15 +152,15 @@ contract('ERC20Expense', (accounts) => {
 
 		var need1 = await Splitter.isNeeds({ from: creator });
 		var totalNeed1 = await Splitter.getTotalNeeded(1000*multiplier);
-		assert.equal(need1, true, 'should need amount');
-		assert.equal(totalNeed1.toNumber(), 1000*multiplier, 'should be 10% of 1000 amount');
+		assert.equal(need1, true, 'Should need amount');
+		assert.equal(totalNeed1.toNumber(), 1000*multiplier, 'Should be 10% of 1000 amount');
 
 		await Splitter.close(callParams);
 
 		var need3 = await Splitter.isNeeds({ from: creator });
 		var totalNeed3 = await Splitter.getTotalNeeded(1000*multiplier);
-		assert.equal(need3, false, 'should not need amount');
-		assert.equal(totalNeed3.toNumber(), 0, 'should be 0 amount');
+		assert.equal(need3, false, 'Should not need amount');
+		assert.equal(totalNeed3.toNumber(), 0, 'Should be 0 amount');
 
 		await token.approve(Splitter.address, 1000*multiplier, {from:outsider});
 		await Splitter.processTokens(1000*multiplier, 1000*multiplier, {from: outsider, gasPrice: 0 }).should.be.rejectedWith('revert');
@@ -168,8 +168,8 @@ contract('ERC20Expense', (accounts) => {
 
 		var need3 = await Splitter.isNeeds({ from: creator });
 		var totalNeed3 = await Splitter.getTotalNeeded(1000*multiplier);
-		assert.equal(need3, true, 'should not need amount');
-		assert.equal(totalNeed3.toNumber(), 1000*multiplier, 'should be 0 amount');
+		assert.equal(need3, true, 'Should not need amount');
+		assert.equal(totalNeed3.toNumber(), 1000*multiplier, 'Should be 0 amount');
 
 		await token.approve(Splitter.address, 1000*multiplier, {from:outsider});
 		await Splitter.processTokens(1000*multiplier, 1000*multiplier, {from: outsider, gasPrice: 0 })
@@ -179,7 +179,7 @@ contract('ERC20Expense', (accounts) => {
 
 	});
 
-	it('5: should process amount with ERC20Splitter + 3 ERC20AbsoluteExpense', async () => {
+	it('Should process amount with ERC20Splitter + 3 ERC20AbsoluteExpense', async () => {
 		// create ERC20Splitter
 		var erc20TopDownSplitter = await ERC20Splitter.new(token.address);
 
@@ -207,7 +207,7 @@ contract('ERC20Expense', (accounts) => {
 		assert.equal(erc20AbsoluteExpense3Balance.toNumber(), 3*multiplier, 'resource point received amount from splitter');
 	});
 
-	it('6: should process amount with ERC20Splitter + 3 ERC20AbsoluteExpense', async () => {
+	it('Should process amount with ERC20Splitter + 3 ERC20AbsoluteExpense', async () => {
 		// create ERC20Splitter
 		var erc20UnsortedSplitter = await ERC20Splitter.new(token.address);
 
@@ -235,7 +235,7 @@ contract('ERC20Expense', (accounts) => {
 		assert.equal(erc20AbsoluteExpense3Balance.toNumber(), 3*multiplier, 'resource point received amount from splitter');
 	});
 
-	it('7: should process amount in structure o-> o-> o-o-o', async () => {
+	it('Should process amount in structure o-> o-> o-o-o', async () => {
 		var AllOutputs = await ERC20Splitter.new(token.address,{ from: creator, gasPrice: 0 });
 		var Salaries = await ERC20Splitter.new(token.address,{ from: creator, gasPrice: 0 });
 
@@ -275,7 +275,7 @@ contract('ERC20Expense', (accounts) => {
 		await Salaries.processTokens(3300*multiplier, 3300*multiplier, {from: creator, gasPrice: 0 });
 	});
 
-	it('8: should process amount in structure o-> o-o-o, while minAmount != totalAmount', async () => {
+	it('Should process amount in structure o-> o-o-o, while minAmount != totalAmount', async () => {
 		var Salaries = await ERC20Splitter.new(token.address,{ from: creator, gasPrice: 0 });
 
 		var Employee1 = await ERC20AbsoluteExpense.new(token.address,1000*multiplier, 500*multiplier, { from: creator, gasPrice: 0 });
@@ -322,7 +322,7 @@ contract('ERC20Expense', (accounts) => {
 		await Salaries.processTokens(200*multiplier, 200*multiplier, {from: creator, gasPrice: 0 }).should.be.rejectedWith('revert');
 	});
 
-	it('9: should process amount with a scheme just like in the paper: 75/25 others, send MORE than minNeed; ', async () => {
+	it('Should process amount with a scheme just like in the paper: 75/25 others, send MORE than minNeed; ', async () => {
 		var params = {token:token.address, CURRENT_INPUT:30900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -342,7 +342,7 @@ contract('ERC20Expense', (accounts) => {
 		await splitterBalancesAsserts(balances);
 	});
 
-	it('10: should process amount with a scheme just like in the paper: 75/25 others, send EQUAL to minNeed', async () => {
+	it('Should process amount with a scheme just like in the paper: 75/25 others, send EQUAL to minNeed', async () => {
 		var params = {token:token.address, CURRENT_INPUT:5900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -352,7 +352,6 @@ contract('ERC20Expense', (accounts) => {
 
 		await totalAndMinNeedsAsserts(splitterParams, params);
 		await structureAsserts(splitterParams);
-		// console.log('------------ struct.AllOutputs.address ', struct);
 		await token.approve(struct.AllOutputs.address, params.CURRENT_INPUT*multiplier, {from:creator});
 		await struct.AllOutputs.processTokens(params.CURRENT_INPUT*multiplier, params.CURRENT_INPUT*multiplier, {from: creator, gasPrice: 0 });
 
@@ -361,7 +360,7 @@ contract('ERC20Expense', (accounts) => {
 		await splitterBalancesAsserts(balances);
 	});
 
-	it('11: should not process multiplier: send LESS than minNeed', async () => {
+	it('Should not process multiplier: send LESS than minNeed', async () => {
 		var params = {token:token.address, CURRENT_INPUT:5900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -379,7 +378,7 @@ contract('ERC20Expense', (accounts) => {
 		await struct.AllOutputs.processTokens(1000*multiplier, 1000000*multiplier, {from: creator }).should.be.rejectedWith('revert');
 	});
 
-	it('12: should process amount with a scheme just like in the paper: 10/15 others, send MORE than minNeed; ', async () => {
+	it('Should process amount with a scheme just like in the paper: 10/15 others, send MORE than minNeed; ', async () => {
 		var params = {token:token.address, CURRENT_INPUT:20900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:850000, dividends:150000}
@@ -397,7 +396,7 @@ contract('ERC20Expense', (accounts) => {
 		await splitterBalancesAsserts(balances);
 	});
 
-	it('13: should NOT process amount (splitter can not accumulate amount) with a scheme just like in the paper: 10/15 others, send MORE than minNeed; ', async () => {
+	it('Should NOT process amount (splitter can not accumulate amount) with a scheme just like in the paper: 10/15 others, send MORE than minNeed; ', async () => {
 		var params = {token:token.address, CURRENT_INPUT:30900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:100000, dividends:250000}
@@ -411,7 +410,7 @@ contract('ERC20Expense', (accounts) => {
 		await struct.AllOutputs.processTokens(params.CURRENT_INPUT*multiplier, params.CURRENT_INPUT*multiplier, {from: creator, gasPrice: 0 }).should.be.rejectedWith('revert');
 	});
 
-	it('14: should process amount with a scheme just like in the paper: 10/15 others, send EQUAL to minNeed; ', async () => {
+	it('Should process amount with a scheme just like in the paper: 10/15 others, send EQUAL to minNeed; ', async () => {
 		var params = {token:token.address, CURRENT_INPUT:5900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:850000, dividends:150000}
@@ -429,7 +428,7 @@ contract('ERC20Expense', (accounts) => {
 		await splitterBalancesAsserts(balances);
 	});
 
-	it('15: should not process multiplier: send LESS than minNeed; ', async () => {
+	it('Should not process multiplier: send LESS than minNeed; ', async () => {
 		var params = {token:token.address, CURRENT_INPUT:30900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -447,7 +446,7 @@ contract('ERC20Expense', (accounts) => {
 		await struct.AllOutputs.processTokens(1000*multiplier, 1000000*multiplier, {from: creator }).should.be.rejectedWith('revert');
 	});
 
-	it('16: should process amount with ERC20Splitter + 3 ERC20RelativeExpenseWithPeriod', async () => {
+	it('Should process amount with ERC20Splitter + 3 ERC20RelativeExpenseWithPeriod', async () => {
 		// create ERC20Splitter
 		var splitter = await ERC20Splitter.new(token.address);
 
@@ -475,17 +474,14 @@ contract('ERC20Expense', (accounts) => {
 
 		await checkParamsCycle(targets, flowArr, [0, 0, 0, 0], [0, 0, 0, 0], [false, false, false, false]);
 		await passHours(24);
-
 		await checkParamsCycle(targets, flowArr, [0, 0, 0, 0], [350, 100, 250, 0], [true, true, true, false]);
 		await passHours(24);
-
 		await checkParamsCycle(targets, flowArr, [0, 0, 0, 0], [720, 100, 250, 370], [true, true, true, true]);
 
 		await token.approve(splitter.address, 720*multiplier, {from:creator});
 		await splitter.processTokens(1000*multiplier, 720*multiplier, {from: creator });
 
 		await checkParamsCycle(targets, flowArr, [0, 0, 0, 0], [0, 0, 0, 0], [false, false, false, false]);
-
 		// multiplier should end up in the outputs
 		assert.equal((await token.balanceOf(rel1.address)).toNumber(), 200*multiplier);
 		assert.equal((await token.balanceOf(rel2.address)).toNumber(), 500*multiplier);
@@ -493,7 +489,7 @@ contract('ERC20Expense', (accounts) => {
 
 		await passHours(24);	
 		await checkParamsCycle(targets, flowArr, [0, 0, 0, 0], [350, 100, 250, 0], [true, true, true, false]);
-
+		
 		await token.approve(splitter.address, 350*multiplier, {from:creator});
 		await splitter.processTokens(1000*multiplier, 350*multiplier, {from: creator });	
 		

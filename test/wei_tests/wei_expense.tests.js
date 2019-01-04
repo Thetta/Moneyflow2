@@ -38,7 +38,7 @@ contract('WeiExpense', (accounts) => {
 	});
 
 
-	it('should process with WeiAbsoluteExpenseWithPeriod, then 25 hours, then needs again', async () => {
+	it('Should process with WeiAbsoluteExpenseWithPeriod, then 25 hours, then needs again', async () => {
 		var timePeriod = 25;
 		var callParams = { from: creator, gasPrice: 0 };
 		var struct = {};
@@ -76,7 +76,7 @@ contract('WeiExpense', (accounts) => {
 		assert.equal(needsEmployee3, false, 'Dont need amount, because he got it');
 	});
 
-	it('should process with WeiAbsoluteExpenseWithPeriod, then 75 hours, then needs again x3', async () => {
+	it('Should process with WeiAbsoluteExpenseWithPeriod, then 75 hours, then needs again x3', async () => {
 		var timePeriod = 25;
 		var callParams = { from: creator, gasPrice: 0 };
 		var struct = {};
@@ -159,7 +159,7 @@ contract('WeiExpense', (accounts) => {
 		assert.equal(taxBalance.toNumber(), 1000*multiplier, 'Tax receiver should get 100 amount');
 	});
 
-	it('should process with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
+	it('Should process with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
 		// create WeiSplitter
 		var weiTopDownSplitter = await WeiSplitter.new();
 
@@ -186,7 +186,7 @@ contract('WeiExpense', (accounts) => {
 		assert.equal(weiAbsoluteExpense3Balance.toNumber(), 3*multiplier, 'resource point received from splitter');
 	});
 
-	it('should process with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
+	it('Should process with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
 		// create WeiSplitter
 		var weiUnsortedSplitter = await WeiSplitter.new();
 
@@ -213,7 +213,7 @@ contract('WeiExpense', (accounts) => {
 		assert.equal(weiAbsoluteExpense3Balance.toNumber(), 3*multiplier, 'resource point received from splitter');
 	});
 
-	it('should process in structure o-> o-> o-o-o', async () => {
+	it('Should process in structure o-> o-> o-o-o', async () => {
 		var AllOutputs = await WeiSplitter.new({ from: creator, gasPrice: 0 });
 		var Salaries = await WeiSplitter.new({ from: creator, gasPrice: 0 });
 
@@ -252,7 +252,7 @@ contract('WeiExpense', (accounts) => {
 		var th = await Salaries.processFunds(3300*multiplier, { value: 3300*multiplier, from: creator, gasPrice: 0 });
 	});
 
-	it('should process in structure o-> o-o-o, while minAmount != totalAmount', async () => {
+	it('Should process in structure o-> o-o-o, while minAmount != totalAmount', async () => {
 		var Salaries = await WeiSplitter.new({ from: creator, gasPrice: 0 });
 
 		var Employee1 = await WeiAbsoluteExpense.new(1000*multiplier, 500*multiplier, { from: creator, gasPrice: 0 });
@@ -294,7 +294,7 @@ contract('WeiExpense', (accounts) => {
 		var th = await Salaries.processFunds(200*multiplier, { value:200*multiplier, from: creator, gasPrice: 0 }).should.be.rejectedWith('revert');
 	});
 
-	it('should process with a scheme just like in the paper: 75/25 others, send MORE than minNeed; ', async () => {
+	it('Should process with a scheme just like in the paper: 75/25 others, send MORE than minNeed; ', async () => {
 		var params = {CURRENT_INPUT:30900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -313,7 +313,7 @@ contract('WeiExpense', (accounts) => {
 		await splitterBalancesAsserts(balances);
 	});
 
-	it('should process with a scheme just like in the paper: 75/25 others, send EQUAL to minNeed', async () => {
+	it('Should process with a scheme just like in the paper: 75/25 others, send EQUAL to minNeed', async () => {
 		var params = {CURRENT_INPUT:5900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -331,7 +331,7 @@ contract('WeiExpense', (accounts) => {
 		await splitterBalancesAsserts(balances);
 	});
 
-	it('should not process multiplier: send LESS than minNeed', async () => {
+	it('Should not process multiplier: send LESS than minNeed', async () => {
 		var params = {CURRENT_INPUT:5900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -346,7 +346,7 @@ contract('WeiExpense', (accounts) => {
 		await struct.AllOutputs.processFunds(1000*multiplier, { value: 1000000*multiplier, from: creator }).should.be.rejectedWith('revert');
 	});
 
-	it('should process with a scheme just like in the paper: 10/15 others, send MORE than minNeed; ', async () => {
+	it('Should process with a scheme just like in the paper: 10/15 others, send MORE than minNeed; ', async () => {
 		var params = {CURRENT_INPUT:20900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:850000, dividends:150000}
@@ -363,7 +363,7 @@ contract('WeiExpense', (accounts) => {
 		await splitterBalancesAsserts(balances);
 	});
 
-	it('should NOT process (splitter can not accumulate amount) with a scheme just like in the paper: 10/15 others, send MORE than minNeed; ', async () => {
+	it('Should NOT process (splitter can not accumulate amount) with a scheme just like in the paper: 10/15 others, send MORE than minNeed; ', async () => {
 		var params = {CURRENT_INPUT:20900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:100000, dividends:150000}
@@ -376,7 +376,7 @@ contract('WeiExpense', (accounts) => {
 		await struct.AllOutputs.processFunds(params.CURRENT_INPUT*multiplier, { value: params.CURRENT_INPUT*multiplier, from: creator, gasPrice: 0 }).should.be.rejectedWith('revert');
 	});
 
-	it('should process with a scheme just like in the paper: 10/15 others, send EQUAL to minNeed; ', async () => {
+	it('Should process with a scheme just like in the paper: 10/15 others, send EQUAL to minNeed; ', async () => {
 		var params = {CURRENT_INPUT:5900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:100000, dividends:150000}
@@ -393,7 +393,7 @@ contract('WeiExpense', (accounts) => {
 		await splitterBalancesAsserts(balances);
 	});
 
-	it('should not process multiplier: send LESS than minNeed; ', async () => {
+	it('Should not process multiplier: send LESS than minNeed; ', async () => {
 		var params = {CURRENT_INPUT:20900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:850000, dividends:150000}
@@ -408,7 +408,7 @@ contract('WeiExpense', (accounts) => {
 		await struct.AllOutputs.processFunds(1000*multiplier, { value: 1000000*multiplier, from: creator }).should.be.rejectedWith('revert');
 	});
 
-	it('should process with WeiSplitter + 3 WeiRelativeExpenseWithPeriod', async () => {
+	it('Should process with WeiSplitter + 3 WeiRelativeExpenseWithPeriod', async () => {
 		// create WeiSplitter
 		var splitter = await WeiSplitter.new();
 

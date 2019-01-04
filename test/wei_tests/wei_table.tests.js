@@ -31,7 +31,7 @@ contract('WeiTable tests', (accounts) => {
 	const outsider = accounts[3];
 
 	// // 0->•abs
-	it('should process with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
+	it('Should process with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
 		let table = await WeiTable.new();
 		var output1 = await WeiAbsoluteExpense.new(multiplier, multiplier);
 		var output2 = await WeiAbsoluteExpense.new(2 * multiplier, 2 * multiplier);
@@ -111,7 +111,7 @@ contract('WeiTable tests', (accounts) => {
 		var need2 = await table.isNeeds();
 	});
 
-	it('should process with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
+	it('Should process with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
 		let table = await WeiTable.new();
 		
 		let unsortedSplitterId = getNodeId(await table.addSplitter());
@@ -141,7 +141,7 @@ contract('WeiTable tests', (accounts) => {
 		assert.equal(absoluteExpense3Balance.toNumber(), 3 * multiplier, 'resource point received from splitter');
 	});
 
-	it('should process with a scheme just like in the paper: 75/25 others, send MORE than minNeed; ', async () => {
+	it('Should process with a scheme just like in the paper: 75/25 others, send MORE than minNeed; ', async () => {
 		var params = {CURRENT_INPUT:30900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -157,7 +157,7 @@ contract('WeiTable tests', (accounts) => {
 		await balancesAssertsTable(balances, params);
 	});
 
-	it('should process with a scheme just like in the paper: 75/25 others, send EQUAL to minNeed', async () => {
+	it('Should process with a scheme just like in the paper: 75/25 others, send EQUAL to minNeed', async () => {
 		var params = {CURRENT_INPUT:5900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -173,7 +173,7 @@ contract('WeiTable tests', (accounts) => {
 		await balancesAssertsTable(balances, params);
 	});
 
-	it('should not process multiplier: send LESS than minNeed', async () => {
+	it('Should not process multiplier: send LESS than minNeed', async () => {
 		var params = {CURRENT_INPUT:5900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -188,7 +188,7 @@ contract('WeiTable tests', (accounts) => {
 		await struct.table.processFunds(params.CURRENT_INPUT * multiplier / 100, { value: params.CURRENT_INPUT * multiplier, gasPrice: 0 }).should.be.rejectedWith('revert');
 	});
 
-	it('should process with a scheme just like in the paper: 10/15 others, send MORE than minNeed; ', async () => {
+	it('Should process with a scheme just like in the paper: 10/15 others, send MORE than minNeed; ', async () => {
 		var params = {CURRENT_INPUT:20900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -204,7 +204,7 @@ contract('WeiTable tests', (accounts) => {
 		await balancesAssertsTable(balances, params);
 	});
 
-	it('should process with a scheme just like in the paper: 10/15 others, send EQUAL to minNeed; ', async () => {
+	it('Should process with a scheme just like in the paper: 10/15 others, send EQUAL to minNeed; ', async () => {
 		var params = {CURRENT_INPUT:5900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -220,7 +220,7 @@ contract('WeiTable tests', (accounts) => {
 		await balancesAssertsTable(balances, params);
 	});
 
-	it('should not process multiplier: send LESS than minNeed; ', async () => {
+	it('Should not process multiplier: send LESS than minNeed; ', async () => {
 		var params = {CURRENT_INPUT:5900, multiplier:multiplier, 
 			e1:1000, e2:1500, e3:800, office:500, internet:300, t1:500, t2:300, t3:1000, 
 			b1:10000, b2:10000, b3:20000, reserve:750000, dividends:250000}
@@ -235,7 +235,7 @@ contract('WeiTable tests', (accounts) => {
 		await struct.table.processFunds(params.CURRENT_INPUT * multiplier / 100, { value: params.CURRENT_INPUT * multiplier, gasPrice: 0 }).should.be.rejectedWith('revert');
 	});
 
-	it('should process when opened and not process when closed with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
+	it('Should process when opened and not process when closed with WeiSplitter + 3 WeiAbsoluteExpense', async () => {
 		let table = await WeiTable.new();
 
 		let splitterId = getNodeId(await table.addSplitter());
