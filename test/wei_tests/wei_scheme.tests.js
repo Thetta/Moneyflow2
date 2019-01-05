@@ -16,10 +16,10 @@ contract('Scheme', (accounts) => {
 	const employee1 = accounts[1];
 	const output = accounts[2];
 
-	beforeEach(async () => {
+	/*beforeEach(async () => {
 		moneyflowScheme = await DefaultMoneyflowSchemeWithUnpackers.new(output, 5000, 5000, { from: creator, gasPrice: 1 });
 		await moneyflowScheme.deployRoot({ from: creator, gasPrice: 1 });
-	});
+	});*/
 
 	it('Should set everything correctly', async () => {
 		// TODO: test DefaultMoneyflowScheme

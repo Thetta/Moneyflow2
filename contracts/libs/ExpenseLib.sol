@@ -10,7 +10,7 @@ contract ExpenseLib {
 	event ExpenseSetTotalNeeded(uint _totalNeeded);
 	event ExpenseSetMinAmount(uint _minAmount);
 	event ExpenseSetPercents(uint _partsPerMillion);
-	event ExpenseProcessFunds(address _sender, uint _value, uint _currentFlow);
+	event ExpenseProcessAmount(address _sender, uint _value, uint _currentFlow);
 
 	struct Expense {
 		uint128 totalNeeded;
@@ -79,7 +79,6 @@ contract ExpenseLib {
 	}
 
 	function _processAmount(Expense _e, uint _currentFlow, uint _value) internal view returns(Expense e) {
-		emit ExpenseProcessFunds(msg.sender, _value, _currentFlow);
 		e = _e;
 		require(_value == _getTotalNeeded(e, _currentFlow));
 		require(_currentFlow >= _value);
@@ -184,12 +183,12 @@ contract ExpenseLib {
 		}
 	}
 
-	function _isNeeds(Expense _e)internal view returns(bool isNeed) {
+	function _isNeeds(Expense _e) internal view returns(bool isNeed) {
 		isNeed = (_getTotalNeeded(_e, 1e30) > 0);
 	}	
 
 	// -------------------- INTERNAL FUNCTIONS
-	function _numberOfEntitiesPlusOne(uint _inclusive, uint _inluded) internal view returns(uint count) {
+	function _numberOfEntitiesPlusOne(uint _inclusive, uint _inluded) internal pure returns(uint count) {
 		if(_inclusive < _inluded) {
 			count = 1;
 		} else {
@@ -214,9 +213,8 @@ contract ExpenseLib {
 		}
 	}
 
-	function _processFlushTo(Expense _e, address _to) internal view returns(Expense e) {
+	function _processFlushTo(Expense _e) internal pure returns(Expense e) {
 		e = _e;
-		emit ExpenseFlush(_to, e.balance);
 		e.balance = 0;
 	}
 }

@@ -26,11 +26,13 @@ contract ERC20Table is ITable, IReceiver, ITokenReceiver, TableBase {
 
 	function flushAt(uint _eId) public onlyOwner isCorrectId(_eId) {
 		token.transfer(owner, expenses[_eId].balance);
-		_processFlushToAt(_eId, owner);
+		emit NodeFlushTo(_eId, owner, expenses[_eId].balance);
+		_processFlushToAt(_eId);
 	}
 
 	function flushToAt(uint _eId, address _to) public onlyOwner isCorrectId(_eId) {
 		token.transfer(_to, expenses[_eId].balance);
-		_processFlushToAt(_eId, _to);
+		emit NodeFlushTo(_eId, _to, expenses[_eId].balance);
+		_processFlushToAt(_eId);
 	}
 }

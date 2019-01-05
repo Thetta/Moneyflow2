@@ -57,8 +57,7 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 		return getTotalNeededAt(0, _currentFlow);
 	}
 
-	function _processFlushToAt(uint _eId, address _to) internal view returns(Expense e) {
-		emit NodeFlushTo(_eId, _to, expenses[_eId].balance);
+	function _processFlushToAt(uint _eId) internal {
 		expenses[_eId].balance = 0;
 	}
 
@@ -139,7 +138,7 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 	}
 
 	// -------------------- public CONTROL FUNCTIONS -------------------- 
-	function getReceiverTypeAt(uint _eId) public isCorrectId(_eId) returns(IReceiver.Type nodeType) {
+	function getReceiverTypeAt(uint _eId) public view isCorrectId(_eId) returns(IReceiver.Type nodeType) {
 		if(isExpenseAt(_eId)) {
 			if(expenses[_eId].partsPerMillion > 0) {
 				nodeType = IReceiver.Type.Relative;
@@ -151,11 +150,11 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 		}
 	}
 
-	function isExpenseAt(uint _eId) public isCorrectId(_eId) returns(bool isExpense) {
+	function isExpenseAt(uint _eId) public view isCorrectId(_eId) returns(bool isExpense) {
 		isExpense = (IReceiver.Type.Splitter != nodesType[_eId]);
 	}
 
-	function isSplitterAt(uint _eId) public isCorrectId(_eId) returns(bool isSplitter) {
+	function isSplitterAt(uint _eId) public view isCorrectId(_eId) returns(bool isSplitter) {
 		isSplitter = (IReceiver.Type.Splitter == nodesType[_eId]);
 	}
 
@@ -194,7 +193,7 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 		return splitters[_eId].outputs[_index];
 	}
 
-	function _tableProcessing(address _target, uint _eId, uint _flow, uint _need) internal {
+	function _tableProcessing(uint _eId, uint _flow, uint _need) internal {
 		_processAmountAt(_eId, _flow, _need);
 	}
 

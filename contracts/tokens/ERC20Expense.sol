@@ -25,21 +25,23 @@ contract ERC20Expense is ITokenReceiver, IDestination, ExpenseBase {
 		token = ERC20(_tokenAddress);
 	}
 
-	event ProcessTokensExpense(address sender, address target, uint _value);
 	function processTokens(uint _currentFlow, uint _value) public {
 		require(_value <= token.allowance(msg.sender, address(this)));
 		token.transferFrom(msg.sender, address(this), _value);
-		emit ProcessTokensExpense(msg.sender, address(this), _value);
+		emit ExpenseProcessAmount(msg.sender, _value, _currentFlow);
 		expense = _processAmount(expense, _currentFlow, _value);
 	}
 
 	function flush() public onlyOwner {
 		token.transfer(owner, expense.balance);
-		expense = _processFlushTo(expense, owner);
+		emit ExpenseFlush(owner, expense.balance);
+		expense = _processFlushTo(expense);
 	}
 
 	function flushTo(address _to) public onlyOwner {
 		token.transfer(_to, expense.balance);
-		expense = _processFlushTo(expense, _to);	
+		emit ExpenseFlush(_to, expense.balance);
+		expense = _processFlushTo(expense);	
 	}	
 }
+

@@ -20,16 +20,19 @@ contract WeiExpense is IWeiReceiver, IDestination, ExpenseBase {
 		ExpenseBase(_totalNeeded, _minAmount, _partsPerMillion, _periodHours, _isSlidingAmount, _isPeriodic) public {}
 
 	function processFunds(uint _currentFlow) public payable {
+		emit ExpenseProcessAmount(msg.sender, msg.value, _currentFlow);
 		expense = _processAmount(expense, _currentFlow, msg.value);
 	}
 
 	function flush() public onlyOwner {
-		_processFlushTo(expense, owner);
+		_processFlushTo(expense);
+		emit ExpenseFlush(owner, address(this).balance);
 		owner.transfer(address(this).balance);
 	}
 
 	function flushTo(address _to) public onlyOwner {
-		_processFlushTo(expense, _to);
+		_processFlushTo(expense);
+		emit ExpenseFlush(_to, address(this).balance);
 		_to.transfer(address(this).balance);
 	}	
 }
