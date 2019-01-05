@@ -7,7 +7,8 @@ pragma solidity ^0.4.24;
 */
 contract ExpenseLib {
 	event ExpenseFlush(address _owner, uint _balance);
-	event ExpenseSetNeeded(uint _totalNeeded);
+	event ExpenseSetTotalNeeded(uint _totalNeeded);
+	event ExpenseSetMinAmount(uint _minAmount);
 	event ExpenseSetPercents(uint _partsPerMillion);
 	event ExpenseProcessFunds(address _sender, uint _value, uint _currentFlow);
 
@@ -54,6 +55,8 @@ contract ExpenseLib {
 		require(!((_totalNeeded == 0) && (_minAmount != 0)));
 		require(!((_partsPerMillion != 0) && (_minAmount != 0)));
 		require(!((_partsPerMillion != 0) && (_totalNeeded != 0)));
+		require(!((_partsPerMillion == 0) && (_totalNeeded == 0)));
+		require(_partsPerMillion <= 1e7);
 		require(_minAmount <= _totalNeeded);
 		if(_minAmount != 0) {
 			require((_totalNeeded % _minAmount) == 0);

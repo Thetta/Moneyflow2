@@ -37,6 +37,13 @@ contract('WeiExpense', (accounts) => {
 		await splitter.addChild(rel.address).should.be.rejectedWith('revert');
 	});
 
+	it('Should revert when trying to add rel to abs splitter', async () => {
+		var abs = await WeiAbsoluteExpense.new(1e15, 1e15);
+		var splitter = await WeiSplitter.new();
+		var rel = await WeiRelativeExpense.new(500000);
+		await splitter.addChild(abs.address);
+		await splitter.addChild(rel.address).should.be.rejectedWith('revert');
+	});
 
 	it('Should process with WeiAbsoluteExpenseWithPeriod, then 25 hours, then needs again', async () => {
 		var timePeriod = 25;

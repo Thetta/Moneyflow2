@@ -15,9 +15,7 @@ import "../interfaces/IReceiver.sol";
  * if they have ended. 
 */
 contract WeiSplitter is IWeiReceiver, SplitterBase {
-	constructor() public {
-		splitter = _constructSplitter(false);
-	}
+	constructor() SplitterBase() public {}
 
 	function _elementProcessing(address _target, uint _flow, uint _need) internal {
 		IWeiReceiver(_target).processFunds.value(_need)(_flow); 

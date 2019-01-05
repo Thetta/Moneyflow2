@@ -208,11 +208,7 @@ contract SplitterLib {
 		}
 	}
 
-	function _tableProcessing(address _target, uint _eId, uint _flow, uint _need) internal {
-		revert();
-	}
+	function _tableProcessing(address _target, uint _eId, uint _flow, uint _need) internal {}
 
-	function _elementProcessing(address _target, uint _flow, uint _need) internal {
-		revert();
-	}
+	function _elementProcessing(address _target, uint _flow, uint _need) internal {}
 }

@@ -105,10 +105,10 @@ contract('ERC20Table tests', (accounts) => {
 		var b2 = await token.balanceOf(accounts[9]);
 		assert.equal(b2.sub(b1).toNumber(), 2 * multiplier);
 
-		var b1 = await token.balanceOf(accounts[9]);
-		await table.flushToAt(AbsoluteExpense3Id, accounts[9], { gasPrice: 0 });
-		var b2 = await token.balanceOf(accounts[9]);
-		assert.equal(b2.sub(b1).toNumber(), 3 * multiplier);
+		var b1 = await token.balanceOf(accounts[0]);
+		await table.flushAt(AbsoluteExpense3Id, { gasPrice: 0 });
+		var b2 = await token.balanceOf(accounts[0]);
+		assert.equal(b2.sub(b1).toNumber(), 1 * multiplier);
 
 		var absoluteExpense1Balance = await table.balanceAt(AbsoluteExpense1Id);
 		assert.equal(absoluteExpense1Balance.toNumber(), 0 * multiplier, 'resource point received from splitter');

@@ -39,8 +39,8 @@ contract DefaultMoneyflowScheme {
 
 	constructor(
 		address _fundOutput, 
-		uint _percentsReserve, 
-		uint _dividendsReserve) 
+		uint32 _percentsReserve, 
+		uint32 _dividendsReserve) 
 	{
 		require(0x0 != _fundOutput);
 

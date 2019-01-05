@@ -7,8 +7,8 @@ import "./DefaultMoneyflowScheme.sol";
 contract DefaultMoneyflowSchemeWithUnpackers is DefaultMoneyflowScheme {
 	constructor(
 			address _fundOutput, 
-			uint _percentsReserve, 
-			uint _dividendsReserve) public 
+			uint32 _percentsReserve, 
+			uint32 _dividendsReserve) public 
 		DefaultMoneyflowScheme(_fundOutput,_percentsReserve,_dividendsReserve)
 	{
 	}

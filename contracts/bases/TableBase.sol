@@ -41,10 +41,6 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 		return isNeedsAt(0);
 	}
 
-	function getPartsPerMillion() public view returns(uint) {
-		return getPartsPerMillionAt(0);
-	}
-
 	function _processAmountAt(uint _eId, uint _currentFlow, uint _value) internal {
 		if(isExpenseAt(_eId)) {
 			expenses[_eId] = _processAmount(expenses[_eId], _currentFlow, _value);
@@ -66,13 +62,13 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 		expenses[_eId].balance = 0;
 	}
 
-	function getLastNodeId() public returns(uint) {
+	function getLastNodeId() public view returns(uint) {
 		if(nodesCount == 0) {
 			return 0;
 		} else {
 			return nodesCount - 1;
 		}
-	}	
+	}
 
 	function getPartsPerMillionAt(uint _eId) public view isCorrectId(_eId) returns(uint ppm) {
 		ppm = expenses[_eId].partsPerMillion;
@@ -107,9 +103,9 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 	}
 
 	// -------------------- public SCHEME FUNCTIONS -------------------- 
-	function addAbsoluteExpense(uint128 _totalNeeded, uint128 _minWeiAmount, bool _isPeriodic, bool _isSlidingAmount, uint32 _periodHours) public onlyOwner {
+	function addAbsoluteExpense(uint128 _totalNeeded, uint128 _minAmount, bool _isPeriodic, bool _isSlidingAmount, uint32 _periodHours) public onlyOwner {
 		emit NodeAdded(nodesCount, IReceiver.Type.Absolute);	
-		expenses[nodesCount] = _constructExpense(_totalNeeded, _minWeiAmount, 0, _periodHours, _isSlidingAmount, _isPeriodic);
+		expenses[nodesCount] = _constructExpense(_totalNeeded, _minAmount, 0, _periodHours, _isSlidingAmount, _isPeriodic);
 		nodesType[nodesCount] = IReceiver.Type.Absolute;
 		nodesCount += 1;	
 	}
