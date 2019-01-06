@@ -1,5 +1,5 @@
 pragma solidity ^0.4.24;
-pragma experimental ABIEncoderV2;
+
 import "../libs/ExpenseLib.sol";
 
 import "../interfaces/IDestination.sol";
@@ -16,6 +16,10 @@ import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 */
 contract ExpenseBase is ExpenseLib, IReceiver, Ownable {
 	Expense public expense;
+
+	constructor(uint128 _totalNeeded, uint128 _minAmount, uint32 _partsPerMillion, uint32 _periodHours, bool _isSlidingAmount, bool _isPeriodic) public {
+		expense = _constructExpense(_totalNeeded, _minAmount, _partsPerMillion, _periodHours, _isSlidingAmount, _isPeriodic);
+	}
 	
 	function getReceiverType() public view returns(Type) {
 		if(0 != expense.partsPerMillion) {
@@ -48,14 +52,35 @@ contract ExpenseBase is ExpenseLib, IReceiver, Ownable {
 		return _isNeeds(expense);
 	}
 
-	function setNeededWei(uint _totalNeeded) public onlyOwner {
-		emit ExpenseSetNeeded(_totalNeeded);
-		expense.totalNeeded = uint128(_totalNeeded);
+	function setTotalNeeded(uint128 _totalNeeded) public onlyOwner {
+		require(expense.partsPerMillion == 0);
+		require(_totalNeeded > 0);
+		require(expense.minAmount <= _totalNeeded);
+		if(expense.minAmount != 0) {
+			require((_totalNeeded % expense.minAmount) == 0);
+		}
+
+		emit ExpenseSetTotalNeeded(_totalNeeded);
+		expense.totalNeeded = _totalNeeded;
 	}
 
-	function setPercents(uint _partsPerMillion) public onlyOwner {
+	function setMinAmount(uint128 _minAmount) public onlyOwner {
+		require(expense.partsPerMillion == 0);
+		require(_minAmount <= expense.totalNeeded);
+		require(_minAmount == uint128(_minAmount));
+		if(_minAmount != 0) {
+			require((expense.totalNeeded % _minAmount) == 0);
+		}
+
+		emit ExpenseSetMinAmount(_minAmount);
+		expense.minAmount = _minAmount;
+	}	
+
+	function setPercents(uint32 _partsPerMillion) public onlyOwner {
+		require(expense.totalNeeded == 0);
+		require(_partsPerMillion <= 1e7);
 		emit ExpenseSetPercents(_partsPerMillion);
-		expense.partsPerMillion = uint32(_partsPerMillion);
+		expense.partsPerMillion = _partsPerMillion;
 	}
 
 	function() public {}

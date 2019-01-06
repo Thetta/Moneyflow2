@@ -41,10 +41,6 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 		return isNeedsAt(0);
 	}
 
-	function getPartsPerMillion() public view returns(uint) {
-		return getPartsPerMillionAt(0);
-	}
-
 	function _processAmountAt(uint _eId, uint _currentFlow, uint _value) internal {
 		if(isExpenseAt(_eId)) {
 			expenses[_eId] = _processAmount(expenses[_eId], _currentFlow, _value);
@@ -61,18 +57,17 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 		return getTotalNeededAt(0, _currentFlow);
 	}
 
-	function _processFlushToAt(uint _eId, address _to) internal view returns(Expense e) {
-		emit NodeFlushTo(_eId, _to, expenses[_eId].balance);
+	function _processFlushToAt(uint _eId) internal {
 		expenses[_eId].balance = 0;
 	}
 
-	function getLastNodeId() public returns(uint) {
+	function getLastNodeId() public view returns(uint) {
 		if(nodesCount == 0) {
 			return 0;
 		} else {
 			return nodesCount - 1;
 		}
-	}	
+	}
 
 	function getPartsPerMillionAt(uint _eId) public view isCorrectId(_eId) returns(uint ppm) {
 		ppm = expenses[_eId].partsPerMillion;
@@ -107,9 +102,9 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 	}
 
 	// -------------------- public SCHEME FUNCTIONS -------------------- 
-	function addAbsoluteExpense(uint128 _totalNeeded, uint128 _minWeiAmount, bool _isPeriodic, bool _isSlidingAmount, uint32 _periodHours) public onlyOwner {
+	function addAbsoluteExpense(uint128 _totalNeeded, uint128 _minAmount, bool _isPeriodic, bool _isSlidingAmount, uint32 _periodHours) public onlyOwner {
 		emit NodeAdded(nodesCount, IReceiver.Type.Absolute);	
-		expenses[nodesCount] = _constructExpense(_totalNeeded, _minWeiAmount, 0, _periodHours, _isSlidingAmount, _isPeriodic);
+		expenses[nodesCount] = _constructExpense(_totalNeeded, _minAmount, 0, _periodHours, _isSlidingAmount, _isPeriodic);
 		nodesType[nodesCount] = IReceiver.Type.Absolute;
 		nodesCount += 1;	
 	}
@@ -143,7 +138,7 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 	}
 
 	// -------------------- public CONTROL FUNCTIONS -------------------- 
-	function getReceiverTypeAt(uint _eId) public isCorrectId(_eId) returns(IReceiver.Type nodeType) {
+	function getReceiverTypeAt(uint _eId) public view isCorrectId(_eId) returns(IReceiver.Type nodeType) {
 		if(isExpenseAt(_eId)) {
 			if(expenses[_eId].partsPerMillion > 0) {
 				nodeType = IReceiver.Type.Relative;
@@ -155,11 +150,11 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 		}
 	}
 
-	function isExpenseAt(uint _eId) public isCorrectId(_eId) returns(bool isExpense) {
+	function isExpenseAt(uint _eId) public view isCorrectId(_eId) returns(bool isExpense) {
 		isExpense = (IReceiver.Type.Splitter != nodesType[_eId]);
 	}
 
-	function isSplitterAt(uint _eId) public isCorrectId(_eId) returns(bool isSplitter) {
+	function isSplitterAt(uint _eId) public view isCorrectId(_eId) returns(bool isSplitter) {
 		isSplitter = (IReceiver.Type.Splitter == nodesType[_eId]);
 	}
 
@@ -198,7 +193,7 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 		return splitters[_eId].outputs[_index];
 	}
 
-	function _tableProcessing(address _target, uint _eId, uint _flow, uint _need) internal {
+	function _tableProcessing(uint _eId, uint _flow, uint _need) internal {
 		_processAmountAt(_eId, _flow, _need);
 	}
 

@@ -18,11 +18,13 @@ contract WeiTable is ITable, IReceiver, IWeiReceiver, TableBase {
 
 	function flushAt(uint _eId) public onlyOwner isCorrectId(_eId) {
 		owner.transfer(expenses[_eId].balance);
-		_processFlushToAt(_eId, owner);
+		emit NodeFlushTo(_eId, owner, expenses[_eId].balance);
+		_processFlushToAt(_eId);
 	}
 
 	function flushToAt(uint _eId, address _to) public onlyOwner isCorrectId(_eId) {
 		_to.transfer(expenses[_eId].balance);
-		_processFlushToAt(_eId, _to);
+		emit NodeFlushTo(_eId, _to, expenses[_eId].balance);
+		_processFlushToAt(_eId);
 	}
 }

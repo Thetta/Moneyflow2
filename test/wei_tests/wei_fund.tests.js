@@ -6,35 +6,19 @@ var WeiRelativeExpense = artifacts.require('./WeiRelativeExpense');
 var WeiAbsoluteExpenseWithPeriod = artifacts.require('./WeiAbsoluteExpenseWithPeriod');
 var WeiRelativeExpenseWithPeriod = artifacts.require('./WeiRelativeExpenseWithPeriod');
 var WeiAbsoluteExpenseWithPeriodSliding = artifacts.require('./WeiAbsoluteExpenseWithPeriodSliding');
-const getEId = o => o.logs.filter(l => l.event == 'elementAdded')[0].args._eId.toNumber();
-const KECCAK256 = x => web3.sha3(x);
-
-async function passHours (hours) {
-	await web3.currentProvider.sendAsync({
-		jsonrpc: '2.0',
-		method: 'evm_increaseTime',
-		params: [3600 * hours * 1000],
-		id: new Date().getTime(),
-	}, function (err) { if (err) console.log('err:', err); });
-}
-
-const BigNumber = web3.BigNumber;
 
 require('chai')
 	.use(require('chai-as-promised'))
-	.use(require('chai-bignumber')(BigNumber))
+	.use(require('chai-bignumber')(web3.BigNumber))
 	.should();
 
-contract('WeiFund', (accounts) => {
-	let money = web3.toWei(0.001, 'ether');
+const {passHours} = require('../helpers/utils');
 
+contract('WeiFund', (accounts) => {
 	const creator = accounts[0];
 	const employee1 = accounts[1];
 	const employee2 = accounts[2];
 	const outsider = accounts[3];
-
-	beforeEach(async () => {
-	});
 
 	it('Should collect money, then revert if more, then flush', async () => {
 		let fund = await WeiAbsoluteExpense.new(1e18, 0);
@@ -80,7 +64,7 @@ contract('WeiFund', (accounts) => {
 		assert.equal(isNeed, false);
 	});
 
-	it('Should collect money (periodic, not accumulate debt), then time passed, then need money again', async () => {
+	it('Should collect (periodic, not accumulate debt), then time passed, then need again', async () => {
 		let fund = await WeiAbsoluteExpenseWithPeriod.new(1e18, 0, 24);
 
 		var totalNeed = await fund.getTotalNeeded(1e22);
@@ -141,7 +125,7 @@ contract('WeiFund', (accounts) => {
 		assert.equal(isNeed, false);
 	});
 
-	it('Should collect money (periodic, accumulate debt), then time passed, then need money again', async () => {
+	it('Should collect (periodic, accumulate debt), then time passed, then need again', async () => {
 		let fund = await WeiAbsoluteExpenseWithPeriodSliding.new(1e18, 0, 24);
 
 		var totalNeed = await fund.getTotalNeeded(1e22);
@@ -199,7 +183,7 @@ contract('WeiFund', (accounts) => {
 		assert.equal(isNeed, false);
 	});
 
-	it('Should collect money (periodic, accumulate debt), then time passed, then need money again', async () => {
+	it('Should collect (periodic, accumulate debt), then time passed, then need again', async () => {
 		let fund = await WeiAbsoluteExpenseWithPeriodSliding.new(1e18, 0, 24);
 		var totalNeed = await fund.getTotalNeeded(1e22);
 		var isNeed = await fund.isNeeds();

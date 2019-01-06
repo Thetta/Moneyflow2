@@ -4,7 +4,7 @@ import "./WeiExpense.sol";
 
 
 contract WeiRelativeExpenseWithPeriodSliding is WeiExpense {
-	constructor(uint _partsPerMillion, uint _periodHours) public 
+	constructor(uint32 _partsPerMillion, uint32 _periodHours) public 
 		WeiExpense(0, 0, _partsPerMillion, _periodHours, true, true)
 	{}
 }

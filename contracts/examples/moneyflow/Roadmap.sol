@@ -6,7 +6,7 @@ import "../../ether/WeiSplitter.sol";
 
 contract Roadmap {
 
-	constructor(uint _sum1, uint _sum2, uint _sum3) {
+	constructor(uint128 _sum1, uint128 _sum2, uint128 _sum3) public {
 		WeiSplitter roadmap = new WeiSplitter();
 
 		WeiAbsoluteExpense milestone1 = new WeiAbsoluteExpense(0, _sum1);

@@ -4,7 +4,7 @@ import "./WeiExpense.sol";
 
 
 contract WeiAbsoluteExpense is WeiExpense {
-	constructor(uint _minWeiAmount, uint _totalWeiNeed) public 
-		WeiExpense(_minWeiAmount, _totalWeiNeed, 0, 0, false, false)
+	constructor(uint128 _minAmount, uint128 _totalWeiNeed) public 
+		WeiExpense(_minAmount, _totalWeiNeed, 0, 0, false, false)
 	{}
 }

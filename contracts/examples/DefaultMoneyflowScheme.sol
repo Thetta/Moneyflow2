@@ -6,7 +6,7 @@ import "../ether/WeiAbsoluteExpense.sol";
 
 
 /**
- * @title FallbackToWeiReceiver
+ * @title DefaultMoneyflowScheme
  * @dev This contract should be used to automatically instantiate Default moneyscheme for a DAO.
  * Use it as example. You can setup your own moneyflow.  
  * THIS IS A WORKING example!
@@ -24,7 +24,7 @@ import "../ether/WeiAbsoluteExpense.sol";
  *			DividendsFund - fund
 */
 contract DefaultMoneyflowScheme {
-	WeiSplitter root;
+/*	WeiSplitter root;
 
 	WeiSplitter spends; 
 	WeiSplitter bonuses; 
@@ -39,8 +39,8 @@ contract DefaultMoneyflowScheme {
 
 	constructor(
 		address _fundOutput, 
-		uint _percentsReserve, 
-		uint _dividendsReserve) 
+		uint32 _percentsReserve, 
+		uint32 _dividendsReserve) 
 	{
 		require(0x0 != _fundOutput);
 
@@ -126,5 +126,5 @@ contract DefaultMoneyflowScheme {
 	// TODO: Currently dividens fund is just another type of Reserve fund (because DividendFund is not implemented yet) 
 	function flushDividendsFundTo(address _to) view public {
 		// TODO:
-	}
+	}*/
 }

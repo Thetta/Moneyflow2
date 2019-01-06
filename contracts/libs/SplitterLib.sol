@@ -143,7 +143,7 @@ contract SplitterLib {
 			b = _processRelativeSeries(_s, b);
 
 			if(_s.isTableSplitter && b.need > 0) {
-				_tableProcessing(address(this), _s.outputs[i], b.flow, b.need);
+				_tableProcessing(_s.outputs[i], b.flow, b.need);
 			} else if(!_s.isTableSplitter && b.need > 0) {
 				_elementProcessing(_s.addresses[i], b.flow, b.need);
 			}
@@ -154,7 +154,7 @@ contract SplitterLib {
 		require(b.sent == _value); 
 	}
 
-	function _constructSplitter(bool _isTableSplitter) internal view returns(Splitter s) {
+	function _constructSplitter(bool _isTableSplitter) internal pure returns(Splitter s) {
 		uint[] memory emptyOutputs;
 		address[] memory emptyAddresses;
 		return Splitter(true, _isTableSplitter, emptyOutputs, emptyAddresses, IReceiver.Type.Splitter);
@@ -208,11 +208,7 @@ contract SplitterLib {
 		}
 	}
 
-	function _tableProcessing(address _target, uint _eId, uint _flow, uint _need) internal {
-		revert();
-	}
+	function _tableProcessing(uint, uint, uint) internal {}
 
-	function _elementProcessing(address _target, uint _flow, uint _need) internal {
-		revert();
-	}
+	function _elementProcessing(address, uint, uint) internal {}
 }

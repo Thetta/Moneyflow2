@@ -8,28 +8,16 @@ var ERC20RelativeExpense = artifacts.require('./ERC20RelativeExpense');
 var ERC20AbsoluteExpenseWithPeriod = artifacts.require('./ERC20AbsoluteExpenseWithPeriod');
 var ERC20RelativeExpenseWithPeriod = artifacts.require('./ERC20RelativeExpenseWithPeriod');
 var ERC20AbsoluteExpenseWithPeriodSliding = artifacts.require('./ERC20AbsoluteExpenseWithPeriodSliding');
-const getEId = o => o.logs.filter(l => l.event == 'elementAdded')[0].args._eId.toNumber();
-const KECCAK256 = x => web3.sha3(x);
-
-async function passHours (hours) {
-	await web3.currentProvider.sendAsync({
-		jsonrpc: '2.0',
-		method: 'evm_increaseTime',
-		params: [3600 * hours * 1000],
-		id: new Date().getTime(),
-	}, function (err) { if (err) console.log('err:', err); });
-}
-
-const BigNumber = web3.BigNumber;
 
 require('chai')
 	.use(require('chai-as-promised'))
-	.use(require('chai-bignumber')(BigNumber))
+	.use(require('chai-bignumber')(web3.BigNumber))
 	.should();
+
+const {passHours} = require('../helpers/utils');
 
 contract('ERC20Fund', (accounts) => {
 	var token;
-	let tokenAmount = 1e7;
 
 	const creator = accounts[0];
 	const employee1 = accounts[1];
@@ -38,19 +26,12 @@ contract('ERC20Fund', (accounts) => {
 
 	beforeEach(async () => {
 		token = await StandardToken.new();
-		await token.mint(accounts[0], 1e25);
-		await token.mint(accounts[1], 1e25);
-		await token.mint(accounts[2], 1e25);
-		await token.mint(accounts[3], 1e25);
-		await token.mint(accounts[4], 1e25);
-		await token.mint(accounts[5], 1e25);
-		await token.mint(accounts[6], 1e25);
-		await token.mint(accounts[7], 1e25);
-		await token.mint(accounts[8], 1e25);
-		await token.mint(accounts[9], 1e25);		
+		for(var i=0; i<10; i++) {
+			await token.mint(accounts[i], 1e25);
+		}
 	});
 
-	it('Should collect tokenAmount, then revert if more, then flush', async () => {
+	it('Should collect, then revert if more, then flush', async () => {
 		let fund = await ERC20AbsoluteExpense.new(token.address,1e18, 0);
 
 		var totalNeed = await fund.getTotalNeeded(1e22);
@@ -99,7 +80,7 @@ contract('ERC20Fund', (accounts) => {
 		assert.equal(isNeed, false);
 	});
 
-	it('Should collect tokenAmount (periodic, not accumulate debt), then time passed, then need tokenAmount again', async () => {
+	it('Should collect (periodic, not accumulate debt), then time passed, then need again', async () => {
 		let fund = await ERC20AbsoluteExpenseWithPeriod.new(token.address,1e18, 0, 24);
 
 		var totalNeed = await fund.getTotalNeeded(1e22);
@@ -163,7 +144,7 @@ contract('ERC20Fund', (accounts) => {
 		assert.equal(isNeed, false);
 	});
 
-	it('Should collect tokenAmount (periodic, accumulate debt), then time passed, then need tokenAmount again', async () => {
+	it('Should collect (periodic, accumulate debt), then time passed, then need again', async () => {
 		let fund = await ERC20AbsoluteExpenseWithPeriodSliding.new(token.address,1e18, 0, 24);
 
 		var totalNeed = await fund.getTotalNeeded(1e22);
@@ -224,7 +205,7 @@ contract('ERC20Fund', (accounts) => {
 		assert.equal(isNeed, false);
 	});
 
-	it('Should collect tokenAmount (periodic, accumulate debt), then time passed, then need tokenAmount again', async () => {
+	it('Should collect (periodic, accumulate debt), then time passed, then need again', async () => {
 		let fund = await ERC20AbsoluteExpenseWithPeriodSliding.new(token.address,1e18, 0, 24);
 		var totalNeed = await fund.getTotalNeeded(1e22);
 		var isNeed = await fund.isNeeds();

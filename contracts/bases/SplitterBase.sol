@@ -15,6 +15,10 @@ import "../interfaces/IReceiver.sol";
 */
 contract SplitterBase is SplitterLib, IReceiver, ISplitter, Ownable {
 	Splitter splitter;
+
+	constructor() public {
+		splitter = _constructSplitter(false);
+	}
 	
 	// --------------------- UNIVERSAL INTERFACE --------------------- 
 	function getMinNeeded(uint _currentFlow) public view returns(uint) {

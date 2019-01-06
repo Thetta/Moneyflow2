@@ -18,61 +18,61 @@ contract Budget is Ownable {
 
 	uint32 budgetPeriod;
 
-	constructor(uint32 _budgetPeriod) {
-		WeiTable weiTable = new WeiTable();
+	constructor(uint32 _budgetPeriod) public {
+		weiTable = new WeiTable();
 		budgetPeriod = _budgetPeriod;
 		createLayout();
 
-		uint128[] employeeSalaries;
-		employeeSalaries.push(10e18);
-		employeeSalaries.push(20e18);
-		employeeSalaries.push(20e18);
-		addEmployees(employeeSalaries);
+		uint128[] memory employeeSalariesArr = new uint128[](3);
+		employeeSalariesArr[0] = 10e18;
+		employeeSalariesArr[1] = 20e18;
+		employeeSalariesArr[2] = 20e18;
+		addEmployees(employeeSalariesArr);
 
-		uint32[] bonuses;
-		bonuses.push(10000);
-		bonuses.push(20000);
-		bonuses.push(20000);
-		addBonuses(bonuses);
+		uint32[] memory bonusesArr = new uint32[](3);
+		bonusesArr[0] = 10000;
+		bonusesArr[1] = 20000;
+		bonusesArr[2] = 20000;
+		addBonuses(bonusesArr);
 
-		uint128[] tasks;
-		tasks.push(0.1e18);
-		tasks.push(0.3e18);
-		tasks.push(0.5e18);
-		addTasks(tasks);
+		uint128[] memory tasksArr = new uint128[](3);
+		tasksArr[0] = 0.1e18;
+		tasksArr[1] = 0.3e18;
+		tasksArr[2] = 0.5e18;
+		addTasks(tasksArr);
 
-		uint128[] utils;
-		utils.push(2e18);
-		utils.push(3e18);
-		addUtils(utils);
+		uint128[] memory utilsArr = new uint128[](2);
+		utilsArr[0] = 2e18;
+		utilsArr[1] = 3e18;
+		addUtils(utilsArr);
 
-		uint128[] funds;
-		funds.push(20000*1e18);
-		funds.push(20000000*1e18);
-		addFunds(funds);
+		uint128[] memory fundsArr = new uint128[](2);
+		fundsArr[0] = 20000*1e18;
+		fundsArr[1] = 20000000*1e18;
+		addFunds(fundsArr);
 	}
 
 	function createLayout() internal {
 		weiTable.addSplitter();
-		uint bubgetEntry = weiTable.getLastNodeId();
+		bubgetEntry = weiTable.getLastNodeId();
 		
 		weiTable.addSplitter();
-		uint spends = weiTable.getLastNodeId();
+		spends = weiTable.getLastNodeId();
 		
 		weiTable.addSplitter();
-		uint salaries = weiTable.getLastNodeId();
+		salaries = weiTable.getLastNodeId();
 
 		weiTable.addSplitter();
-		uint tasks = weiTable.getLastNodeId();
+		tasks = weiTable.getLastNodeId();
 	
 		weiTable.addSplitter();
-		uint bonuses = weiTable.getLastNodeId();
+		bonuses = weiTable.getLastNodeId();
 
 		weiTable.addSplitter();
-		uint oneTimeUtils = weiTable.getLastNodeId();
+		oneTimeUtils = weiTable.getLastNodeId();
 		
 		weiTable.addSplitter();
-		uint funds = weiTable.getLastNodeId();
+		funds = weiTable.getLastNodeId();
 
 		weiTable.addChildAt(bubgetEntry, spends);
 		weiTable.addChildAt(spends, salaries);
@@ -82,7 +82,7 @@ contract Budget is Ownable {
 		weiTable.addChildAt(bubgetEntry, funds);
 	}
 
-	function addEmployees(uint128[] _employeeSalaries) public onlyOwner {
+	function addEmployees(uint128[] memory _employeeSalaries) public onlyOwner {
 		for(uint i=0; i<_employeeSalaries.length; i++) {
 			weiTable.addAbsoluteExpense(_employeeSalaries[i], _employeeSalaries[i], true, true, budgetPeriod);
 			uint employee = weiTable.getLastNodeId();
@@ -90,7 +90,7 @@ contract Budget is Ownable {
 		}
 	}
 
-	function addBonuses(uint32[] _bonuses) public onlyOwner {
+	function addBonuses(uint32[] memory _bonuses) public onlyOwner {
 		for(uint i=0; i<_bonuses.length; i++) {
 			weiTable.addRelativeExpense(_bonuses[i], true, true, budgetPeriod);
 			uint bonus = weiTable.getLastNodeId();
@@ -98,7 +98,7 @@ contract Budget is Ownable {
 		}
 	}
 
-	function addTasks(uint128[] _tasks) public onlyOwner {
+	function addTasks(uint128[] memory _tasks) public onlyOwner {
 		for(uint i=0; i<_tasks.length; i++) {
 			weiTable.addAbsoluteExpense(_tasks[i], _tasks[i], false, false, 0);
 			uint task = weiTable.getLastNodeId();
@@ -106,7 +106,7 @@ contract Budget is Ownable {
 		}
 	}
 
-	function addUtils(uint128[] _oneTimeUtils) public onlyOwner {
+	function addUtils(uint128[] memory _oneTimeUtils) public onlyOwner {
 		for(uint i=0; i<_oneTimeUtils.length; i++) {
 			weiTable.addAbsoluteExpense(_oneTimeUtils[i], _oneTimeUtils[i], false, false, 0);
 			uint oneTimeUtil = weiTable.getLastNodeId();
@@ -114,7 +114,7 @@ contract Budget is Ownable {
 		}
 	}
 
-	function addFunds(uint128[] _funds) public onlyOwner {
+	function addFunds(uint128[] memory _funds) public onlyOwner {
 		for(uint i=0; i<_funds.length; i++) {
 			weiTable.addAbsoluteExpense(_funds[i], 0, false, false, 0);
 			uint fund = weiTable.getLastNodeId();

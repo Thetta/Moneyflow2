@@ -18,9 +18,8 @@ import "../interfaces/IReceiver.sol";
 contract ERC20Splitter is ITokenReceiver, SplitterBase {
 	ERC20 public token;
 
-	constructor(address _tokenAddress) public {
+	constructor(address _tokenAddress) SplitterBase() public {
 		token = ERC20(_tokenAddress);
-		splitter = _constructSplitter(false);
 	}
 
 	function _elementProcessing(address _target, uint _currentFlow, uint _value) internal {
