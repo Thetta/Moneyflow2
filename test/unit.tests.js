@@ -234,7 +234,6 @@ contract('Unit tests', (accounts) => {
 				await spl.open();
 				assert.equal((await spl.isOpen()), true);
 			});			
-
 		});
 
 		describe('Table', function() {

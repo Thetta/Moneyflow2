@@ -16,8 +16,7 @@ import "zeppelin-solidity/contracts/ownership/Ownable.sol";
  * Should be used in the Moneyflow so will automatically receive Wei.
 */
 contract WeiExpense is IWeiReceiver, IDestination, ExpenseBase {
-	constructor(uint128 _totalNeeded, uint128 _minAmount, uint32 _partsPerMillion, uint32 _periodHours, bool _isSlidingAmount, bool _isPeriodic) 
-		ExpenseBase(_totalNeeded, _minAmount, _partsPerMillion, _periodHours, _isSlidingAmount, _isPeriodic) public {}
+	constructor(uint128 _totalNeeded, uint128 _minAmount, uint32 _partsPerMillion, uint32 _periodHours, bool _isSlidingAmount, bool _isPeriodic) ExpenseBase(_totalNeeded, _minAmount, _partsPerMillion, _periodHours, _isSlidingAmount, _isPeriodic) public {}
 
 	function processFunds(uint _currentFlow) public payable {
 		emit ExpenseProcessAmount(msg.sender, msg.value, _currentFlow);
