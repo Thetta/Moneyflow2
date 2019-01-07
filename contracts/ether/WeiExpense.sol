@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "../bases/ExpenseBase.sol";
 
@@ -6,8 +6,8 @@ import "../interfaces/IDestination.sol";
 import "../interfaces/IReceiver.sol";
 import "../interfaces/IWeiReceiver.sol";
 
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
 /**
@@ -24,14 +24,16 @@ contract WeiExpense is IWeiReceiver, IDestination, ExpenseBase {
 	}
 
 	function flush() public onlyOwner {
+		address payable ownerPayable = address(uint160(owner()));
 		_processFlushTo(expense);
-		emit ExpenseFlush(owner, address(this).balance);
-		owner.transfer(address(this).balance);
+		emit ExpenseFlush(ownerPayable, address(this).balance);
+		ownerPayable.transfer(address(this).balance);
 	}
 
 	function flushTo(address _to) public onlyOwner {
+		address payable toPayable = address(uint160(_to));
 		_processFlushTo(expense);
-		emit ExpenseFlush(_to, address(this).balance);
-		_to.transfer(address(this).balance);
+		emit ExpenseFlush(toPayable, address(this).balance);
+		toPayable.transfer(address(this).balance);
 	}	
 }

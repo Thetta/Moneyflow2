@@ -1,9 +1,9 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "../../ether/WeiTable.sol";
 
 
-// this contract is an owner of weiTable; so, no one else can modify scheme
+// this contract is an owner() of weiTable; so, no one else can modify scheme
 // while this contract have no modifying methods, the scheme is constant
 contract Roadmap {
 	WeiTable weiTable;
@@ -31,5 +31,5 @@ contract Roadmap {
 		weiTable.addChildAt(roadmap, milestone3);
 	}
 
-	function() public {}
+	function() external {}
 }

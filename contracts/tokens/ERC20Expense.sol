@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "../bases/ExpenseBase.sol";
 
@@ -6,9 +6,9 @@ import "../interfaces/IDestination.sol";
 import "../interfaces/IReceiver.sol";
 import "../interfaces/ITokenReceiver.sol";
 
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 
 /**
@@ -33,8 +33,8 @@ contract ERC20Expense is ITokenReceiver, IDestination, ExpenseBase {
 	}
 
 	function flush() public onlyOwner {
-		token.transfer(owner, expense.balance);
-		emit ExpenseFlush(owner, expense.balance);
+		token.transfer(owner(), expense.balance);
+		emit ExpenseFlush(owner(), expense.balance);
 		expense = _processFlushTo(expense);
 	}
 

@@ -15,6 +15,15 @@ const {checkParamsCycle, createStructure, totalAndMinNeedsAsserts,
 
 const {passHours} = require('../helpers/utils');
 
+function toHex(num) {
+	var hexString = yourNumber.toString(16);
+	if (hexString.length % 2) {
+	  hexString = '0' + hexString;
+	}
+	return hexString;
+}
+
+
 require('chai')
 	.use(require('chai-as-promised'))
 	.use(require('chai-bignumber')(web3.BigNumber))

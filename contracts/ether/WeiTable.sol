@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "../bases/TableBase.sol";
 import "../bases/ExpenseBase.sol";
@@ -6,7 +6,7 @@ import "../bases/SplitterBase.sol";
 
 import "../interfaces/IReceiver.sol";
 import "../interfaces/IWeiReceiver.sol";
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
 contract WeiTable is ITable, IReceiver, IWeiReceiver, TableBase {
@@ -17,13 +17,15 @@ contract WeiTable is ITable, IReceiver, IWeiReceiver, TableBase {
 	}
 
 	function flushAt(uint _eId) public onlyOwner isCorrectId(_eId) {
-		owner.transfer(expenses[_eId].balance);
-		emit NodeFlushTo(_eId, owner, expenses[_eId].balance);
+		address payable ownerPayable = address(uint160(owner()));
+		ownerPayable.transfer(expenses[_eId].balance);
+		emit NodeFlushTo(_eId, owner(), expenses[_eId].balance);
 		_processFlushToAt(_eId);
 	}
 
 	function flushToAt(uint _eId, address _to) public onlyOwner isCorrectId(_eId) {
-		_to.transfer(expenses[_eId].balance);
+		address payable toPayable = address(uint160(_to));
+		toPayable.transfer(expenses[_eId].balance);
 		emit NodeFlushTo(_eId, _to, expenses[_eId].balance);
 		_processFlushToAt(_eId);
 	}
