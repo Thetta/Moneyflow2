@@ -2,15 +2,15 @@ const {getNodeId} = require('../helpers/utils');
 
 async function checkParamsCycle (targets, flowArr, minNeedArr, totalNeedArr, isNeedArr) {
 	for(var i=0; i<targets.length; i++) {
-		assert.equal((await targets[i].getMinNeeded(flowArr[i]*1e14)).toNumber() / 1e14, minNeedArr[i]);	
-		assert.equal((await targets[i].getTotalNeeded(flowArr[i]*1e14)).toNumber() / 1e14, totalNeedArr[i]);
+		assert.equal((await targets[i].getMinNeeded(flowArr[i]*1e4)) / 1e4, minNeedArr[i]);	
+		assert.equal((await targets[i].getTotalNeeded(flowArr[i]*1e4)) / 1e4, totalNeedArr[i]);
 		assert.equal((await targets[i].isNeeds()), isNeedArr[i]);
 	}
 }
 
 async function checkNeededArrs(salaries, multiplier, flow, need) {
 	for(var i=0; i<flow.length; i++) {
-		assert.equal((await salaries.getMinNeeded(flow[i]*multiplier)).toNumber() / multiplier, need[i]);
+		assert.equal((await salaries.getMinNeeded(flow[i]*multiplier)) / multiplier, need[i]);
 	}
 }
 
@@ -91,20 +91,20 @@ async function totalAndMinNeedsAsserts(i, p) {
 
 	var allNeeds = totalSpend + bonusesSpendPercent*(p.b1 + p.b2 + p.b3) + fundsPercent*(p.reserve + p.dividends);
 
-	assert.equal(i.AllOutputsTotalNeed.toNumber() / p.multiplier, allNeeds);
-	assert.equal(i.AllOutputsMinNeed.toNumber() / p.multiplier, totalSpend);
-	assert.equal(i.SpendsTotalNeed.toNumber() / p.multiplier, totalSpend);
-	assert.equal(i.SpendsMinNeed.toNumber() / p.multiplier, totalSpend);
-	assert.equal(i.SalariesTotalNeed.toNumber() / p.multiplier, p.e1 + p.e2 + p.e3);
-	assert.equal(i.SalariesMinNeed.toNumber() / p.multiplier, p.e1 + p.e2 + p.e3);
-	assert.equal(i.OtherTotalNeed.toNumber() / p.multiplier, p.office + p.internet);
-	assert.equal(i.OtherMinNeed.toNumber() / p.multiplier, p.office + p.internet);
-	assert.equal(i.TasksTotalNeed.toNumber() / p.multiplier, p.t1 + p.t2 + p.t3);
-	assert.equal(i.TasksMinNeed.toNumber() / p.multiplier, p.t1 + p.t2 + p.t3);
-	assert.equal(i.BonusesTotalNeed.toNumber() / p.multiplier, (p.b1 + p.b2 + p.b3)*p.CURRENT_INPUT / 1000000);
-	assert.equal(i.BonusesMinNeed.toNumber() / p.multiplier, 0);
-	assert.equal(i.RestTotalNeed.toNumber() / p.multiplier, (p.reserve + p.dividends)*p.CURRENT_INPUT / 1000000);
-	assert.equal(i.RestMinNeed.toNumber() / p.multiplier, 0);
+	assert.equal(i.AllOutputsTotalNeed / p.multiplier, allNeeds);
+	assert.equal(i.AllOutputsMinNeed / p.multiplier, totalSpend);
+	assert.equal(i.SpendsTotalNeed / p.multiplier, totalSpend);
+	assert.equal(i.SpendsMinNeed / p.multiplier, totalSpend);
+	assert.equal(i.SalariesTotalNeed / p.multiplier, p.e1 + p.e2 + p.e3);
+	assert.equal(i.SalariesMinNeed / p.multiplier, p.e1 + p.e2 + p.e3);
+	assert.equal(i.OtherTotalNeed / p.multiplier, p.office + p.internet);
+	assert.equal(i.OtherMinNeed / p.multiplier, p.office + p.internet);
+	assert.equal(i.TasksTotalNeed / p.multiplier, p.t1 + p.t2 + p.t3);
+	assert.equal(i.TasksMinNeed / p.multiplier, p.t1 + p.t2 + p.t3);
+	assert.equal(i.BonusesTotalNeed / p.multiplier, (p.b1 + p.b2 + p.b3)*p.CURRENT_INPUT / 1000000);
+	assert.equal(i.BonusesMinNeed / p.multiplier, 0);
+	assert.equal(i.RestTotalNeed / p.multiplier, (p.reserve + p.dividends)*p.CURRENT_INPUT / 1000000);
+	assert.equal(i.RestMinNeed / p.multiplier, 0);
 }
 
 async function getBalances(i, getter) {
@@ -161,13 +161,13 @@ async function getSplitterParams(i, p) {
 }
 
 async function structureAsserts(i) {
-	assert.equal(i.AllOutputsChildrenCount.toNumber(), 3);
-	assert.equal(i.SpendsChildrenCount.toNumber(), 3);
-	assert.equal(i.SalariesChildrenCount.toNumber(), 3);
-	assert.equal(i.OtherChildrenCount.toNumber(), 2);
-	assert.equal(i.TasksChildrenCount.toNumber(), 3);
-	assert.equal(i.BonusesChildrenCount.toNumber(), 3);
-	assert.equal(i.RestChildrenCount.toNumber(), 2);
+	assert.equal(i.AllOutputsChildrenCount, 3);
+	assert.equal(i.SpendsChildrenCount, 3);
+	assert.equal(i.SalariesChildrenCount, 3);
+	assert.equal(i.OtherChildrenCount, 2);
+	assert.equal(i.TasksChildrenCount, 3);
+	assert.equal(i.BonusesChildrenCount, 3);
+	assert.equal(i.RestChildrenCount, 2);
 }
 
 async function balancesAsserts(i, p) {
@@ -175,31 +175,31 @@ async function balancesAsserts(i, p) {
 	var bonusesSpendPercent = (p.CURRENT_INPUT - totalSpend) / 1000000;
 	var fundsPercent = (p.CURRENT_INPUT - totalSpend - bonusesSpendPercent*(p.b1 + p.b2 + p.b3)) / 1000000;
 
-	assert.equal(i.Employee1Balance.toNumber() / p.multiplier, p.e1);
-	assert.equal(i.Employee2Balance.toNumber() / p.multiplier, p.e2);
-	assert.equal(i.Employee3Balance.toNumber() / p.multiplier, p.e3);
-	assert.equal(i.OfficeBalance.toNumber() / p.multiplier, p.office);
-	assert.equal(i.InternetBalance.toNumber() / p.multiplier, p.internet);
-	assert.equal(i.Task1Balance.toNumber() / p.multiplier, p.t1);
-	assert.equal(i.Task2Balance.toNumber() / p.multiplier, p.t2);
-	assert.equal(i.Task3Balance.toNumber() / p.multiplier, p.t3);
+	assert.equal(i.Employee1Balance / p.multiplier, p.e1);
+	assert.equal(i.Employee2Balance / p.multiplier, p.e2);
+	assert.equal(i.Employee3Balance / p.multiplier, p.e3);
+	assert.equal(i.OfficeBalance / p.multiplier, p.office);
+	assert.equal(i.InternetBalance / p.multiplier, p.internet);
+	assert.equal(i.Task1Balance / p.multiplier, p.t1);
+	assert.equal(i.Task2Balance / p.multiplier, p.t2);
+	assert.equal(i.Task3Balance / p.multiplier, p.t3);
 
-	assert.equal(i.Bonus1Balance.toNumber() / p.multiplier, bonusesSpendPercent*p.b1);
-	assert.equal(i.Bonus2Balance.toNumber() / p.multiplier, bonusesSpendPercent*p.b2);
-	assert.equal(i.Bonus3Balance.toNumber() / p.multiplier, bonusesSpendPercent*p.b3);
+	assert.equal(i.Bonus1Balance / p.multiplier, bonusesSpendPercent*p.b1);
+	assert.equal(i.Bonus2Balance / p.multiplier, bonusesSpendPercent*p.b2);
+	assert.equal(i.Bonus3Balance / p.multiplier, bonusesSpendPercent*p.b3);
 
-	assert.equal(i.Reserve3Balance.toNumber() / p.multiplier, fundsPercent*p.reserve);
-	assert.equal(i.Dividends3Balance.toNumber() / p.multiplier, fundsPercent*p.dividends);
+	assert.equal(i.Reserve3Balance / p.multiplier, fundsPercent*p.reserve);
+	assert.equal(i.Dividends3Balance / p.multiplier, fundsPercent*p.dividends);
 }
 
 async function splitterBalancesAsserts(i) {
-	assert.equal(i.AllOutputsBalance.toNumber(), 0);
-	assert.equal(i.SpendsBalance.toNumber(), 0);
-	assert.equal(i.SalariesBalance.toNumber(), 0);
-	assert.equal(i.OtherBalance.toNumber(), 0);
-	assert.equal(i.TasksBalance.toNumber(), 0);
-	assert.equal(i.BonusesBalance.toNumber(), 0);
-	assert.equal(i.RestBalance.toNumber(), 0);
+	assert.equal(i.AllOutputsBalance, 0);
+	assert.equal(i.SpendsBalance, 0);
+	assert.equal(i.SalariesBalance, 0);
+	assert.equal(i.OtherBalance, 0);
+	assert.equal(i.TasksBalance, 0);
+	assert.equal(i.BonusesBalance, 0);
+	assert.equal(i.RestBalance, 0);
 }
 
 async function createStructureTable(p, table) {
@@ -271,20 +271,20 @@ async function totalAndMinNeedsAssertsTable(i, p) {
 	}
 	var allNeeds = totalSpend + (bonusesSpendPercent * (p.b1 + p.b2 + p.b3)) + (dividendsAmount + reserveAmount);
 
-	assert.equal((new web3.BigNumber(i.AllOutputsTotalNeed).div(p.multiplier)).toNumber(), allNeeds);
-	assert.equal((new web3.BigNumber(i.AllOutputsMinNeed).div(p.multiplier)).toNumber(), totalSpend);
-	assert.equal((new web3.BigNumber(i.SpendsTotalNeed).div(p.multiplier)).toNumber(), totalSpend);
-	assert.equal((new web3.BigNumber(i.SpendsMinNeed).div(p.multiplier)).toNumber(), totalSpend);
-	assert.equal((new web3.BigNumber(i.SalariesTotalNeed).div(p.multiplier)).toNumber(), p.e1 + p.e2 + p.e3);
-	assert.equal((new web3.BigNumber(i.SalariesMinNeed).div(p.multiplier)).toNumber(), p.e1 + p.e2 + p.e3);
-	assert.equal((new web3.BigNumber(i.OtherTotalNeed).div(p.multiplier)).toNumber(), p.office + p.internet);
-	assert.equal((new web3.BigNumber(i.OtherMinNeed).div(p.multiplier)).toNumber(), p.office + p.internet);
-	assert.equal((new web3.BigNumber(i.TasksTotalNeed).div(p.multiplier)).toNumber(), p.t1 + p.t2 + p.t3);
-	assert.equal((new web3.BigNumber(i.TasksMinNeed).div(p.multiplier)).toNumber(), p.t1 + p.t2 + p.t3);
-	assert.equal((new web3.BigNumber(i.BonusesTotalNeed).div(p.multiplier)).toNumber(), (p.b1 + p.b2 + p.b3) * p.CURRENT_INPUT / 1000000);
-	assert.equal((new web3.BigNumber(i.BonusesMinNeed).div(p.multiplier)).toNumber(), 0);
-	assert.equal((new web3.BigNumber(i.RestTotalNeed).div(p.multiplier)).toNumber(), p.CURRENT_INPUT);
-	assert.equal((new web3.BigNumber(i.RestMinNeed).div(p.multiplier)).toNumber(), 0);
+	assert.equal(web3.utils.BN(i.AllOutputsTotalNeed).toNumber(), allNeeds * p.multiplier);
+	assert.equal(web3.utils.BN(i.AllOutputsMinNeed).toNumber(), totalSpend * p.multiplier);
+	assert.equal(web3.utils.BN(i.SpendsTotalNeed).toNumber(), totalSpend * p.multiplier);
+	assert.equal(web3.utils.BN(i.SpendsMinNeed).toNumber(), totalSpend * p.multiplier);
+	assert.equal(web3.utils.BN(i.SalariesTotalNeed).toNumber(), (p.e1 + p.e2 + p.e3) * p.multiplier);
+	assert.equal(web3.utils.BN(i.SalariesMinNeed).toNumber(), (p.e1 + p.e2 + p.e3) * p.multiplier);
+	assert.equal(web3.utils.BN(i.OtherTotalNeed).toNumber(), (p.office + p.internet) * p.multiplier);
+	assert.equal(web3.utils.BN(i.OtherMinNeed).toNumber(), (p.office + p.internet) * p.multiplier);
+	assert.equal(web3.utils.BN(i.TasksTotalNeed).toNumber(), (p.t1 + p.t2 + p.t3) * p.multiplier);
+	assert.equal(web3.utils.BN(i.TasksMinNeed).toNumber(), (p.t1 + p.t2 + p.t3) * p.multiplier);
+	assert.equal(web3.utils.BN(i.BonusesTotalNeed).toNumber(), ((p.b1 + p.b2 + p.b3) * p.CURRENT_INPUT / 1000000) * p.multiplier);
+	assert.equal(web3.utils.BN(i.BonusesMinNeed).toNumber(), 0 * p.multiplier);
+	assert.equal(web3.utils.BN(i.RestTotalNeed).toNumber(), p.CURRENT_INPUT * p.multiplier);
+	assert.equal(web3.utils.BN(i.RestMinNeed).toNumber(), 0 * p.multiplier);
 }
 
 async function getBalancesTable(i) {
@@ -341,13 +341,13 @@ async function getSplitterParamsTable(i, p) {
 }
 
 async function structureAssertsTable(i) {
-	assert.equal(i.AllOutputsChildrenCount.toNumber(), 3);
-	assert.equal(i.SpendsChildrenCount.toNumber(), 3);
-	assert.equal(i.SalariesChildrenCount.toNumber(), 3);
-	assert.equal(i.OtherChildrenCount.toNumber(), 2);
-	assert.equal(i.TasksChildrenCount.toNumber(), 3);
-	assert.equal(i.BonusesChildrenCount.toNumber(), 3);
-	assert.equal(i.RestChildrenCount.toNumber(), 2);
+	assert.equal(i.AllOutputsChildrenCount, 3);
+	assert.equal(i.SpendsChildrenCount, 3);
+	assert.equal(i.SalariesChildrenCount, 3);
+	assert.equal(i.OtherChildrenCount, 2);
+	assert.equal(i.TasksChildrenCount, 3);
+	assert.equal(i.BonusesChildrenCount, 3);
+	assert.equal(i.RestChildrenCount, 2);
 }
 
 async function balancesAssertsTable(i, p) {
@@ -355,19 +355,19 @@ async function balancesAssertsTable(i, p) {
 	var bonusesSpendPercent = (p.CURRENT_INPUT - totalSpend) / 1000000;
 	var fundsPercent = (p.CURRENT_INPUT - totalSpend - bonusesSpendPercent*(p.b1 + p.b2 + p.b3)) / 1000000;
 	
-	assert.equal((new web3.BigNumber(i.Employee1Balance).div(p.multiplier)).toNumber(), p.e1);
-	assert.equal((new web3.BigNumber(i.Employee2Balance).div(p.multiplier)).toNumber(), p.e2);
-	assert.equal((new web3.BigNumber(i.Employee3Balance).div(p.multiplier)).toNumber(), p.e3);
-	assert.equal((new web3.BigNumber(i.OfficeBalance).div(p.multiplier)).toNumber(), p.office);
-	assert.equal((new web3.BigNumber(i.InternetBalance).div(p.multiplier)).toNumber(), p.internet);
-	assert.equal((new web3.BigNumber(i.Task1Balance).div(p.multiplier)).toNumber(), p.t1);
-	assert.equal((new web3.BigNumber(i.Task2Balance).div(p.multiplier)).toNumber(), p.t2);
-	assert.equal((new web3.BigNumber(i.Task3Balance).div(p.multiplier)).toNumber(), p.t3);
-	assert.equal((new web3.BigNumber(i.Bonus1Balance).div(p.multiplier)).toNumber(), bonusesSpendPercent * p.b1);
-	assert.equal((new web3.BigNumber(i.Bonus2Balance).div(p.multiplier)).toNumber(), bonusesSpendPercent * p.b2);
-	assert.equal((new web3.BigNumber(i.Bonus3Balance).div(p.multiplier)).toNumber(), bonusesSpendPercent * p.b3);
-	assert.equal((new web3.BigNumber(i.DividendsBalance).div(p.multiplier)).toNumber(), fundsPercent*p.dividends);
-	assert.equal((new web3.BigNumber(i.ReserveBalance).div(p.multiplier)).toNumber(), fundsPercent*p.reserve);
+	assert.equal(web3.utils.BN(i.Employee1Balance).toNumber(), p.e1 * p.multiplier);
+	assert.equal(web3.utils.BN(i.Employee2Balance).toNumber(), p.e2 * p.multiplier);
+	assert.equal(web3.utils.BN(i.Employee3Balance).toNumber(), p.e3 * p.multiplier);
+	assert.equal(web3.utils.BN(i.OfficeBalance).toNumber(), p.office * p.multiplier);
+	assert.equal(web3.utils.BN(i.InternetBalance).toNumber(), p.internet * p.multiplier);
+	assert.equal(web3.utils.BN(i.Task1Balance).toNumber(), p.t1 * p.multiplier);
+	assert.equal(web3.utils.BN(i.Task2Balance).toNumber(), p.t2 * p.multiplier);
+	assert.equal(web3.utils.BN(i.Task3Balance).toNumber(), p.t3 * p.multiplier);
+	assert.equal(web3.utils.BN(i.Bonus1Balance).toNumber(), bonusesSpendPercent * p.b1 * p.multiplier);
+	assert.equal(web3.utils.BN(i.Bonus2Balance).toNumber(), bonusesSpendPercent * p.b2 * p.multiplier);
+	assert.equal(web3.utils.BN(i.Bonus3Balance).toNumber(), bonusesSpendPercent * p.b3 * p.multiplier);
+	assert.equal(web3.utils.BN(i.DividendsBalance).toNumber(), fundsPercent*p.dividends * p.multiplier);
+	assert.equal(web3.utils.BN(i.ReserveBalance).toNumber(), fundsPercent*p.reserve * p.multiplier);
 }
 
 module.exports = {

@@ -11,17 +11,17 @@ var ERC20RelativeExpenseWithPeriod = artifacts.require('./ERC20RelativeExpenseWi
 
 require('chai')
 	.use(require('chai-as-promised'))
-	.use(require('chai-bignumber')(web3.BigNumber))
+	.use(require('chai-bignumber')(web3.utils.BN))
 	.should();
 
 const {createStructureTable, totalAndMinNeedsAssertsTable, getBalancesTable, 
 	getSplitterParamsTable, structureAssertsTable, balancesAssertsTable} = require('../helpers/structures');
 
-const {passHours, getNodeId} = require('../helpers/utils');
+const {passHours, getNodeId, toBN} = require('../helpers/utils');
 
 contract('ERC20Table tests', (accounts) => {
 	var token;
-	var multiplier = 1e12;
+	var multiplier = 1e3;
 	var isPeriodic = false;
 	var isAccumulateDebt = false;
 	var periodHours = 0;
@@ -35,7 +35,7 @@ contract('ERC20Table tests', (accounts) => {
 	beforeEach(async () => {
 		token = await StandardToken.new();
 		for(var i=0; i<10; i++) {
-			await token.mint(accounts[i], 1e30);
+			await token.mint(accounts[i], 1e9);
 		}
 	});
 
@@ -59,9 +59,9 @@ contract('ERC20Table tests', (accounts) => {
 		var id2 = await table.getChildIdAt(splitterId, 1);
 		var id3 = await table.getChildIdAt(splitterId, 2);
 
-		assert.equal(id1, AbsoluteExpense1Id);
-		assert.equal(id2, AbsoluteExpense2Id);
-		assert.equal(id3, AbsoluteExpense3Id);
+		assert.equal(toBN(id1).toNumber(), toBN(AbsoluteExpense1Id).toNumber());
+		assert.equal(toBN(id2).toNumber(), toBN(AbsoluteExpense2Id).toNumber());
+		assert.equal(toBN(id3).toNumber(), toBN(AbsoluteExpense3Id).toNumber());
 
 		var totalNeed = await table.getTotalNeeded(6 * multiplier);
 		assert.equal(totalNeed, 6 * multiplier);
@@ -75,22 +75,22 @@ contract('ERC20Table tests', (accounts) => {
 		
 		// should end up in the outputs
 		var absoluteExpense1Balance = await table.balanceAt(AbsoluteExpense1Id);
-		assert.equal(absoluteExpense1Balance.toNumber(), 1 * multiplier, 'resource point received from splitter');
+		assert.equal(absoluteExpense1Balance, 1 * multiplier, 'resource point received from splitter');
 
 		var absoluteExpense2Balance = await table.balanceAt(AbsoluteExpense2Id);
-		assert.equal(absoluteExpense2Balance.toNumber(), 2 * multiplier, 'resource point received from splitter');
+		assert.equal(absoluteExpense2Balance, 2 * multiplier, 'resource point received from splitter');
 
 		var absoluteExpense3Balance = await table.balanceAt(AbsoluteExpense3Id);
-		assert.equal(absoluteExpense3Balance.toNumber(), 3 * multiplier, 'resource point received from splitter');
+		assert.equal(absoluteExpense3Balance, 3 * multiplier, 'resource point received from splitter');
 
-		assert.equal((await table.getTotalNeededAt(AbsoluteExpense1Id, 6 * multiplier)).toNumber(), 0);
-		assert.equal((await table.getTotalNeededAt(AbsoluteExpense2Id, 6 * multiplier)).toNumber(), 0);
-		assert.equal((await table.getTotalNeededAt(AbsoluteExpense3Id, 6 * multiplier)).toNumber(), 0);	
+		assert.equal((await table.getTotalNeededAt(AbsoluteExpense1Id, 6 * multiplier)), 0);
+		assert.equal((await table.getTotalNeededAt(AbsoluteExpense2Id, 6 * multiplier)), 0);
+		assert.equal((await table.getTotalNeededAt(AbsoluteExpense3Id, 6 * multiplier)), 0);	
 
 		var totalNeed = await table.getTotalNeeded(6 * multiplier);
-		assert.equal(totalNeed.toNumber(), 0 * multiplier);
+		assert.equal(totalNeed, 0 * multiplier);
 		var minNeed = await table.getMinNeeded(6 * multiplier);
-		assert.equal(minNeed.toNumber(), 0 * multiplier);
+		assert.equal(minNeed, 0 * multiplier);
 
 		var need2 = await table.isNeeds();
 		assert.equal(need2, false);
@@ -98,26 +98,26 @@ contract('ERC20Table tests', (accounts) => {
 		var b1 = await token.balanceOf(accounts[9]);
 		await table.flushToAt(AbsoluteExpense1Id, accounts[9], { gasPrice: 0 });
 		var b2 = await token.balanceOf(accounts[9]);
-		assert.equal(b2.sub(b1).toNumber(), 1 * multiplier);
+		assert.equal(b2.sub(b1), 1 * multiplier);
 
 		var b1 = await token.balanceOf(accounts[9]);
 		await table.flushToAt(AbsoluteExpense2Id, accounts[9], { gasPrice: 0 });
 		var b2 = await token.balanceOf(accounts[9]);
-		assert.equal(b2.sub(b1).toNumber(), 2 * multiplier);
+		assert.equal(b2.sub(b1), 2 * multiplier);
 
 		var b1 = await token.balanceOf(accounts[0]);
 		await table.flushAt(AbsoluteExpense3Id, { gasPrice: 0 });
 		var b2 = await token.balanceOf(accounts[0]);
-		assert.equal(b2.sub(b1).toNumber(), 3 * multiplier);
+		assert.equal(b2.sub(b1), 3 * multiplier);
 
 		var absoluteExpense1Balance = await table.balanceAt(AbsoluteExpense1Id);
-		assert.equal(absoluteExpense1Balance.toNumber(), 0 * multiplier, 'resource point received from splitter');
+		assert.equal(absoluteExpense1Balance, 0 * multiplier, 'resource point received from splitter');
 
 		var absoluteExpense2Balance = await table.balanceAt(AbsoluteExpense2Id);
-		assert.equal(absoluteExpense2Balance.toNumber(), 0 * multiplier, 'resource point received from splitter');
+		assert.equal(absoluteExpense2Balance, 0 * multiplier, 'resource point received from splitter');
 
 		var absoluteExpense3Balance = await table.balanceAt(AbsoluteExpense3Id);
-		assert.equal(absoluteExpense3Balance.toNumber(), 0 * multiplier, 'resource point received from splitter');
+		assert.equal(absoluteExpense3Balance, 0 * multiplier, 'resource point received from splitter');
 		var need2 = await table.isNeeds();
 	});
 
@@ -143,13 +143,13 @@ contract('ERC20Table tests', (accounts) => {
 		await table.processTokens(6 * multiplier, 6 * multiplier, {from: creator });
 		// should end up in the outputs
 		var absoluteExpense1Balance = await table.balanceAt(AbsoluteExpense1Id);
-		assert.equal(absoluteExpense1Balance.toNumber(), 1 * multiplier, 'resource point received from splitter');
+		assert.equal(absoluteExpense1Balance, 1 * multiplier, 'resource point received from splitter');
 
 		var absoluteExpense2Balance = await table.balanceAt(AbsoluteExpense2Id);
-		assert.equal(absoluteExpense2Balance.toNumber(), 2 * multiplier, 'resource point received from splitter');
+		assert.equal(absoluteExpense2Balance, 2 * multiplier, 'resource point received from splitter');
 
 		var absoluteExpense3Balance = await table.balanceAt(AbsoluteExpense3Id);
-		assert.equal(absoluteExpense3Balance.toNumber(), 3 * multiplier, 'resource point received from splitter');
+		assert.equal(absoluteExpense3Balance, 3 * multiplier, 'resource point received from splitter');
 	});
 
 	it('Should process with a scheme just like in the paper: 75/25 others, send MORE than minNeed; ', async () => {
@@ -284,7 +284,7 @@ contract('ERC20Table tests', (accounts) => {
 		await table.closeAt(AbsoluteExpense3Id);
 
 		var totalNeed = await table.getTotalNeeded(6 * multiplier);
-		assert.equal(totalNeed.toNumber(), 3 * multiplier);
+		assert.equal(totalNeed, 3 * multiplier);
 		var minNeed = await table.getMinNeeded(6 * multiplier);
 		assert.equal(minNeed, 3 * multiplier);
 
@@ -316,12 +316,12 @@ contract('ERC20Table tests', (accounts) => {
 
 		// should end up in the outputs
 		var absoluteExpense1Balance = await table.balanceAt(AbsoluteExpense1Id);
-		assert.equal(absoluteExpense1Balance.toNumber(), 0 * multiplier, 'resource point received from splitter');
+		assert.equal(absoluteExpense1Balance, 0 * multiplier, 'resource point received from splitter');
 
 		var absoluteExpense2Balance = await table.balanceAt(AbsoluteExpense2Id);
-		assert.equal(absoluteExpense2Balance.toNumber(), 2 * multiplier, 'resource point received from splitter');
+		assert.equal(absoluteExpense2Balance, 2 * multiplier, 'resource point received from splitter');
 
 		var absoluteExpense3Balance = await table.balanceAt(AbsoluteExpense3Id);
-		assert.equal(absoluteExpense3Balance.toNumber(), 3 * multiplier, 'resource point received from splitter');
+		assert.equal(absoluteExpense3Balance, 3 * multiplier, 'resource point received from splitter');
 	});
 });

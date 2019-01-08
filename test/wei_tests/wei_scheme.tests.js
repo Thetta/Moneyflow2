@@ -10,8 +10,6 @@ contract('Scheme', (accounts) => {
 	let token;
 	let moneyflowScheme;
 
-	let money = 1e14;
-
 	const creator = accounts[0];
 	const employee1 = accounts[1];
 	const output = accounts[2];

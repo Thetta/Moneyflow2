@@ -13,7 +13,7 @@ var ERC20RelativeExpenseWithPeriodSliding = artifacts.require('./ERC20RelativeEx
 
 require('chai')
 	.use(require('chai-as-promised'))
-	.use(require('chai-bignumber')(web3.BigNumber))
+	.use(require('chai-bignumber')(web3.utils.BN))
 	.should();
 
 const {checkParamsCycle, createStructure, totalAndMinNeedsAsserts, 
@@ -24,7 +24,7 @@ const {passHours} = require('../helpers/utils');
 
 contract('ERC20Expense', (accounts) => {
 	var token;
-	var multiplier = 1e10;
+	var multiplier = 1e3;
 
 	const creator = accounts[0];
 	const employee1 = accounts[1];
@@ -60,27 +60,27 @@ contract('ERC20Expense', (accounts) => {
 		await Employee1.flush({ from: creator, gasPrice: 0 });
 
 		var balance = await token.balanceOf(creator);
-		assert.equal((new web3.BigNumber(balance).sub(balance0)).toNumber(), 1000*multiplier, 'Should get amount');
+		assert.equal((new web3.utils.BN(balance).sub(balance0)), 1000*multiplier, 'Should get amount');
 
 		var needsEmployee1 = await Employee1.isNeeds({ from: creator });
 		assert.equal(needsEmployee1, false, 'Dont need amount, because he got it');
 
-		await passHours(timePeriod);
+		await passHours(web3, timePeriod);
 		var needsEmployee2 = await Employee1.isNeeds({ from: creator });
 		assert.equal(needsEmployee2, true, 'Need amount, because 24 hours passed');
 
 		var need = await Employee1.getTotalNeeded(10000*multiplier);
-		assert.equal(need.toNumber(), 1000*multiplier);
+		assert.equal(need, 1000*multiplier);
 
 		var min = await Employee1.getMinNeeded(10000*multiplier);
-		assert.equal(min.toNumber(), 1000*multiplier);
+		assert.equal(min, 1000*multiplier);
 
 		await token.approve(Employee1.address, 1000*multiplier, {from:outsider});
 		await Employee1.processTokens(1000*multiplier, 1000*multiplier, {from: outsider, gasPrice: 0 });
 		await Employee1.flush({ from: creator, gasPrice: 0 });
 
 		var balance2 = await token.balanceOf(creator);
-		assert.equal((new web3.BigNumber(balance2).sub(balance0)).toNumber(), 2000*multiplier, 'Should get amount');
+		assert.equal((new web3.utils.BN(balance2).sub(balance0)), 2000*multiplier, 'Should get amount');
 
 		var needsEmployee3 = await Employee1.isNeeds({ from: creator });
 		assert.equal(needsEmployee3, false, 'Dont need amount, because he got it');
@@ -102,25 +102,25 @@ contract('ERC20Expense', (accounts) => {
 
 		var balance = await token.balanceOf(creator);
 
-		assert.equal(balance.toNumber() - balance0.toNumber(), 1000*multiplier, 'Should get amount');
+		assert.equal(balance - balance0, 1000*multiplier, 'Should get amount');
 
 		var needsEmployee1 = await Employee1.isNeeds({ from: creator });
 
 		assert.equal(needsEmployee1, false, 'Dont need amount, because he got it');
 		var need = await Employee1.getTotalNeeded(10000*multiplier);
-		assert.equal(need.toNumber(), 0);
+		assert.equal(need, 0);
 
-		await passHours(1*timePeriod);
+		await passHours(web3, 1*timePeriod);
 		var need = await Employee1.getTotalNeeded(10000*multiplier);
-		assert.equal(need.toNumber(), 1000*multiplier);
+		assert.equal(need, 1000*multiplier);
 
-		await passHours(1*timePeriod);
+		await passHours(web3, 1*timePeriod);
 		var need = await Employee1.getTotalNeeded(10000*multiplier);
-		assert.equal(need.toNumber(), 2000*multiplier);
+		assert.equal(need, 2000*multiplier);
 
-		await passHours(1*timePeriod);
+		await passHours(web3, 1*timePeriod);
 		var need = await Employee1.getTotalNeeded(10000*multiplier);
-		assert.equal(need.toNumber(), 3000*multiplier);
+		assert.equal(need, 3000*multiplier);
 
 		var needsEmployee2 = await Employee1.isNeeds({ from: creator });
 		assert.equal(needsEmployee2, true, 'Need amount, because 24 hours passed');
@@ -135,7 +135,7 @@ contract('ERC20Expense', (accounts) => {
 		await Employee1.flush({ from: creator, gasPrice: 0 });
 
 		var balance2 = await token.balanceOf(creator);
-		assert.equal(balance2.toNumber() - balance0.toNumber(), 4000*multiplier, 'Should get amount');
+		assert.equal(balance2 - balance0, 4000*multiplier, 'Should get amount');
 
 		var needsEmployee3 = await Employee1.isNeeds({ from: creator });
 		assert.equal(needsEmployee3, false, 'Dont need amount, because he got it');
@@ -153,14 +153,14 @@ contract('ERC20Expense', (accounts) => {
 		var need1 = await Splitter.isNeeds({ from: creator });
 		var totalNeed1 = await Splitter.getTotalNeeded(1000*multiplier);
 		assert.equal(need1, true, 'Should need amount');
-		assert.equal(totalNeed1.toNumber(), 1000*multiplier, 'Should be 10% of 1000 amount');
+		assert.equal(totalNeed1, 1000*multiplier, 'Should be 10% of 1000 amount');
 
 		await Splitter.close(callParams);
 
 		var need3 = await Splitter.isNeeds({ from: creator });
 		var totalNeed3 = await Splitter.getTotalNeeded(1000*multiplier);
 		assert.equal(need3, false, 'Should not need amount');
-		assert.equal(totalNeed3.toNumber(), 0, 'Should be 0 amount');
+		assert.equal(totalNeed3, 0, 'Should be 0 amount');
 
 		await token.approve(Splitter.address, 1000*multiplier, {from:outsider});
 		await Splitter.processTokens(1000*multiplier, 1000*multiplier, {from: outsider, gasPrice: 0 }).should.be.rejectedWith('revert');
@@ -169,13 +169,13 @@ contract('ERC20Expense', (accounts) => {
 		var need3 = await Splitter.isNeeds({ from: creator });
 		var totalNeed3 = await Splitter.getTotalNeeded(1000*multiplier);
 		assert.equal(need3, true, 'Should not need amount');
-		assert.equal(totalNeed3.toNumber(), 1000*multiplier, 'Should be 0 amount');
+		assert.equal(totalNeed3, 1000*multiplier, 'Should be 0 amount');
 
 		await token.approve(Splitter.address, 1000*multiplier, {from:outsider});
 		await Splitter.processTokens(1000*multiplier, 1000*multiplier, {from: outsider, gasPrice: 0 })
 	
 		var taxBalance = await token.balanceOf(tax.address);
-		assert.equal(taxBalance.toNumber(), 1000*multiplier, 'Tax receiver should get 100 amount');
+		assert.equal(taxBalance, 1000*multiplier, 'Tax receiver should get 100 amount');
 
 	});
 
@@ -198,13 +198,13 @@ contract('ERC20Expense', (accounts) => {
 
 		// multiplier should end up in the outputs
 		var erc20AbsoluteExpense1Balance = await token.balanceOf(erc20AbsoluteExpense1.address);
-		assert.equal(erc20AbsoluteExpense1Balance.toNumber(), 1*multiplier, 'resource point received amount from splitter');
+		assert.equal(erc20AbsoluteExpense1Balance, 1*multiplier, 'resource point received amount from splitter');
 
 		var erc20AbsoluteExpense2Balance = await token.balanceOf(erc20AbsoluteExpense2.address);
-		assert.equal(erc20AbsoluteExpense2Balance.toNumber(), 2*multiplier, 'resource point received amount from splitter');
+		assert.equal(erc20AbsoluteExpense2Balance, 2*multiplier, 'resource point received amount from splitter');
 
 		var erc20AbsoluteExpense3Balance = await token.balanceOf(erc20AbsoluteExpense3.address);
-		assert.equal(erc20AbsoluteExpense3Balance.toNumber(), 3*multiplier, 'resource point received amount from splitter');
+		assert.equal(erc20AbsoluteExpense3Balance, 3*multiplier, 'resource point received amount from splitter');
 	});
 
 	it('Should process amount with ERC20Splitter + 3 ERC20AbsoluteExpense', async () => {
@@ -226,13 +226,13 @@ contract('ERC20Expense', (accounts) => {
 
 		// multiplier should end up in the outputs
 		var erc20AbsoluteExpense1Balance = await token.balanceOf(erc20AbsoluteExpense1.address);
-		assert.equal(erc20AbsoluteExpense1Balance.toNumber(), 1*multiplier, 'resource point received amount from splitter');
+		assert.equal(erc20AbsoluteExpense1Balance, 1*multiplier, 'resource point received amount from splitter');
 
 		var erc20AbsoluteExpense2Balance = await token.balanceOf(erc20AbsoluteExpense2.address);
-		assert.equal(erc20AbsoluteExpense2Balance.toNumber(), 2*multiplier, 'resource point received amount from splitter');
+		assert.equal(erc20AbsoluteExpense2Balance, 2*multiplier, 'resource point received amount from splitter');
 
 		var erc20AbsoluteExpense3Balance = await token.balanceOf(erc20AbsoluteExpense3.address);
-		assert.equal(erc20AbsoluteExpense3Balance.toNumber(), 3*multiplier, 'resource point received amount from splitter');
+		assert.equal(erc20AbsoluteExpense3Balance, 3*multiplier, 'resource point received amount from splitter');
 	});
 
 	it('Should process amount in structure o-> o-> o-o-o', async () => {
@@ -250,26 +250,26 @@ contract('ERC20Expense', (accounts) => {
 		await Salaries.addChild(Employee3.address, { from: creator, gasPrice: 0 });
 
 		var Employee1Needs = await Employee1.getTotalNeeded(3300*multiplier);
-		assert.equal(Employee1Needs.toNumber() / multiplier, 1000, 'Employee1 Needs 1000 amount');
+		assert.equal(Employee1Needs / multiplier, 1000, 'Employee1 Needs 1000 amount');
 		var Employee2Needs = await Employee2.getTotalNeeded(3300*multiplier);
-		assert.equal(Employee2Needs.toNumber() / multiplier, 1500, 'Employee1 Needs 1500 amount');
+		assert.equal(Employee2Needs / multiplier, 1500, 'Employee1 Needs 1500 amount');
 		var Employee3Needs = await Employee3.getTotalNeeded(3300*multiplier);
-		assert.equal(Employee3Needs.toNumber() / multiplier, 800, 'Employee1 Needs 800 amount');
+		assert.equal(Employee3Needs / multiplier, 800, 'Employee1 Needs 800 amount');
 
 		var SalariesNeeds = await Salaries.getTotalNeeded(3300*multiplier);
-		assert.equal(SalariesNeeds.toNumber() / multiplier, 3300, 'Salaries Needs 3300 amount');
+		assert.equal(SalariesNeeds / multiplier, 3300, 'Salaries Needs 3300 amount');
 
 		var SalariesMinNeeds = await Salaries.getMinNeeded(3300*multiplier);
-		assert.equal(SalariesNeeds.toNumber() / multiplier, 3300, 'Salaries min Needs 3300 amount');
+		assert.equal(SalariesNeeds / multiplier, 3300, 'Salaries min Needs 3300 amount');
 
 		var AllOutputsNeeds = await AllOutputs.getTotalNeeded(3300*multiplier);
-		assert.equal(AllOutputsNeeds.toNumber() / multiplier, 3300, 'AllOutputs Needs 3300 amount');
+		assert.equal(AllOutputsNeeds / multiplier, 3300, 'AllOutputs Needs 3300 amount');
 		var MinOutpultsNeeds = await AllOutputs.getMinNeeded(3300*multiplier);
-		assert.equal(AllOutputsNeeds.toNumber() / multiplier, 3300, 'AllOutputs Needs min 3300 amount');
+		assert.equal(AllOutputsNeeds / multiplier, 3300, 'AllOutputs Needs min 3300 amount');
 		var OutputChildrenCount = await AllOutputs.getChildrenCount();
-		assert.equal(OutputChildrenCount.toNumber(), 1, 'OutputChildrenCount should be 1');
+		assert.equal(OutputChildrenCount, 1, 'OutputChildrenCount should be 1');
 		var SalariesChildrenCount = await Salaries.getChildrenCount();
-		assert.equal(SalariesChildrenCount.toNumber(), 3, 'SalariesChildrenCount should be 3');
+		assert.equal(SalariesChildrenCount, 3, 'SalariesChildrenCount should be 3');
 
 		var th = await token.approve(Salaries.address, 3300*multiplier, {from:creator});
 		await Salaries.processTokens(3300*multiplier, 3300*multiplier, {from: creator, gasPrice: 0 });
@@ -287,14 +287,14 @@ contract('ERC20Expense', (accounts) => {
 		await Salaries.addChild(Employee3.address, { from: creator, gasPrice: 0 });
 
 		var Employee1Needs = await Employee1.getTotalNeeded(3300*multiplier);
-		assert.equal(Employee1Needs.toNumber() / multiplier, 1000);
+		assert.equal(Employee1Needs / multiplier, 1000);
 		var Employee2Needs = await Employee2.getTotalNeeded(3300*multiplier);
-		assert.equal(Employee2Needs.toNumber() / multiplier, 800);
+		assert.equal(Employee2Needs / multiplier, 800);
 		var Employee3Needs = await Employee3.getTotalNeeded(3300*multiplier);
-		assert.equal(Employee3Needs.toNumber() / multiplier, 1500);
+		assert.equal(Employee3Needs / multiplier, 1500);
 
 		var SalariesNeeds = await Salaries.getTotalNeeded(3300*multiplier);
-		assert.equal(SalariesNeeds.toNumber() / multiplier, 3300, 'Salaries Needs 3300 amount');
+		assert.equal(SalariesNeeds / multiplier, 3300, 'Salaries Needs 3300 amount');
 		await checkNeededArrs(Salaries, multiplier, 
 			[100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500],
 			[0,   200, 200, 400, 500, 500, 700, 700, 900, 1000, 1000, 1200, 1200, 1400, 1400, 1600, 1600, 1800, 1800, 1800, 1800, 1800, 2300, 2300, 2300, 2300, 2300, 2800, 2800, 2800, 2800, 2800, 3300, 3300, 3300]
@@ -468,14 +468,14 @@ contract('ERC20Expense', (accounts) => {
 		await token.approve(splitter.address, 720*multiplier, {from:creator});
 		await splitter.processTokens(1000*multiplier, 720*multiplier, {from: creator});
 
-		assert.equal((await token.balanceOf(rel1.address)).toNumber(), 100*multiplier);
-		assert.equal((await token.balanceOf(rel2.address)).toNumber(), 250*multiplier);
-		assert.equal((await token.balanceOf(rel3.address)).toNumber(), 370*multiplier);
+		assert.equal((await token.balanceOf(rel1.address)), 100*multiplier);
+		assert.equal((await token.balanceOf(rel2.address)), 250*multiplier);
+		assert.equal((await token.balanceOf(rel3.address)), 370*multiplier);
 
 		await checkParamsCycle(targets, flowArr, [0, 0, 0, 0], [0, 0, 0, 0], [false, false, false, false]);
-		await passHours(24);
+		await passHours(web3, 24);
 		await checkParamsCycle(targets, flowArr, [0, 0, 0, 0], [350, 100, 250, 0], [true, true, true, false]);
-		await passHours(24);
+		await passHours(web3, 24);
 		await checkParamsCycle(targets, flowArr, [0, 0, 0, 0], [720, 100, 250, 370], [true, true, true, true]);
 
 		await token.approve(splitter.address, 720*multiplier, {from:creator});
@@ -483,11 +483,11 @@ contract('ERC20Expense', (accounts) => {
 
 		await checkParamsCycle(targets, flowArr, [0, 0, 0, 0], [0, 0, 0, 0], [false, false, false, false]);
 		// multiplier should end up in the outputs
-		assert.equal((await token.balanceOf(rel1.address)).toNumber(), 200*multiplier);
-		assert.equal((await token.balanceOf(rel2.address)).toNumber(), 500*multiplier);
-		assert.equal((await token.balanceOf(rel3.address)).toNumber(), 740*multiplier);
+		assert.equal((await token.balanceOf(rel1.address)), 200*multiplier);
+		assert.equal((await token.balanceOf(rel2.address)), 500*multiplier);
+		assert.equal((await token.balanceOf(rel3.address)), 740*multiplier);
 
-		await passHours(24);	
+		await passHours(web3, 24);	
 		await checkParamsCycle(targets, flowArr, [0, 0, 0, 0], [350, 100, 250, 0], [true, true, true, false]);
 		
 		await token.approve(splitter.address, 350*multiplier, {from:creator});
