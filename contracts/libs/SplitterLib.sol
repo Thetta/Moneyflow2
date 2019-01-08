@@ -1,6 +1,6 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../interfaces/IReceiver.sol";
 import "../interfaces/ITable.sol";
 
@@ -68,7 +68,7 @@ contract SplitterLib {
 		}	
 	}
 
-	function _getMinNeeded(Splitter _s, uint _currentFlow) internal view returns(uint) {
+	function _getMinNeeded(Splitter memory _s, uint _currentFlow) internal view returns(uint) {
 		if(!_s.isOpen) {
 			return 0;
 		}
@@ -88,7 +88,7 @@ contract SplitterLib {
 		return minNeed;
 	}
 
-	function _getTotalNeeded(Splitter _s, uint _currentFlow) internal view returns(uint) {
+	function _getTotalNeeded(Splitter memory _s, uint _currentFlow) internal view returns(uint) {
 		if(!_s.isOpen) {
 			return 0;
 		}
@@ -109,7 +109,7 @@ contract SplitterLib {
 		return totalNeed;
 	}
 
-	function _isNeeds(Splitter _s) internal view returns(bool) {
+	function _isNeeds(Splitter memory _s) internal view returns(bool) {
 		if(!_s.isOpen) {
 			return false;
 		}
@@ -127,7 +127,7 @@ contract SplitterLib {
 		}
 	}
 
-	function _processAmount(Splitter _s, uint _currentFlow, uint _value) internal {
+	function _processAmount(Splitter memory _s, uint _currentFlow, uint _value) internal {
 		require(_s.isOpen);
 		require(_isNeeds(_s));
 		FlowBuffer memory b = FlowBuffer(_currentFlow, false, 0, 0, 0, 0);
@@ -154,14 +154,14 @@ contract SplitterLib {
 		require(b.sent == _value); 
 	}
 
-	function _constructSplitter(bool _isTableSplitter) internal pure returns(Splitter s) {
+	function _constructSplitter(bool _isTableSplitter) internal pure returns(Splitter memory s) {
 		uint[] memory emptyOutputs;
 		address[] memory emptyAddresses;
 		return Splitter(true, _isTableSplitter, emptyOutputs, emptyAddresses, IReceiver.Type.Splitter);
 	}
 
-	function _modifyFlow(FlowBuffer _b) internal pure returns(FlowBuffer) {
-		FlowBuffer memory b = _b;
+	function _modifyFlow(FlowBuffer memory _b) internal pure returns(FlowBuffer memory b) {
+		b = _b;
 		if(!b.relSeqQ) { 
 			if(b.flow >= b.needAcc) { 
 				b.flow -= b.needAcc; 
@@ -169,11 +169,10 @@ contract SplitterLib {
 				b.flow = 0;
 			}
 		}
-		return b;
 	}
 
-	function _processRelativeSeries(Splitter _s, FlowBuffer _b) internal view returns(FlowBuffer) {
-		FlowBuffer memory b = _b;
+	function _processRelativeSeries(Splitter memory _s, FlowBuffer memory _b) internal view returns(FlowBuffer memory b) {
+		b = _b;
 		if(b.relSeqQ) {
 			b.needAcc += b.need; 
 			b.relSeqQ = false;
@@ -189,10 +188,9 @@ contract SplitterLib {
 		}
 
 		b.sent += b.need;
-		return b;
 	}
 
-	function _getReceiverTypeBase(Splitter _s, uint _childNum) internal view returns(IReceiver.Type t) {
+	function _getReceiverTypeBase(Splitter memory _s, uint _childNum) internal view returns(IReceiver.Type t) {
 		if(_s.isTableSplitter) {
 			t = ITable(address(this)).getReceiverTypeAt(_s.outputs[_childNum]);
 		} else {
@@ -200,7 +198,7 @@ contract SplitterLib {
 		}
 	}
 	
-	function _getChildrenCount(Splitter _s) internal pure returns(uint) {
+	function _getChildrenCount(Splitter memory _s) internal pure returns(uint) {
 		if(_s.isTableSplitter) {
 			return _s.outputs.length;
 		} else {

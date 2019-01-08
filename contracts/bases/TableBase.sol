@@ -1,6 +1,6 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../interfaces/IReceiver.sol";
 import "../interfaces/ITable.sol";
 
@@ -197,5 +197,5 @@ contract TableBase is ExpenseLib, SplitterLib, Ownable {
 		_processAmountAt(_eId, _flow, _need);
 	}
 
-	function() public {}	
+	function() external {}	
 }

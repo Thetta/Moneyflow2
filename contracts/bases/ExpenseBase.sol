@@ -1,12 +1,12 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "../libs/ExpenseLib.sol";
 
 import "../interfaces/IDestination.sol";
 import "../interfaces/IReceiver.sol";
 
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
 /**
@@ -83,5 +83,5 @@ contract ExpenseBase is ExpenseLib, IReceiver, Ownable {
 		expense.partsPerMillion = _partsPerMillion;
 	}
 
-	function() public {}
+	function() external {}
 }

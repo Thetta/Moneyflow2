@@ -1,8 +1,8 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "../libs/SplitterLib.sol";
 
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 import "../interfaces/ISplitter.sol";
 import "../interfaces/IReceiver.sol";
@@ -61,5 +61,5 @@ contract SplitterBase is SplitterLib, IReceiver, ISplitter, Ownable {
 		return splitter.addresses[_index];
 	}
 
-	function() public {}	
+	function() external {}	
 }

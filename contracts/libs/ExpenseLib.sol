@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 
 /**
@@ -48,7 +48,7 @@ contract ExpenseLib {
 	// all inputs divide _minAmount == INTEGER
 	// if _totalNeeded == 100 and _minAmount == 5
 	// you can send 5,10,15, but not 1, 2, 3, 4, 6, ...
-	function _constructExpense(uint128 _totalNeeded, uint128 _minAmount, uint32 _partsPerMillion, uint32 _periodHours, bool _isSlidingAmount, bool _isPeriodic) internal view returns(Expense e) {
+	function _constructExpense(uint128 _totalNeeded, uint128 _minAmount, uint32 _partsPerMillion, uint32 _periodHours, bool _isSlidingAmount, bool _isPeriodic) internal view returns(Expense memory e) {
 		require(!((_isSlidingAmount) && (_periodHours == 0)));
 		require(!(!(_isPeriodic) && (_periodHours != 0)));
 		require(!((_isSlidingAmount) && (!_isPeriodic)));
@@ -78,7 +78,7 @@ contract ExpenseLib {
 		}		
 	}
 
-	function _processAmount(Expense _e, uint _currentFlow, uint _value) internal view returns(Expense e) {
+	function _processAmount(Expense memory _e, uint _currentFlow, uint _value) internal view returns(Expense memory e) {
 		e = _e;
 		require(_value == _getTotalNeeded(e, _currentFlow));
 		require(_currentFlow >= _value);
@@ -100,7 +100,7 @@ contract ExpenseLib {
 		_e.isOpen = false;
 	}	
 
-	function _getTotalNeeded(Expense _e, uint _currentFlow) internal view returns(uint need) {
+	function _getTotalNeeded(Expense memory _e, uint _currentFlow) internal view returns(uint need) {
 		uint receiveTimeDelta = (block.timestamp - _e.momentReceived);
 		uint creationTimeDelta = (block.timestamp - _e.momentCreated);
 		uint periodLength = (_e.periodHours * 3600 * 1000);
@@ -176,14 +176,14 @@ contract ExpenseLib {
 		}
 	}
 
-	function _getMinNeeded(Expense _e, uint _currentFlow) internal view returns(uint minNeed) {
+	function _getMinNeeded(Expense memory _e, uint _currentFlow) internal view returns(uint minNeed) {
 		if( !((_e.minAmount == 0) && (_e.totalNeeded > 0)) 
 		 && !(_e.partsPerMillion > 0) ) {
 			minNeed = _getTotalNeeded(_e, _currentFlow);
 		}
 	}
 
-	function _isNeeds(Expense _e) internal view returns(bool isNeed) {
+	function _isNeeds(Expense memory _e) internal view returns(bool isNeed) {
 		isNeed = (_getTotalNeeded(_e, 1e30) > 0);
 	}	
 
@@ -196,7 +196,7 @@ contract ExpenseLib {
 		}
 	}
 
-	function _getDebtIfNoSliding(Expense _e) internal view returns(uint) {
+	function _getDebtIfNoSliding(Expense memory _e) internal view returns(uint) {
 		uint receiveTimeDelta = (block.timestamp - _e.momentReceived);
 		uint creationTimeDelta = (block.timestamp - _e.momentCreated);
 		uint periodLength = (_e.periodHours * 3600 * 1000);
@@ -213,7 +213,7 @@ contract ExpenseLib {
 		}
 	}
 
-	function _processFlushTo(Expense _e) internal pure returns(Expense e) {
+	function _processFlushTo(Expense memory _e) internal pure returns(Expense memory e) {
 		e = _e;
 		e.balance = 0;
 	}

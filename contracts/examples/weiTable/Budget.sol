@@ -1,11 +1,11 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "../../ether/WeiTable.sol";
 
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
-// this contract is an owner of weiTable; so, no one else can modify scheme
+// this contract is an owner() of weiTable; so, no one else can modify scheme
 contract Budget is Ownable {
 	WeiTable weiTable;
 	uint bubgetEntry;
@@ -122,5 +122,5 @@ contract Budget is Ownable {
 		}
 	}
 
-	function() public {}
+	function() external {}
 }

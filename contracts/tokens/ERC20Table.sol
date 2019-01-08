@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "../bases/TableBase.sol";
 import "../bases/ExpenseBase.sol";
@@ -7,8 +7,8 @@ import "../bases/SplitterBase.sol";
 import "../interfaces/IReceiver.sol";
 import "../interfaces/ITokenReceiver.sol";
 
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 
 contract ERC20Table is ITable, IReceiver, ITokenReceiver, TableBase {
@@ -25,8 +25,8 @@ contract ERC20Table is ITable, IReceiver, ITokenReceiver, TableBase {
 	}
 
 	function flushAt(uint _eId) public onlyOwner isCorrectId(_eId) {
-		token.transfer(owner, expenses[_eId].balance);
-		emit NodeFlushTo(_eId, owner, expenses[_eId].balance);
+		token.transfer(owner(), expenses[_eId].balance);
+		emit NodeFlushTo(_eId, owner(), expenses[_eId].balance);
 		_processFlushToAt(_eId);
 	}
 
