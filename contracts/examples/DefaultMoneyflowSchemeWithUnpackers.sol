@@ -1,22 +1,22 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
 import "./DefaultMoneyflowScheme.sol";
 
 
 // TODO:
 contract DefaultMoneyflowSchemeWithUnpackers is DefaultMoneyflowScheme {
-	constructor(
+	/*constructor(
 			address _fundOutput, 
-			uint _percentsReserve, 
-			uint _dividendsReserve) public 
+			uint32 _percentsReserve, 
+			uint32 _dividendsReserve) public 
 		DefaultMoneyflowScheme(_fundOutput,_percentsReserve,_dividendsReserve)
 	{
 	}
 
 	function addNewTaskGeneric(bytes32[] _params) view public {
-		IWeiReceiver _iwr = IWeiReceiver(address(_params[0]));
+		IReceiver _iwr = IReceiver(address(_params[0]));
 		addNewTask(_iwr);
 	}
 
-	// TODO: add unpackers for all methods of the Scheme
+	// TODO: add unpackers for all methods of the Scheme*/
 }

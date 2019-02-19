@@ -1,10 +1,10 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
 import "./WeiExpense.sol";
 
 
 contract WeiAbsoluteExpenseWithPeriod is WeiExpense { 
-	constructor(uint _neededWei, uint _periodHours, bool _isAccumulateDebt) public
-		WeiExpense(_neededWei, 0, _periodHours, _isAccumulateDebt, true)
+	constructor(uint128 _minAmount, uint128 _totalWeiNeed, uint32 _periodHours) public
+		WeiExpense(_minAmount, _totalWeiNeed, 0, _periodHours, false, true)
 	{}
 }

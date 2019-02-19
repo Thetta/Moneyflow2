@@ -1,11 +1,11 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
-import "../../WeiTable.sol";
+import "../../ether/WeiTable.sol";
 
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
-// this contract is an owner of weiTable; so, no one else can modify scheme
+// this contract is an owner() of weiTable; so, no one else can modify scheme
 contract Budget is Ownable {
 	WeiTable weiTable;
 	uint bubgetEntry;
@@ -16,63 +16,63 @@ contract Budget is Ownable {
 	uint funds;
 	uint bonuses;
 
-	uint budgetPeriod;
+	uint32 budgetPeriod;
 
-	constructor(uint _budgetPeriod) {
-		WeiTable weiTable = new WeiTable();
+	constructor(uint32 _budgetPeriod) public {
+		weiTable = new WeiTable();
 		budgetPeriod = _budgetPeriod;
 		createLayout();
 
-		uint[] employeeSalaries;
-		employeeSalaries.push(10e18);
-		employeeSalaries.push(20e18);
-		employeeSalaries.push(20e18);
-		addEmployees(employeeSalaries);
+		uint128[] memory employeeSalariesArr = new uint128[](3);
+		employeeSalariesArr[0] = 10e18;
+		employeeSalariesArr[1] = 20e18;
+		employeeSalariesArr[2] = 20e18;
+		addEmployees(employeeSalariesArr);
 
-		uint[] bonuses;
-		bonuses.push(10000);
-		bonuses.push(20000);
-		bonuses.push(20000);
-		addBonuses(bonuses);
+		uint32[] memory bonusesArr = new uint32[](3);
+		bonusesArr[0] = 10000;
+		bonusesArr[1] = 20000;
+		bonusesArr[2] = 20000;
+		addBonuses(bonusesArr);
 
-		uint[] tasks;
-		tasks.push(0.1e18);
-		tasks.push(0.3e18);
-		tasks.push(0.5e18);
-		addTasks(tasks);
+		uint128[] memory tasksArr = new uint128[](3);
+		tasksArr[0] = 0.1e18;
+		tasksArr[1] = 0.3e18;
+		tasksArr[2] = 0.5e18;
+		addTasks(tasksArr);
 
-		uint[] utils;
-		utils.push(2e18);
-		utils.push(3e18);
-		addUtils(utils);
+		uint128[] memory utilsArr = new uint128[](2);
+		utilsArr[0] = 2e18;
+		utilsArr[1] = 3e18;
+		addUtils(utilsArr);
 
-		uint[] funds;
-		funds.push(20000*1e18);
-		funds.push(20000000*1e18);
-		addFunds(funds);
+		uint128[] memory fundsArr = new uint128[](2);
+		fundsArr[0] = 20000*1e18;
+		fundsArr[1] = 20000000*1e18;
+		addFunds(fundsArr);
 	}
 
 	function createLayout() internal {
-		weiTable.addTopdownSplitter();
-		uint bubgetEntry = weiTable.getLastNodeId();
+		weiTable.addSplitter();
+		bubgetEntry = weiTable.getLastNodeId();
 		
-		weiTable.addUnsortedSplitter();
-		uint spends = weiTable.getLastNodeId();
+		weiTable.addSplitter();
+		spends = weiTable.getLastNodeId();
 		
-		weiTable.addUnsortedSplitter();
-		uint salaries = weiTable.getLastNodeId();
+		weiTable.addSplitter();
+		salaries = weiTable.getLastNodeId();
 
-		weiTable.addUnsortedSplitter();
-		uint tasks = weiTable.getLastNodeId();
+		weiTable.addSplitter();
+		tasks = weiTable.getLastNodeId();
 	
-		weiTable.addTopdownSplitter();
-		uint bonuses = weiTable.getLastNodeId();
+		weiTable.addSplitter();
+		bonuses = weiTable.getLastNodeId();
 
-		weiTable.addTopdownSplitter();
-		uint oneTimeUtils = weiTable.getLastNodeId();
+		weiTable.addSplitter();
+		oneTimeUtils = weiTable.getLastNodeId();
 		
-		weiTable.addTopdownSplitter();
-		uint funds = weiTable.getLastNodeId();
+		weiTable.addSplitter();
+		funds = weiTable.getLastNodeId();
 
 		weiTable.addChildAt(bubgetEntry, spends);
 		weiTable.addChildAt(spends, salaries);
@@ -82,15 +82,15 @@ contract Budget is Ownable {
 		weiTable.addChildAt(bubgetEntry, funds);
 	}
 
-	function addEmployees(uint[] _employeeSalaries) public onlyOwner {
+	function addEmployees(uint128[] memory _employeeSalaries) public onlyOwner {
 		for(uint i=0; i<_employeeSalaries.length; i++) {
-			weiTable.addAbsoluteExpense(_employeeSalaries[i], true, true, budgetPeriod);
+			weiTable.addAbsoluteExpense(_employeeSalaries[i], _employeeSalaries[i], true, true, budgetPeriod);
 			uint employee = weiTable.getLastNodeId();
 			weiTable.addChildAt(salaries, employee);
 		}
 	}
 
-	function addBonuses(uint[] _bonuses) public onlyOwner {
+	function addBonuses(uint32[] memory _bonuses) public onlyOwner {
 		for(uint i=0; i<_bonuses.length; i++) {
 			weiTable.addRelativeExpense(_bonuses[i], true, true, budgetPeriod);
 			uint bonus = weiTable.getLastNodeId();
@@ -98,27 +98,29 @@ contract Budget is Ownable {
 		}
 	}
 
-	function addTasks(uint[] _tasks) public onlyOwner {
+	function addTasks(uint128[] memory _tasks) public onlyOwner {
 		for(uint i=0; i<_tasks.length; i++) {
-			weiTable.addRelativeExpense(_tasks[i], false, false, 0);
+			weiTable.addAbsoluteExpense(_tasks[i], _tasks[i], false, false, 0);
 			uint task = weiTable.getLastNodeId();
 			weiTable.addChildAt(tasks, task);
 		}
 	}
 
-	function addUtils(uint[] _oneTimeUtils) public onlyOwner {
+	function addUtils(uint128[] memory _oneTimeUtils) public onlyOwner {
 		for(uint i=0; i<_oneTimeUtils.length; i++) {
-			weiTable.addRelativeExpense(_oneTimeUtils[i], false, false, 0);
+			weiTable.addAbsoluteExpense(_oneTimeUtils[i], _oneTimeUtils[i], false, false, 0);
 			uint oneTimeUtil = weiTable.getLastNodeId();
 			weiTable.addChildAt(oneTimeUtils, oneTimeUtil);
 		}
 	}
 
-	function addFunds(uint[] _funds) public onlyOwner {
+	function addFunds(uint128[] memory _funds) public onlyOwner {
 		for(uint i=0; i<_funds.length; i++) {
-			weiTable.addFund(_funds[i], false, false, 0);
+			weiTable.addAbsoluteExpense(_funds[i], 0, false, false, 0);
 			uint fund = weiTable.getLastNodeId();
 			weiTable.addChildAt(funds, fund);
 		}
-	}	
+	}
+
+	function() external {}
 }

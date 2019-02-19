@@ -1,19 +1,21 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
-import "../../ether/WeiFund.sol";
-import "../../ether/WeiTopDownSplitter.sol";
+import "../../ether/WeiAbsoluteExpense.sol";
+import "../../ether/WeiSplitter.sol";
 
 
 contract Roadmap {
 
-	constructor(uint _sum1, uint _sum2, uint _sum3) {
-		WeiTopDownSplitter roadmap = new WeiTopDownSplitter("Roadmap");
+	constructor(uint128 _sum1, uint128 _sum2, uint128 _sum3) public {
+		WeiSplitter roadmap = new WeiSplitter();
 
-		WeiFund milestone1 = new WeiFund(_sum1, false, false, 0);
-		WeiFund milestone2 = new WeiFund(_sum2, false, false, 0);
-		WeiFund milestone3 = new WeiFund(_sum3, false, false, 0);
-		roadmap.addChild(milestone1);
-		roadmap.addChild(milestone2);
-		roadmap.addChild(milestone3);
+		WeiAbsoluteExpense milestone1 = new WeiAbsoluteExpense(0, _sum1);
+		WeiAbsoluteExpense milestone2 = new WeiAbsoluteExpense(0, _sum2);
+		WeiAbsoluteExpense milestone3 = new WeiAbsoluteExpense(0, _sum3);
+		roadmap.addChild(address(milestone1));
+		roadmap.addChild(address(milestone2));
+		roadmap.addChild(address(milestone3));
 	}
+
+	function() external {}
 }
