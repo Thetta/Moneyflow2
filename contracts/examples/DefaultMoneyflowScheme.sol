@@ -1,11 +1,12 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
 import "../ether/WeiRelativeExpenseWithPeriod.sol";
-import "../ether/WeiTopDownSplitter.sol";
-import "../ether/WeiUnsortedSplitter.sol";
+import "../ether/WeiSplitter.sol";
+import "../ether/WeiAbsoluteExpense.sol";
+
 
 /**
- * @title FallbackToWeiReceiver
+ * @title DefaultMoneyflowScheme
  * @dev This contract should be used to automatically instantiate Default moneyscheme for a DAO.
  * Use it as example. You can setup your own moneyflow.  
  * THIS IS A WORKING example!
@@ -23,41 +24,41 @@ import "../ether/WeiUnsortedSplitter.sol";
  *			DividendsFund - fund
 */
 contract DefaultMoneyflowScheme {
-	WeiTopDownSplitter root;
+/*	WeiSplitter root;
 
-	WeiUnsortedSplitter spends; 
-	WeiUnsortedSplitter bonuses; 
-	WeiUnsortedSplitter rest; 
+	WeiSplitter spends; 
+	WeiSplitter bonuses; 
+	WeiSplitter rest; 
 
-	WeiUnsortedSplitter salaries; 
-	WeiUnsortedSplitter other; 
-	WeiUnsortedSplitter tasks; 
+	WeiSplitter salaries; 
+	WeiSplitter other; 
+	WeiSplitter tasks; 
 
 	WeiRelativeExpenseWithPeriod reserveFund;
 	WeiRelativeExpenseWithPeriod dividendsFund;
 
 	constructor(
 		address _fundOutput, 
-		uint _percentsReserve, 
-		uint _dividendsReserve) 
+		uint32 _percentsReserve, 
+		uint32 _dividendsReserve) 
 	{
 		require(0x0 != _fundOutput);
 
-		// root = new WeiTopDownSplitter("root");
+		// root = new WeiSplitter();
 
-		// spends = new WeiUnsortedSplitter("spends");
-		// bonuses = new WeiUnsortedSplitter("bonuses");
-		// rest = new WeiUnsortedSplitter("rest");
+		// spends = new WeiSplitter();
+		// bonuses = new WeiSplitter();
+		// rest = new WeiSplitter();
 
-		// salaries = new WeiUnsortedSplitter("salaries");
-		// other = new WeiUnsortedSplitter("other");
-		// tasks = new WeiUnsortedSplitter("tasks");
+		// salaries = new WeiSplitter();
+		// other = new WeiSplitter();
+		// tasks = new WeiSplitter();
 
 		// // // use .setPercents() to change 
-		// reserveFund = new WeiFund(_fundOutput, true, _percentsReserve);
+		// reserveFund = new WeiAbsoluteExpense(0, _fundOutput, 0, 0, false, false);
 
 		// // use .setPercents() to change 
-		// dividendsFund = new WeiFund(_fundOutput, true, _dividendsReserve);
+		// dividendsFund = new WeiAbsoluteExpense(0, _fundOutput, 0, 0, false, false);
 
 		// spends.addChild(salaries);
 		// spends.addChild(other);
@@ -73,17 +74,17 @@ contract DefaultMoneyflowScheme {
 		// rest.addChild(dividendsFund);
 	}
 
-	function getRootReceiver() public view returns(IWeiReceiver) {
+	function getRootReceiver() public view returns(IReceiver) {
 		return root;
 	}
 
 	function deployRoot() public {
-		root = new WeiTopDownSplitter("root");
+		// root = new WeiSplitter();
 	}
 
 ////////////////////////////////////////////////////////////////
 	// use MoneyflowAuto to add new task with voting! 
-	function addNewTask(IWeiReceiver _wr) view public {
+	function addNewTask(IReceiver _wr) view public {
 		// 1 - add new task immediately
 		//tasks.addChild(_wr);
 	}
@@ -125,5 +126,5 @@ contract DefaultMoneyflowScheme {
 	// TODO: Currently dividens fund is just another type of Reserve fund (because DividendFund is not implemented yet) 
 	function flushDividendsFundTo(address _to) view public {
 		// TODO:
-	}
+	}*/
 }
